@@ -1,0 +1,61 @@
+﻿ID;Phase;Tâche;Domaine;Responsable;Priorité;Budget (EUR);Échéance;Statut;Dépendances;Gate
+T01;Validation;Obtenir minimums de production, délais et prix unitaires;Produit;Fondateur;Critique;0;Semaine 1;À faire;—;Gate 3
+T02;Validation;Commander les échantillons de matcha;Produit;Fondateur;Critique;300;Semaine 1;À faire;—;Gate 1
+T03;Validation;Construire la grille de dégustation (couleur, amertume, longueur, mousse);Produit;Fondateur;Haute;0;Semaine 1;À faire;T02;Gate 1
+T04;Validation;Dégustation à l'aveugle et notation;Produit;Fondateur;Critique;0;Semaine 2;À faire;"T02;T03";Gate 1
+T05;Validation;Remplir le modèle de COGS avec les chiffres réels;Finance;Fondateur;Critique;0;Semaine 3;À faire;T01;Gate 3
+T06;Validation;Vérifier que le COGS rendu reste sous 22,50 EUR/boîte;Finance;Fondateur;Critique;0;Semaine 3;À faire;T05;Gate 3
+T07;Juridique;Recherche d'antériorité de marque (INPI/EUIPO, classes 30 et 35);Juridique;Conseil PI;Critique;600;Semaine 3;À faire;—;—
+T08;Juridique;Réserver domaines et identifiants sociaux;Juridique;Fondateur;Haute;100;Semaine 3;À faire;T07;—
+T09;Juridique;Créer la société et ouvrir le compte bancaire;Entreprise;Fondateur;Critique;400;Semaine 7;À faire;—;—
+T10;Juridique;Souscrire l'assurance RC pro et produits;Entreprise;Fondateur;Haute;300;Semaine 8;À faire;T09;—
+T11;Juridique;Engager un expert-comptable;Finance;Fondateur;Haute;0;Semaine 8;À faire;T09;—
+T12;Conformité;Déclarer l'activité alimentaire;Conformité;Fondateur;Critique;0;Semaine 8;À faire;T09;—
+T13;Conformité;Obtenir le numéro EORI;Conformité;Fondateur;Haute;0;Semaine 8;À faire;T09;—
+T14;Conformité;Confirmer le classement douanier du produit;Conformité;Transitaire;Haute;0;Semaine 9;À faire;T13;—
+T15;Conformité;Faire valider l'étiquetage par un professionnel;Conformité;Consultant régl.;Critique;500;Semaine 4;À faire;—;—
+T16;Conformité;Adhérer à un éco-organisme emballages (REP);Conformité;Fondateur;Haute;150;Semaine 10;À faire;T09;—
+T17;Conformité;Obtenir l'attestation contact alimentaire des matériaux;Qualité;Fabricant;Critique;0;Semaine 6;À faire;T01;Gate 4
+T18;Packaging;Arrêter la direction packaging (recommandation : B);Marque;Fondateur;Critique;0;Semaine 5;À faire;—;—
+T19;Packaging;Produire les fichiers d'impression;Marque;Fondateur;Critique;0;Semaine 6;À faire;"T18;T15";—
+T20;Packaging;Commander et valider les épreuves;Packaging;Fabricant;Critique;900;Semaine 6;À faire;T19;Gate 4
+T21;Packaging;Contractualiser la référence colorimétrique et sa tolérance;Packaging;Fondateur;Haute;0;Semaine 6;À faire;T20;—
+T22;Qualité;Commander les analyses laboratoire;Qualité;Laboratoire;Critique;600;Semaine 6;À faire;T04;Gate 1
+T23;Qualité;Lancer le test de vieillissement sur échantillons scellés;Qualité;Fondateur;Haute;0;Semaine 6;À faire;T20;Gate 4
+T24;Qualité;Mettre en place le registre de traçabilité et l'échantillothèque;Qualité;Fondateur;Haute;0;Semaine 10;À faire;—;—
+T25;Qualité;Rédiger la procédure de retrait/rappel;Qualité;Fondateur;Haute;0;Semaine 10;À faire;T24;—
+T26;Marketing;Ouvrir les comptes marque et fondateur;Contenu;Fondateur;Haute;0;Semaine 4;À faire;—;—
+T27;Marketing;Publier la première vidéo (journal de bord);Contenu;Fondateur;Haute;0;Semaine 4;À faire;T26;—
+T28;Marketing;Tenir une cadence d'une publication par jour;Contenu;Fondateur;Critique;0;Continu;À faire;T27;Gate 5
+T29;Marketing;Mettre la page liste d'attente en ligne;E-commerce;Fondateur;Critique;0;Semaine 5;À faire;T26;Gate 5
+T30;Marketing;Atteindre 150 inscrits en liste d'attente;Marketing;Fondateur;Critique;0;Semaine 12;À faire;"T29;T28";Gate 5
+T31;Marketing;Rédiger le calendrier de contenu 30 jours;Contenu;Fondateur;Moyenne;0;Semaine 6;À faire;—;—
+T32;Marketing;Identifier 30 à 50 créateurs pour le seeding;Marketing;Fondateur;Moyenne;0;Semaine 9;À faire;—;—
+T33;Marketing;Rédiger le brief UGC et la cession de droits;Marketing;Fondateur;Moyenne;0;Semaine 10;À faire;—;—
+T34;Marketing;Préparer le dossier de presse (visuels HD + fiche produit);Marketing;Fondateur;Basse;0;Semaine 11;À faire;T20;—
+T35;E-commerce;Paramétrer frais de port et seuil de franco;E-commerce;Fondateur;Haute;0;Semaine 10;À faire;T44;—
+T36;E-commerce;Activer CB, Apple Pay et PayPal;E-commerce;Fondateur;Critique;0;Semaine 10;À faire;T09;—
+T37;E-commerce;Configurer les séquences e-mail (7 flux);CRM;Fondateur;Haute;0;Semaine 11;À faire;T29;—
+T38;E-commerce;Passer une commande test et l'expédier réellement;E-commerce;Fondateur;Critique;0;Semaine 12;À faire;T36;—
+T39;E-commerce;Vérifier le site sur trois téléphones différents;E-commerce;Fondateur;Haute;0;Semaine 12;À faire;T38;—
+T40;Décision;Revue des six gates — GO / NO-GO production;Direction;Fondateur;Critique;0;Semaine 13;À faire;"T06;T22;T23;T30";Toutes
+T41;Production;Commander le premier lot;Produit;Fondateur;Critique;4500;Semaine 14;Bloqué;T40;—
+T42;Production;Contrôle qualité à réception (documentaire, visuel, pesée, dégustation);Qualité;Fondateur;Critique;0;Semaine 20;Bloqué;T41;—
+T43;Opérations;Choisir le transporteur et négocier les tarifs;Opérations;Fondateur;Haute;0;Semaine 13;À faire;T44;—
+T44;Opérations;Peser et mesurer une boîte emballée;Opérations;Fondateur;Critique;0;Semaine 12;À faire;T20;—
+T45;Opérations;Commander cartons, calages, cartes et stickers;Opérations;Fondateur;Haute;400;Semaine 18;Bloqué;T44;—
+T46;Opérations;Préparer la zone de stockage et la procédure d'expédition;Opérations;Fondateur;Moyenne;0;Semaine 19;Bloqué;T41;—
+T47;Opérations;Identifier un second fournisseur potentiel;Produit;Fondateur;Haute;0;Semaine 16;À faire;T40;—
+T48;Lancement;Fixer la date de lancement;Direction;Fondateur;Critique;0;Semaine 19;Bloqué;T42;—
+T49;Lancement;Envoyer les colis de seeding aux créateurs;Marketing;Fondateur;Haute;500;Semaine 20;Bloqué;"T42;T32";—
+T50;Lancement;Écrire les e-mails de la séquence de lancement;CRM;Fondateur;Haute;0;Semaine 20;Bloqué;T48;—
+T51;Lancement;Exécuter la séquence J-2 à J+7;Marketing;Fondateur;Critique;0;Semaine 21;Bloqué;T50;—
+T52;Post-lancement;Mesurer le taux de conversion réel;Finance;Fondateur;Critique;0;Semaine 23;Bloqué;T51;Gate 6
+T53;Post-lancement;Lancer le test publicitaire à 30 EUR/jour;Marketing;Fondateur;Moyenne;1000;Semaine 24;Bloqué;T52;Gate 6
+T54;Post-lancement;Mesurer le taux de réachat à 60 jours;Finance;Fondateur;Critique;0;Semaine 30;Bloqué;T51;—
+T55;Post-lancement;Ouvrir l'abonnement si réachat > 20 %;E-commerce;Fondateur;Moyenne;0;Semaine 32;Bloqué;T54;—
+T56;Post-lancement;Déclencher le réassort à 45 jours de stock restant;Opérations;Fondateur;Critique;0;Continu;Bloqué;T42;—
+T57;Pilotage;Mettre en place la scorecard hebdomadaire;Direction;Fondateur;Haute;0;Semaine 13;À faire;—;—
+T58;Pilotage;Constituer une réserve de trésorerie de 1 500 EUR;Finance;Fondateur;Haute;1500;Semaine 13;À faire;—;—
+
+;;TOTAL BUDGET IDENTIFIÉ;;;;11750;;;;

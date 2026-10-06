@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 560" width="460" height="560">
+  <path d="M62 150 L390 150 L436 106 L108 106 Z" fill="#1C4A34"/>
+  <path d="M390 150 L436 106 L436 484 L390 528 Z" fill="#0F2A1E"/>
+  <path d="M62 150 L390 150 L390 528 L62 528 Z" fill="#173D2B"/>
+  <g transform="translate(226 330) scale(1)">
+    <clipPath id="abx"><path d="M-50 -68 C-48 -16 -40 32 -32 56 C-29 65 -22 70 -13 70 L13 70 C22 70 29 65 32 56 C40 32 48 -16 50 -68 Z"/></clipPath>
+    <g clip-path="url(#abx)"><path d="M-76 14 C-44 0 -18 22 6 12 C30 2 56 26 90 14 L90 90 L-76 90 Z" fill="#79A84B"/></g>
+    <path d="M-58 -74 C-56 -18 -47 34 -38 61 C-35 71 -26 78 -13 78 L13 78 C26 78 34 71 37 61 C46 34 55 -18 57 -74" stroke="#F3EFE5" stroke-width="9" fill="none" stroke-linecap="round"/>
+    <ellipse cx="0" cy="-74" rx="58" ry="9" stroke="#F3EFE5" stroke-width="9" fill="none"/>
+    <path d="M-22 78 L22 78" stroke="#F3EFE5" stroke-width="13" stroke-linecap="round"/>
+  </g>
+  <text x="96" y="212" fill="#F3EFE5" font-size="34" font-weight="600" font-family="Archivo, Helvetica, Arial, sans-serif">MATOCHA</text>
+  <text x="96" y="240" fill="#F3EFE5" font-size="12" letter-spacing="4.2" opacity=".7" font-family="Archivo, Helvetica, Arial, sans-serif">MATCHA</text>
+  <text x="96" y="482" fill="#F3EFE5" font-size="18" font-weight="600" letter-spacing="2.4" font-family="Archivo, Helvetica, Arial, sans-serif">30 × 2G</text>
+  <text x="96" y="504" fill="#F3EFE5" font-size="10.5" letter-spacing="2" opacity=".6" font-family="Archivo, Helvetica, Arial, sans-serif">100% JAPANESE MATCHA</text>
+</svg>

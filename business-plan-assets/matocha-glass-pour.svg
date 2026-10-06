@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220" fill="none">
+  <clipPath id="apour"><path d="M42 50 C43 98 49 148 56 175 C58 185 63 189 72 189 L128 189 C137 189 142 185 144 175 C151 148 157 98 158 50 Z"/></clipPath>
+  <g clip-path="url(#apour)">
+    <path d="M28 156 C48 145 66 161 92 156 C118 148 140 163 172 145 L172 202 L28 202 Z" fill="#79A84B"/>
+    
+  </g>
+  <path d="M104 -6 C102 22 96 34 99 52 C100 60 104 66 103 74" stroke="#79A84B" stroke-width="13" stroke-linecap="round"/><circle cx="122" cy="42" r="4.5" fill="#79A84B"/>
+  <path d="M36 47 C37 97 43 149 50 178 C52 190 60 196 72 196 L129 196 C141 196 148 189 150 177 C157 148 162 96 164 47" stroke="#161713" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <ellipse cx="100" cy="47" rx="64" ry="9.5" stroke="#161713" stroke-width="7"/>
+  <path d="M64 196 L136 196" stroke="#161713" stroke-width="11" stroke-linecap="round"/>
+</svg>

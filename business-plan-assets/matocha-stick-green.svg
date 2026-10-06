@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 520" width="132" height="520">
+  <rect x="8" y="4" width="116" height="512" rx="7" fill="#173D2B"/>
+  <rect x="8" y="4" width="116" height="46" fill="#12331F"/>
+  <rect x="8" y="470" width="116" height="46" fill="#12331F"/>
+  <g transform="translate(66 140) scale(1.5)"><clipPath id="sgbu1"><path d="M-19 -18 C-18 0 -15 16 -12 23 C-11 26 -8 27 -5 27 L5 27 C8 27 11 26 12 23 C15 16 18 0 19 -18 Z"/></clipPath><g clip-path="url(#sgbu1)"><path d="M-22 2 C-12 -2 -4 4 4 1 C12 -1 17 3 22 1 L22 30 L-22 30 Z" fill="#79A84B"/></g><path d="M-19 -18 C-18 0 -15 16 -12 23 C-11 26 -8 27 -5 27 L5 27 C8 27 11 26 12 23 C15 16 18 0 19 -18" stroke="#F3EFE5" stroke-width="3" fill="none" stroke-linecap="round"/><ellipse cx="0" cy="-18" rx="19" ry="3.4" stroke="#F3EFE5" stroke-width="3" fill="none"/><path d="M-7 27 L7 27" stroke="#F3EFE5" stroke-width="4.5" stroke-linecap="round"/></g>
+  <text transform="rotate(-90 66 330)" x="66" y="330" text-anchor="middle" fill="#F3EFE5" font-size="26" font-weight="600" font-family="Archivo, Helvetica, Arial, sans-serif">MATOCHA</text>
+  <text x="66" y="436" text-anchor="middle" fill="#F3EFE5" font-size="12" letter-spacing="4" opacity=".7" font-family="Archivo, Helvetica, Arial, sans-serif">MATCHA</text>
+  <text x="66" y="464" text-anchor="middle" fill="#F3EFE5" font-size="17" font-weight="600" letter-spacing="2" font-family="Archivo, Helvetica, Arial, sans-serif">2G</text>
+</svg>
