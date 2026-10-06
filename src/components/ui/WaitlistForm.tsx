@@ -184,14 +184,26 @@ export function WaitlistForm({
         </div>
       </fieldset>
 
-      <label className="mt-5 flex items-start gap-3 text-sm">
-        <input
-          name="consent"
-          type="checkbox"
-          defaultChecked={false}
-          aria-invalid={field === "consent" || undefined}
-          className="mt-1 h-5 w-5 shrink-0 accent-[var(--foret)]"
-        />
+      <label className="mt-5 flex items-start gap-2 text-sm">
+        {/* 44 px hit area around a 24 px box. */}
+        <span className="relative -mt-2.5 -ml-2.5 flex h-11 w-11 shrink-0 items-center justify-center">
+          <input
+            name="consent"
+            type="checkbox"
+            defaultChecked={false}
+            aria-invalid={field === "consent" || undefined}
+            className="peer absolute inset-0 h-11 w-11 cursor-pointer opacity-0"
+          />
+          <span
+            aria-hidden="true"
+            className={cn(
+              "flex h-6 w-6 items-center justify-center border-2 text-sm font-bold text-transparent peer-checked:text-current peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-matcha-profond",
+              dark ? "border-lait" : "border-encre",
+            )}
+          >
+            ✓
+          </span>
+        </span>
         <span>
           {consentText}{" "}
           <Link href="/legal/confidentialite" className="underline underline-offset-2">

@@ -89,7 +89,7 @@ export function Header({
           aria-label="Navigation principale"
           className="mx-auto flex h-16 max-w-[1600px] items-center justify-between gap-6 px-4 sm:px-8 lg:h-[72px] lg:px-12"
         >
-          <Link href="/" aria-label={fr.nav.home} className="text-[1.05rem]">
+          <Link href="/" aria-label={fr.nav.home} className="flex min-h-11 items-center text-[1.05rem]">
             <MatochaLogo variant="inline" glassVariant="classic" ink="currentColor" />
           </Link>
 

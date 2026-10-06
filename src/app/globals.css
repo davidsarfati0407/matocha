@@ -150,16 +150,15 @@
 }
 
 @layer utilities {
-  /* Tactile paper grain over the whole document (v1, kept, lighter). */
-  .grain::after {
-    content: "";
-    position: fixed;
-    inset: -50%;
-    z-index: 60;
-    pointer-events: none;
-    opacity: 0.26;
-    mix-blend-mode: multiply;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  /*
+   * Tactile paper grain (v1, kept). Painted as part of the page background,
+   * under the content: a fixed full-screen layer in multiply blend had to be
+   * re-composited on every scroll frame and left sections blank after fast
+   * scroll jumps.
+   */
+  .grain {
+    background-color: var(--lait-avoine);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.09 0 0 0 0 0.14 0 0 0 0 0.11 0 0 0 0.32 -0.06'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
   .no-scrollbar::-webkit-scrollbar {

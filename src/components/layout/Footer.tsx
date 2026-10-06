@@ -46,10 +46,10 @@ export function Footer({ catalog }: { catalog: Catalog }) {
 
           <nav aria-label={fr.footer.help}>
             <h2 className="u-label text-lait/75">{fr.footer.help}</h2>
-            <ul className="mt-4 space-y-2.5">
+            <ul className="mt-2">
               {[...fr.nav.primary, ...fr.footer.helpLinks].map((item) => (
                 <li key={item.href}>
-                  <Link href={item.href} className="hover:underline underline-offset-4">
+                  <Link href={item.href} className="inline-flex min-h-11 min-w-11 items-center underline-offset-4 hover:underline">
                     {item.label}
                   </Link>
                 </li>
@@ -59,10 +59,10 @@ export function Footer({ catalog }: { catalog: Catalog }) {
 
           <nav aria-label={fr.footer.legal}>
             <h2 className="u-label text-lait/75">{fr.footer.legal}</h2>
-            <ul className="mt-4 space-y-2.5">
+            <ul className="mt-2">
               {fr.footer.legalLinks.map((item) => (
                 <li key={item.href}>
-                  <Link href={item.href} className="hover:underline underline-offset-4">
+                  <Link href={item.href} className="inline-flex min-h-11 min-w-11 items-center underline-offset-4 hover:underline">
                     {item.label}
                   </Link>
                 </li>

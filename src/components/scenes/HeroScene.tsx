@@ -80,7 +80,7 @@ export function HeroScene({ variants }: { variants: Variant[] }) {
           <button
             type="button"
             onClick={() => setPlaying((p) => !p)}
-            className="absolute right-3 bottom-3 flex h-10 items-center gap-2 rounded-full bg-lait/90 px-3 text-xs font-semibold"
+            className="absolute right-3 bottom-3 flex h-11 items-center gap-2 rounded-full bg-lait/90 px-3 text-xs font-semibold"
             aria-pressed={!playing}
           >
             {playing ? "Mettre en pause" : "Lire l'animation"}

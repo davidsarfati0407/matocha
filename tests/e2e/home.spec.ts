@@ -105,3 +105,32 @@ test.describe("interactions", () => {
     await expect(page.getByText("Cette combinaison n'a pas encore été testée.")).toBeVisible();
   });
 });
+
+test.describe("mobile", () => {
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+
+  test("every touch target is at least 44 px (inline text links excepted)", async ({ page }) => {
+    for (const path of ["/", "/formats/poudre", "/preparer", "/faq", "/aide"]) {
+      await page.goto(path);
+      const small = await page.evaluate(() =>
+        [...document.querySelectorAll("a[href], button, input, summary, [role=slider], [role=radio]")]
+          .filter((el) => {
+            const cs = getComputedStyle(el);
+            if (cs.display === "none" || cs.visibility === "hidden" || el.closest("[hidden]") || el.classList.contains("sr-only")) return false;
+            const parent = el.parentElement;
+            const inline = el.tagName === "A" && parent && ["P", "SPAN"].includes(parent.tagName) && (parent.textContent ?? "").trim().length > (el.textContent ?? "").trim().length + 15;
+            const r = el.getBoundingClientRect();
+            return !inline && r.width > 0 && (r.height < 44 || r.width < 44);
+          })
+          .map((el) => `${el.tagName} ${(el.textContent ?? "").trim().slice(0, 30)}`),
+      );
+      expect(small, path).toEqual([]);
+    }
+  });
+
+  test("Le Filet is not drawn on phones and nothing overflows", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator('main path[stroke="var(--accent)"]')).toHaveCount(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
+  });
+});

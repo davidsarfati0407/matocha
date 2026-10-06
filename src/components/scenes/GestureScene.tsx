@@ -68,8 +68,21 @@ export function GestureScene({ families, header }: { families: GestureFamily[]; 
   const method =
     f.methods.find((m) => (temp === "hot" ? m.hot : m.iced))?.method ?? f.methods[0]?.method;
   /* Scroll covers Ouvrir → Préparer and stops on the finished drink. */
-  const t = reduced ? STEP_FRAMES[2] : Math.min(0.78, progress * 0.82);
-  const active = t < 0.14 ? 0 : t < 0.4 ? 1 : 2;
+  /* Scroll → film: a short lead-in, then three equal bands (one per step,
+     each ~420 px of scroll), then a hold on the finished drink. Each band
+     maps to the stage's own timeline, so the highlighted step is always the
+     one being shown: Verser covers the whole pour, Préparer starts when the
+     tool enters. */
+  const BANDS = [
+    { p: [0.06, 0.34], t: [0, 0.14] },
+    { p: [0.34, 0.62], t: [0.14, 0.42] },
+    { p: [0.62, 0.9], t: [0.42, 0.76] },
+  ] as const;
+  const bandIndex = BANDS.findIndex((b) => progress < b.p[1]);
+  const active = reduced ? 2 : bandIndex === -1 ? 2 : bandIndex;
+  const band = BANDS[active];
+  const local = Math.min(1, Math.max(0, (progress - band.p[0]) / (band.p[1] - band.p[0])));
+  const t = reduced ? STEP_FRAMES[2] : bandIndex === -1 ? 0.76 : band.t[0] + (band.t[1] - band.t[0]) * local;
 
   const stage = (time: number, cls: string) => (
     <PourStage
@@ -155,9 +168,9 @@ export function GestureScene({ families, header }: { families: GestureFamily[]; 
   );
 
   return (
-    /* Desktop: a short pin (115vh) that is always passable; the heading pins
+    /* Desktop: a pin (260vh, ~1 500 px of scroll) that is always passable; the heading pins
        with the scene. Mobile: three swipeable cards, no pinning. */
-    <div ref={pin} className={cn("relative", !reduced && "lg:h-[115vh]")}>
+    <div ref={pin} className={cn("relative", !reduced && "lg:h-[260vh]")}>
       <div
         className={cn(
           "lg:grid lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-16",
@@ -206,7 +219,7 @@ function MobileCards({
     <div className="mt-6">
       <ol
         ref={track}
-        className="no-scrollbar -mx-4 flex snap-x snap-mandatory overflow-x-auto px-4"
+        className="no-scrollbar -mx-4 flex snap-x snap-mandatory scroll-px-4 overflow-x-auto px-4"
         aria-label="Les trois étapes"
       >
         {labels.map((label, i) => (

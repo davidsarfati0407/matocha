@@ -9,7 +9,7 @@
 | | v1 | v2 |
 |---|---|---|
 | Langue | Anglais, `lang="en"`, bouton FR décoratif | Français complet, `lang="fr"`, anglais retiré tant qu'il n'est pas intégral |
-| Home desktop 1440 px | 17 809 px, 18 sections | **8 908 px** (8 210 px sans footer), 8 blocs |
+| Home desktop 1440 px | 17 809 px, 18 sections | **11 055 px**, 8 blocs (épinglages allongés en revue : voir F23) |
 | Home mobile 390 px | 20 571 px | 13 010 px |
 | Lighthouse mobile home : perf / a11y | 91 / 96 | **96 / 100** (médiane de 3 passages) |
 | LCP / CLS / TBT mobile | 3,4 s / 0 / 100 ms | **2,8 s** / 0 / 40 ms |
@@ -17,7 +17,7 @@
 | Achat | Panier et abonnement actifs, 39 € / 35,10 € | Impossible par construction en pré-lancement |
 | Inscription | Fausse confirmation, rien stocké | Double opt-in réel, ou « Inscriptions bientôt ouvertes » |
 | Back-office / API | — | `/admin`, API Ops v1, MCP, webhooks signés |
-| Tests | 0 | 71 unitaires + 64 e2e |
+| Tests | 0 | 71 unitaires + 66 e2e |
 
 Captures : `docs/captures/avant/` (home 390 et 1440, page entière) et `docs/captures/apres/` (48 captures : home, `/formats/poudre`, `/preparer`, `/faq`, 404, admin en 360 / 390 / 768 / 1440, mouvement normal et réduit). Rapports Lighthouse bruts : `docs/lighthouse/`.
 
@@ -57,11 +57,11 @@ Toutes les scènes ont une version mobile et une version `reduced-motion`, et af
 |---|---|---|---|
 | Le Filet | home | Ruban SVG entre les blocs, tracé au scroll, couleur du goût, fin dans le verre M09. Statique en reduced-motion. | concept (SVG) |
 | M01 Le Versement | hero | Boucle de 8 s du vrai geste poudre (déchirure, poudre en surface, mousseur, couleur uniforme, verre soulevé, gorgée) ; bascule vers le concentré « en développement ». Poster rendu côté serveur, bouton pause, pause hors écran. Reduced-motion : poster + 3 vignettes. | concept ; vidéos `missing` |
-| M02 Le geste en 3 temps | home, fiches | Épinglage court de 115 vh lié au scroll sur desktop, carrousel 3 cartes sur mobile, poudre/concentré, chaud/glacé, outil selon `preparation.method`. | concept ; plans `missing` |
+| M02 Le geste en 3 temps | home, fiches | Épinglage de 260 vh lié au scroll sur desktop, trois bandes calées sur le film, carrousel 3 cartes sur mobile, poudre/concentré, chaud/glacé, outil selon `preparation.method`. | concept ; plans `missing` |
 | M03 Ouvre la boîte | home, fiches | Couvercle, nombre exact de sticks par pack, rejouée à chaque changement, `aria-expanded`. | concept ; renders `missing` |
 | M04 Ma dose | home | Curseur 1–14, chaud/glacé, doses par mois, pack conseillé, durée, prix par boisson seulement s'il est confirmé. | — |
 | M05 Sélecteur de goût | home, fiches | Couleur interpolée, sachet, accent du Filet, texte, ingrédients et CTA changent ensemble ; radiogroup au clavier. | concept |
-| M06 Une journée | home | Défilement horizontal piloté par le scroll (120 vh) sur desktop, swipe sur mobile, grille en reduced-motion ; 5 moments. | concept ; photos `missing` |
+| M06 Une journée | home | Défilement horizontal piloté par le scroll (200 vh, repos à trois cartes entières) sur desktop, swipe sur mobile, grille en reduced-motion ; 5 moments. | concept ; photos `missing` |
 | M07 Sous la loupe + Suspension | home | 4 points d'intérêt en boutons, fiche Proof, liste lisible à côté ; canvas où l'on remue la poudre, qui retombe au repos. | concept ; macro `missing` |
 | M08 Comparateur rituel | home | Avant/après avec `role="slider"` (flèches, Home/End) et tableau pour une boisson. | concept |
 | M09 Dernière gorgée | home | Verre qui se remplit au scroll, paille quand il est plein, CTA jamais bloqué. | concept |
@@ -133,14 +133,15 @@ Commandes : `npm test` · `npm run test:e2e` · `npm run check:claims`.
   - liste d'attente : 7 (succès, e-mail invalide, consentement requis, service absent → 503 sans enregistrement, double envoi sans doublon, confirmation, désinscription) ;
   - checkout : 3 ;
   - MCP : 3.
-- **E2E Playwright (64)** :
+- **E2E Playwright (66)** :
   - 40 captures (5 pages × 4 largeurs × 2 modes de mouvement) avec titre visible, pas de défilement horizontal et zéro erreur console ;
   - home : titre et CTA dans le HTML serveur, lisibles **sans JavaScript** ; aucun contrôle d'achat ni ancien prix ou délai en pré-lancement ; liste d'attente fermée honnêtement ; checkout refusé ; aucun lien vers une racine de réseau social ;
   - interactions : goût (couleur, ingrédients, statut et CTA ensemble), boîte au nombre exact de doses, comparateur au clavier, FAQ au clavier, calculateur, `/preparer` « pas encore testée » ;
   - liens internes tous en 200 ; redirections 301 ; journal noindex ; schéma FAQPage ; sitemap ;
   - **3G lente** (400 ms, 500 kbit/s) : titre visible en 0,55 s, CTA dans la vue et cliquable, titre immobile à l'arrivée des médias ;
   - inscription sur serveur de dev avec stockage mémoire : e-mail invalide, consentement non pré-coché et requis, succès après la vraie réponse API avec un seul envoi malgré un double clic, même adresse deux fois sans doublon ;
-  - admin : connexion de dev et captures aux 4 largeurs, refus des visiteurs anonymes.
+  - admin : connexion de dev et captures aux 4 largeurs, refus des visiteurs anonymes ;
+  - mobile : toutes les cibles tactiles ≥ 44 px, Le Filet absent et aucun débordement horizontal.
 - **Lighthouse mobile** : home 96 / 100 / 100 / 100 (médiane de 3) ; `/formats/poudre` 97 / 100 / 100 / 100.
 - **Chaînes interdites** : `scripts/check-claims.mjs` trouve **0** occurrence hors champs Proof. Le script a été vérifié sur un fichier piège : 5 détections sur 5.
 - **Revue visuelle** : captures relues ; corrigé en conséquence la hauteur de page, un stick à l'envers, le Filet qui traversait des titres, la mise en page tablette du calculateur et des cartes, et un hotspot qui masquait une lettre.

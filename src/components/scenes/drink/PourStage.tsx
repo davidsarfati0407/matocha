@@ -83,7 +83,7 @@ function Sachet({ accent }: { accent: string }) {
       <rect x="-8" y="0" width="42" height="92" rx="6" fill={LAIT} stroke={INK} strokeWidth="2.5" />
       <rect x="-8" y="0" width="42" height="14" rx="4" fill={FORET} />
       <path d="M13 34 C6 46 5 52 13 58 C21 52 20 46 13 34 Z" fill={accent} stroke={INK} strokeWidth="1.5" />
-      <text x="13" y="78" textAnchor="middle" fontFamily="var(--font-sans)" fontWeight="700" fontSize="7.5" fill={FORET}>
+      <text x="31" y="86" transform="rotate(-90 31 86)" fontFamily="var(--font-sans)" fontWeight="700" fontSize="7.5" fill={FORET}>
         MATOCHA
       </text>
     </g>
@@ -203,10 +203,12 @@ export function PourStage({
   const wobble = 0.6 + Math.sin(t * Math.PI * 16) * 0.25 + mix * (1 - mix) * 2.4;
 
   /* Pack position: held above the glass, tilted to pour. */
-  const packX = 222;
+  /* Tipped clockwise: the printed MATOCHA (running upward) stays readable
+     through the pour instead of turning upside down. */
+  const packX = 116;
   const packY = -8;
   const S = 1.4;
-  const angle = -128 * tilt;
+  const angle = 128 * tilt;
   const packOut = smooth(seg(t, 0.4, 0.5));
 
   const rand = seeded(7);
@@ -216,7 +218,7 @@ export function PourStage({
     z: 1.6 + rand() * 2.2,
   }));
   /* The torn end of the pack, once fully tilted (pivot at its centre 13,60). */
-  const theta = (-128 * Math.PI) / 180;
+  const theta = (128 * Math.PI) / 180;
   const mouthX = packX + S * (13 + 60 * Math.sin(theta));
   const mouthY = packY + S * (60 - 60 * Math.cos(theta));
 
@@ -372,7 +374,7 @@ export function PourStage({
 
         {/* The pack, held, torn, tilted — then set aside */}
         <g
-          transform={`translate(${r(packX + packOut * 160)} ${r(packY - packOut * 40)}) rotate(${r(angle)} ${13 * S} ${60 * S}) scale(${S})`}
+          transform={`translate(${r(packX - packOut * 160)} ${r(packY - packOut * 40)}) rotate(${r(angle)} ${13 * S} ${60 * S}) scale(${S})`}
           opacity={r(1 - packOut)}
         >
           {/* Torn top piece flies off */}

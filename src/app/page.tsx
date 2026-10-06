@@ -143,7 +143,7 @@ export default async function HomePage() {
           <p className="mt-4 measure text-lg">{fr.formats.intro}</p>
           <div className="mt-8">
             <FormatComparator catalog={catalog} rows={["preparation", "equipment", "composition", "pricePerDrink"]} />
-            <TextLink href="/formats" className="mt-4 inline-block">
+            <TextLink href="/formats" className="mt-4">
               Le comparatif complet
             </TextLink>
           </div>
@@ -196,7 +196,7 @@ export default async function HomePage() {
                 <div>
                   <h3 className="text-2xl u-caps">{fr.inside.suspensionTitle}</h3>
                   <p className="mt-3">{fr.inside.suspensionText}</p>
-                  <TextLink href="/preparer" className="mt-4 inline-block">
+                  <TextLink href="/preparer" className="mt-4">
                     Comment préparer
                   </TextLink>
                 </div>
@@ -225,8 +225,24 @@ export default async function HomePage() {
           <p className="mt-4 measure">{fr.ritual.intro}</p>
           <div className="mt-10 grid gap-10 lg:grid-cols-[1.2fr_1fr]">
             <RitualCompare />
-            <div className="-mx-4 overflow-x-auto px-4">
-              <table className="w-full min-w-[480px] border-collapse text-left text-sm">
+            {/* Phones: one card per step, both answers stacked — no hidden horizontal scroll. */}
+            <dl className="divide-y divide-encre/15 border-y border-encre/15 md:hidden">
+              {fr.ritual.rows.map((row) => (
+                <div key={row.label} className="py-3 text-sm">
+                  <dt className="font-semibold">{row.label}</dt>
+                  <dd className="mt-1 grid grid-cols-[8.5rem_1fr] gap-2">
+                    <span className="font-medium">{fr.ritual.traditional}</span>
+                    <span>{row.traditional}</span>
+                  </dd>
+                  <dd className="mt-1 grid grid-cols-[8.5rem_1fr] gap-2">
+                    <span className="font-medium">{fr.ritual.matocha}</span>
+                    <span>{row.matocha}</span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <div className="hidden md:block">
+              <table className="w-full border-collapse text-left text-sm">
                 <caption className="sr-only">Étapes pour une boisson</caption>
                 <thead>
                   <tr className="border-b-2 border-encre">
@@ -259,7 +275,7 @@ export default async function HomePage() {
             <div className="mt-8">
               <FaqList items={homeFaq} />
             </div>
-            <TextLink href="/faq" className="mt-6 inline-block">
+            <TextLink href="/faq" className="mt-6">
               {fr.final.allFaq}
             </TextLink>
           </div>

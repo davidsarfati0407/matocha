@@ -55,8 +55,9 @@ const ART: Record<number, React.ReactNode> = {
   /* 7 h — kitchen: window light, glass, frother, stick on the counter. */
   0: (
     <>
-      <rect x="40" y="20" width="120" height="110" fill="#fff" opacity="0.55" />
-      <line x1="100" y1="20" x2="100" y2="130" stroke={INK} strokeWidth="2" opacity="0.3" />
+      {/* Window, kept clear of the glass */}
+      <rect x="14" y="20" width="84" height="104" fill="#fff" opacity="0.55" />
+      <line x1="56" y1="20" x2="56" y2="124" stroke={INK} strokeWidth="2" opacity="0.3" />
       <line x1="0" y1="210" x2="320" y2="210" stroke={INK} strokeWidth="2" opacity="0.4" />
       <Glass x={120} y={100} ice />
       <g transform="translate(206 70) rotate(12)">
@@ -146,7 +147,18 @@ export function DayScene({ header }: { header?: React.ReactNode }) {
       const rect = el.getBoundingClientRect();
       const total = rect.height - window.innerHeight;
       const p = total > 0 ? Math.min(1, Math.max(0, -rect.top / total)) : 0;
-      setShift(p * Math.max(0, tr.scrollWidth - tr.clientWidth));
+      /* Cards rest at whole-card positions (three fully visible), with a
+         short eased move between two rests: never a card cut mid-scene. */
+      const max = Math.max(0, tr.scrollWidth - tr.clientWidth);
+      const first = tr.firstElementChild as HTMLElement | null;
+      const gap = Number.parseFloat(getComputedStyle(tr).columnGap) || 0;
+      const step = first ? first.offsetWidth + gap : max;
+      const stops = step > 0 ? Math.round(max / step) : 0;
+      if (stops === 0) return setShift(0);
+      const raw = p * stops;
+      const i = Math.min(stops - 1, Math.floor(raw));
+      const f = Math.min(1, Math.max(0, (raw - i - 0.25) / 0.5));
+      setShift(Math.min(max, (i + f * f * (3 - 2 * f)) * step));
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update);
@@ -165,7 +177,7 @@ export function DayScene({ header }: { header?: React.ReactNode }) {
       key={scene.time}
       className={cn(
         "shrink-0 snap-start",
-        reduced ? "w-full" : "w-[82%] sm:w-[46%] lg:w-[30vw] lg:max-w-[420px]",
+        reduced ? "w-full" : "w-[82%] sm:w-[46%] lg:w-[calc((100%-3rem)/3)]",
       )}
     >
       <figure className="relative aspect-[4/3] overflow-hidden bg-[linear-gradient(170deg,#fbfaf2,var(--lait-profond))]">
@@ -179,7 +191,7 @@ export function DayScene({ header }: { header?: React.ReactNode }) {
         <span className="font-semibold">{scene.place}</span>
       </p>
       <p className="mt-1">{scene.text}</p>
-      <Link href={scene.recipe} className="mt-2 inline-block text-sm font-semibold underline decoration-matcha decoration-2 underline-offset-4">
+      <Link href={scene.recipe} className="mt-1 inline-flex min-h-11 items-center text-sm font-semibold underline decoration-matcha decoration-2 underline-offset-4">
         La recette
       </Link>
     </li>
@@ -195,7 +207,7 @@ export function DayScene({ header }: { header?: React.ReactNode }) {
   }
 
   return (
-    <div ref={wrap} className={cn(pinned && "h-[120vh]")}>
+    <div ref={wrap} className={cn(pinned && "h-[200vh]")}>
       <div className={cn(pinned && "sticky top-[72px] flex h-[calc(100vh-72px)] flex-col justify-center overflow-hidden")}>
         {header}
         <ol
@@ -203,7 +215,7 @@ export function DayScene({ header }: { header?: React.ReactNode }) {
           aria-label="Cinq moments de la journée"
           className={cn(
             "mt-8 flex gap-6",
-            pinned ? "w-full" : "no-scrollbar -mx-4 snap-x snap-mandatory overflow-x-auto px-4",
+            pinned ? "w-full" : "no-scrollbar -mx-4 snap-x snap-mandatory scroll-px-4 overflow-x-auto px-4",
           )}
           style={pinned ? { transform: `translateX(${-shift}px)` } : undefined}
         >

@@ -112,7 +112,7 @@ export function TextLink({
     <Link
       href={href}
       className={cn(
-        "font-semibold underline decoration-matcha decoration-2 underline-offset-[6px] transition-colors hover:decoration-foret",
+        "inline-flex min-h-11 items-center font-semibold underline decoration-matcha decoration-2 underline-offset-[6px] transition-colors hover:decoration-foret",
         className,
       )}
     >
