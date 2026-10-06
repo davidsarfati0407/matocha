@@ -84,7 +84,6 @@ export function Photo({
             fill
             sizes={sizes}
             priority={priority}
-            quality={80}
             className="object-cover"
             style={{ objectPosition }}
           />
