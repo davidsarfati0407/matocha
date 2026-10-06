@@ -1,0 +1,580 @@
+openapi: 3.1.0
+info:
+  title: Matocha Ops API
+  version: "1.0.0"
+  description: |
+    API opérationnelle de Matocha pour l'agent Instinct.
+
+    - Authentification : `Authorization: Bearer <jeton>` (jeton créé dans /admin/jetons, stocké haché).
+    - Toute écriture exige l'en-tête `Idempotency-Key`. Une même clé rejouée avec la même requête
+      renvoie la même réponse (`Idempotent-Replayed: true`) ; avec une requête différente, 422.
+    - Limitation de débit par jeton (défaut 120 requêtes/minute) : 429 + `Retry-After`.
+    - Chaque appel est journalisé (acteur, route, statut, avant/après pour les écritures).
+    - Les actions sensibles renvoient **202** avec une `change_request` à valider par un humain dans /admin.
+      Suivez-la avec `GET /change-requests/{id}` ou le webhook `change_request.decided`.
+    - Les mêmes opérations existent en outils MCP sur `POST /mcp` (JSON-RPC, Streamable HTTP sans état).
+servers:
+  - url: https://matocha.vercel.app/api/ops/v1
+  - url: http://localhost:3000/api/ops/v1
+security:
+  - bearer: []
+tags:
+  - name: Système
+  - name: Catalogue
+  - name: Contenu
+  - name: Inscrits
+  - name: Commandes
+  - name: Médias
+  - name: Statistiques
+  - name: Réglages
+
+paths:
+  /health:
+    get:
+      tags: [Système]
+      summary: État de l'API et mode du site
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  api: { type: string, const: matocha-ops }
+                  version: { type: string, const: v1 }
+                  mode: { $ref: "#/components/schemas/SiteMode" }
+                  storage: { type: [string, "null"], enum: [supabase, memory, null] }
+                  time: { type: string, format: date-time }
+
+  /catalog:
+    get:
+      tags: [Catalogue]
+      summary: Lire familles, recettes (goûts), packs, société
+      x-scope: catalog:read
+      responses:
+        "200": { description: Catalogue fusionné (base + surcharges approuvées), content: { application/json: { schema: { $ref: "#/components/schemas/Catalog" } } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+
+  /catalog/packs/{id}:
+    get:
+      tags: [Catalogue]
+      summary: Lire un pack
+      x-scope: catalog:read
+      parameters: [{ $ref: "#/components/parameters/PackId" }]
+      responses:
+        "200": { description: Pack, content: { application/json: { schema: { $ref: "#/components/schemas/Pack" } } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /catalog/recipes/{id}:
+    patch:
+      tags: [Catalogue]
+      summary: Modifier les textes ou proposer des valeurs Proof (restent « to_confirm »)
+      description: Ne confirme jamais un champ. Un `status` autre que `to_confirm` renvoie 422 `confirmation_requires_validation`.
+      x-scope: catalog:write
+      parameters: [{ $ref: "#/components/parameters/RecipeId" }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fields]
+              properties:
+                fields:
+                  type: object
+                  properties:
+                    description: { type: string, maxLength: 1000 }
+                  additionalProperties:
+                    $ref: "#/components/schemas/ProofProposal"
+            example: { fields: { origin: { value: "Japon", target: "Japon, à confirmer avec le COA" } } }
+      responses:
+        "200": { description: Appliqué }
+        "400": { $ref: "#/components/responses/IdempotencyRequired" }
+        "422": { $ref: "#/components/responses/Validation" }
+
+  /catalog/recipes/{id}/proofs:
+    post:
+      tags: [Catalogue]
+      summary: Demander la confirmation d'un champ Proof (validation humaine)
+      x-scope: catalog:write
+      x-human-validation: true
+      parameters: [{ $ref: "#/components/parameters/RecipeId" }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [field, value, source]
+              properties:
+                field: { $ref: "#/components/schemas/ProofField" }
+                value: { description: Valeur à confirmer (type selon le champ) }
+                source: { type: string, description: "Preuve interne : COA, devis, fiche technique…" }
+                verifiedAt: { type: string, format: date }
+      responses:
+        "202": { $ref: "#/components/responses/ChangeRequestCreated" }
+
+  /catalog/packs/{id}/price:
+    patch:
+      tags: [Catalogue]
+      summary: Proposer un prix TTC (validation humaine)
+      x-scope: catalog:write
+      x-human-validation: true
+      parameters: [{ $ref: "#/components/parameters/PackId" }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [price]
+              properties:
+                price: { type: number, exclusiveMinimum: 0, description: Euros TTC }
+                source: { type: string }
+      responses:
+        "202": { $ref: "#/components/responses/ChangeRequestCreated" }
+
+  /catalog/packs/{id}/status:
+    post:
+      tags: [Catalogue]
+      summary: Changer le statut commercial (validation humaine si « available »)
+      x-scope: catalog:write
+      parameters: [{ $ref: "#/components/parameters/PackId" }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { $ref: "#/components/schemas/CommercialStatus" }
+      responses:
+        "200": { description: Appliqué directement (statut autre que available) }
+        "202": { $ref: "#/components/responses/ChangeRequestCreated" }
+
+  /content/blocks:
+    get:
+      tags: [Contenu]
+      summary: Lister les blocs de contenu
+      x-scope: content:read
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [draft, published] } }
+      responses:
+        "200": { description: Liste, content: { application/json: { schema: { type: object, properties: { items: { type: array, items: { $ref: "#/components/schemas/ContentBlock" } } } } } } }
+    post:
+      tags: [Contenu]
+      summary: Créer un brouillon (FAQ, bandeau d'annonce, texte de section)
+      x-scope: content:write
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [key, kind, body]
+              properties:
+                key: { type: string, example: faq.livraison }
+                kind: { type: string, enum: [faq, announcement, section] }
+                title: { type: string }
+                body: { type: string }
+                locale: { type: string, enum: [fr] }
+      responses:
+        "201": { description: Brouillon créé, content: { application/json: { schema: { $ref: "#/components/schemas/ContentBlock" } } } }
+
+  /content/blocks/{id}/publish:
+    post:
+      tags: [Contenu]
+      summary: Demander la publication d'un brouillon (validation humaine)
+      x-scope: content:write
+      x-human-validation: true
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      responses:
+        "202": { $ref: "#/components/responses/ChangeRequestCreated" }
+
+  /leads:
+    get:
+      tags: [Inscrits]
+      summary: Inscrits confirmés de la liste d'attente
+      x-scope: leads:read
+      parameters:
+        - { name: tag, in: query, schema: { type: string } }
+        - { name: interest, in: query, schema: { type: string, enum: [poudre, concentre, original, vanille, fraise] } }
+      responses:
+        "200":
+          description: Liste
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count: { type: integer }
+                  items: { type: array, items: { $ref: "#/components/schemas/Lead" } }
+
+  /leads/export:
+    get:
+      tags: [Inscrits]
+      summary: Export CSV des inscrits confirmés
+      x-scope: leads:read
+      responses:
+        "200": { description: CSV (email, interests, tags, source, confirmed_at, consent_version), content: { text/csv: { schema: { type: string } } } }
+
+  /leads/{id}/tags:
+    patch:
+      tags: [Inscrits]
+      summary: Ajouter / retirer des tags
+      x-scope: leads:write
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                add: { type: array, items: { type: string, pattern: "^[a-z0-9][a-z0-9:_-]{0,39}$" } }
+                remove: { type: array, items: { type: string } }
+      responses:
+        "200": { description: Tags à jour }
+
+  /orders:
+    get:
+      tags: [Commandes]
+      summary: Lister les commandes
+      x-scope: orders:read
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [pending, paid, payment_failed, refunded, shipped] } }
+      responses:
+        "200": { description: Liste, content: { application/json: { schema: { type: object, properties: { count: { type: integer }, items: { type: array, items: { $ref: "#/components/schemas/Order" } } } } } } }
+
+  /orders/{id}:
+    get:
+      tags: [Commandes]
+      summary: Lire une commande (avec expéditions)
+      x-scope: orders:read
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        "200": { description: Commande, content: { application/json: { schema: { $ref: "#/components/schemas/Order" } } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /orders/{id}/shipments:
+    post:
+      tags: [Commandes]
+      summary: Créer l'expédition d'une commande payée
+      description: Sans connecteur transporteur (pré-lancement), carrier et trackingNumber sont requis (saisie manuelle).
+      x-scope: orders:write
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                carrier: { type: string }
+                trackingNumber: { type: string }
+                trackingUrl: { type: string, format: uri }
+      responses:
+        "201": { description: Expédition créée }
+        "409": { description: Commande non payée }
+
+  /orders/{id}/refunds:
+    post:
+      tags: [Commandes]
+      summary: Demander un remboursement (validation humaine)
+      x-scope: orders:write
+      x-human-validation: true
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                amount_cents: { type: integer, minimum: 1, description: Absent = remboursement total }
+                reason: { type: string }
+      responses:
+        "202": { $ref: "#/components/responses/ChangeRequestCreated" }
+
+  /media/incoming:
+    post:
+      tags: [Médias]
+      summary: Déposer un asset avec statut et licence (publication validée par un humain)
+      x-scope: media:write
+      x-human-validation: true
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MediaIncoming" }
+      responses:
+        "202": { $ref: "#/components/responses/ChangeRequestCreated" }
+
+  /analytics/summary:
+    get:
+      tags: [Statistiques]
+      summary: Visites, inscriptions, conversions par jour
+      x-scope: analytics:read
+      parameters:
+        - { name: days, in: query, schema: { type: integer, minimum: 1, maximum: 90, default: 30 } }
+      responses:
+        "200":
+          description: Série journalière. `visits` vaut null si aucune source de visites n'est configurée.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  days: { type: integer }
+                  visits_source: { type: [string, "null"] }
+                  totals: { type: object }
+                  series:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date: { type: string, format: date }
+                        visits: { type: [integer, "null"] }
+                        signups: { type: integer }
+                        confirmations: { type: integer }
+                        orders_paid: { type: integer }
+                        revenue_cents: { type: integer }
+
+  /settings/mode:
+    post:
+      tags: [Réglages]
+      summary: Proposer le passage prelaunch → sale (ou retour) — toujours validé par un humain
+      description: La réponse inclut l'état de la checklist bloquante. Elle est réévaluée côté serveur au moment de l'approbation.
+      x-scope: settings:propose
+      x-human-validation: true
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mode]
+              properties:
+                mode: { $ref: "#/components/schemas/SiteMode" }
+                reason: { type: string }
+      responses:
+        "202": { $ref: "#/components/responses/ChangeRequestCreated" }
+
+  /change-requests/{id}:
+    get:
+      tags: [Réglages]
+      summary: Suivre une demande de validation créée par ce jeton
+      x-scope: catalog:read
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        "200": { description: Demande, content: { application/json: { schema: { $ref: "#/components/schemas/ChangeRequest" } } } }
+
+webhooks:
+  matochaEvent:
+    post:
+      summary: Événement envoyé à OPS_WEBHOOK_URL
+      description: |
+        Événements : lead.confirmed, order.paid, order.payment_failed, stock.low, change_request.decided, form.error_spike.
+        En-têtes : `Matocha-Signature: t=<unix>,v1=<hex>` où v1 = HMAC-SHA256(OPS_WEBHOOK_SECRET, "<t>.<corps brut>"),
+        `Matocha-Event`, `Matocha-Delivery` (identifiant stable entre les rejeux).
+        Rejeu exponentiel (30 s, 1 min, 2 min…) jusqu'à OPS_WEBHOOK_MAX_ATTEMPTS ; toute réponse 2xx vaut accusé de réception.
+        Rejetez une signature dont l'horodatage a plus de 5 minutes.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id: { type: string }
+                event: { type: string, enum: [lead.confirmed, order.paid, order.payment_failed, stock.low, change_request.decided, form.error_spike] }
+                created_at: { type: string, format: date-time }
+                data: { type: object }
+      responses:
+        "200": { description: Reçu }
+
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      description: Jeton « mto_… » créé dans /admin/jetons.
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, maxLength: 200 }
+    PackId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, enum: [poudre-decouverte, poudre-quotidien, poudre-duo, concentre-decouverte] }
+    RecipeId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, example: poudre-original, description: "<famille>-<goût>" }
+  responses:
+    Unauthorized:
+      description: Jeton manquant, invalide, expiré ou révoqué
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    Forbidden:
+      description: Scope insuffisant
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    NotFound:
+      description: Introuvable
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    RateLimited:
+      description: Trop de requêtes
+      headers: { Retry-After: { schema: { type: integer } } }
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    IdempotencyRequired:
+      description: Idempotency-Key manquante
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    Validation:
+      description: Données invalides
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    ChangeRequestCreated:
+      description: Demande de validation humaine créée
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              change_request:
+                type: object
+                properties:
+                  id: { type: string }
+                  kind: { type: string }
+                  target: { type: string }
+                  status: { type: string, const: pending }
+              message: { type: string }
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string, examples: [unauthorized, invalid_token, token_expired, token_revoked, insufficient_scope, idempotency_key_required, idempotency_key_reused, rate_limited, validation_error, not_found, confirmation_requires_validation] }
+            message: { type: string, description: Message en français }
+            details: {}
+    SiteMode: { type: string, enum: [prelaunch, sale] }
+    ProofStatus: { type: string, enum: [confirmed, to_confirm, unknown] }
+    ProofField: { type: string, enum: [denomination, ingredients, allergens, matchaPerServingG, servingTotal, origin, preparation, storage, nutrition, caffeineMg] }
+    Proof:
+      type: object
+      properties:
+        value: {}
+        status: { $ref: "#/components/schemas/ProofStatus" }
+        source: { type: string }
+        verifiedAt: { type: string }
+        target: { type: string }
+    ProofProposal:
+      type: object
+      properties:
+        value: {}
+        target: { type: string, maxLength: 300 }
+        status: { type: string, const: to_confirm }
+    CommercialStatus: { type: string, enum: [concept, waitlist, preorder, available, sold_out, retired] }
+    Pack:
+      type: object
+      properties:
+        key: { type: string }
+        id: { type: string, enum: [decouverte, quotidien, duo] }
+        familyId: { type: string, enum: [poudre, concentre] }
+        name: { type: string }
+        recipeIds: { type: array, items: { type: string } }
+        doses: { type: integer }
+        dosesStatus: { $ref: "#/components/schemas/ProofStatus" }
+        netQuantity: { $ref: "#/components/schemas/Proof" }
+        price: { $ref: "#/components/schemas/Proof" }
+        commercialStatus: { $ref: "#/components/schemas/CommercialStatus" }
+    Catalog:
+      type: object
+      properties:
+        families: { type: array, items: { type: object } }
+        recipes: { type: array, items: { type: object } }
+        packs: { type: array, items: { $ref: "#/components/schemas/Pack" } }
+        company: { type: object }
+        socials: { type: array, items: { type: object } }
+        shipping: { type: object }
+    ContentBlock:
+      type: object
+      properties:
+        id: { type: string }
+        key: { type: string }
+        kind: { type: string, enum: [faq, announcement, section] }
+        title: { type: [string, "null"] }
+        body: { type: string }
+        status: { type: string, enum: [draft, published] }
+    Lead:
+      type: object
+      properties:
+        id: { type: string }
+        email: { type: string, format: email }
+        interests: { type: array, items: { type: string } }
+        tags: { type: array, items: { type: string } }
+        source: { type: [string, "null"] }
+        confirmed_at: { type: string, format: date-time }
+        consent_version: { type: string }
+    Order:
+      type: object
+      properties:
+        id: { type: string }
+        status: { type: string, enum: [pending, paid, payment_failed, refunded, shipped] }
+        email: { type: [string, "null"] }
+        lines: { type: array, items: { type: object } }
+        amount_total_cents: { type: [integer, "null"] }
+        currency: { type: [string, "null"] }
+        paid_at: { type: [string, "null"], format: date-time }
+    MediaIncoming:
+      type: object
+      required: [id, status, kind, source, license, files]
+      properties:
+        id: { type: string, example: hero-pour-poudre-desktop }
+        family: { type: string, enum: [poudre, concentre] }
+        recipe: { type: string, enum: [original, vanille, fraise] }
+        status: { type: string, enum: [real, concept] }
+        kind: { type: string, enum: [video, image, rive, lottie, model3d] }
+        source: { type: string, example: "génération IA" }
+        license:
+          type: object
+          required: [commercialUse]
+          properties:
+            name: { type: string }
+            url: { type: string }
+            commercialUse: { type: boolean, const: true }
+            proofStored: { type: string }
+        files:
+          type: object
+          description: URLs https
+          properties:
+            desktop: { type: string, format: uri }
+            mobile: { type: string, format: uri }
+            poster: { type: string, format: uri }
+        alt: { type: string, description: Obligatoire si decorative est faux }
+        decorative: { type: boolean }
+        usedIn: { type: array, items: { type: string } }
+        notes: { type: string }
+    ChangeRequest:
+      type: object
+      properties:
+        id: { type: string }
+        kind: { type: string, enum: [recipe.proof, pack.price, pack.status, content.publish, order.refund, media.publish, settings.mode] }
+        target: { type: string }
+        summary: { type: string }
+        status: { type: string, enum: [pending, approved, rejected, applied, failed] }
+        decided_by: { type: [string, "null"] }
+        decision_note: { type: [string, "null"] }
+        error: { type: [string, "null"] }

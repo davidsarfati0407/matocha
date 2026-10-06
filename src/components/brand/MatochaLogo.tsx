@@ -1,5 +1,4 @@
 import { MatochaGlass, MatochaWave } from "./MatochaGlass";
-import { brand } from "@/data/brand";
 import { cn } from "@/lib/utils";
 
 /*
@@ -64,7 +63,7 @@ export function MatochaLogo({
           variant={glassVariant}
           ink={ink}
           liquid={liquid}
-          title={brand.brandName}
+          title={"Matocha"}
         />
       </span>
     );

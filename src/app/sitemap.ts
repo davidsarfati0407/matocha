@@ -1,25 +1,27 @@
 import type { MetadataRoute } from "next";
-import { site } from "@/data/site";
+import { SITE_URL } from "@/lib/site-url";
 
+/* The journal stays out while empty (noindex). */
 const ROUTES = [
   "",
-  "/product",
-  "/why-sticks",
-  "/our-matcha",
-  "/journal",
-  "/contact",
-  "/shipping",
-  "/returns",
-  "/legal",
-  "/terms",
-  "/privacy",
-  "/cookies",
+  "/formats",
+  "/formats/poudre",
+  "/formats/concentre",
+  "/preparer",
+  "/recettes",
+  "/notre-produit",
+  "/faq",
+  "/aide",
+  "/legal/mentions-legales",
+  "/legal/cgv",
+  "/legal/confidentialite",
+  "/legal/cookies",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return ROUTES.map((route) => ({
-    url: `${site.url}${route}`,
+    url: `${SITE_URL}${route}`,
     changeFrequency: route === "" ? "weekly" : "monthly",
-    priority: route === "" ? 1 : route === "/product" ? 0.9 : 0.5,
+    priority: route === "" ? 1 : route.startsWith("/legal") ? 0.2 : 0.7,
   }));
 }

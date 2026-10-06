@@ -1,278 +1,125 @@
-"use client";
-
-import { useId } from "react";
-import { brand } from "@/data/brand";
 import { cn } from "@/lib/utils";
-import type { GlassVariant } from "./MatochaGlass";
 
 /*
- * A 2g MATOCHA stick.
+ * THE MATOCHA STICK — packaging route "Everyday icon".
  *
- * The pack carries the glass, printed small. Different sticks in a box show
- * different states of it — classic, iced, pouring, whisked — so a tray reads as
- * one family rather than thirty identical wrappers.
+ * Thin cream sachet, forêt crimp, MATOCHA set large and upright so it reads in
+ * a jeans pocket, an original "filet" ribbon (the same ribbon that runs down
+ * the site), one colour block per recipe, three gestures on the back.
+ *
+ * No weight, origin or "100 %" is printed: those wait for confirmed data. The
+ * drawing is the reference for every render and generation (PROMPTS.md) —
+ * generators must not invent the typography.
  */
 
-/* Two colourways only — deep green and ivory. There is no pale-green pack. */
-export type StickTone = "green" | "ivory";
+export type StickView = "face" | "dos" | "profil";
 
-const TONES: Record<
-  StickTone,
-  { base: string; shade: string; crimp: string; ink: string; liquid: string }
-> = {
-  green: {
-    base: brand.colors.green,
-    shade: brand.colors.greenDeep,
-    crimp: "#12331F",
-    ink: brand.colors.ivory,
-    liquid: brand.colors.matcha,
-  },
-  ivory: {
-    base: brand.colors.ivory,
-    shade: "#CFC7B4",
-    crimp: brand.colors.ivoryDeep,
-    ink: brand.colors.black,
-    liquid: brand.colors.matcha,
-  },
-};
+const LAIT = "#F4F2E6";
+const FORET = "#1B3B2A";
+const INK = "#16241B";
 
-const LEVELS: Record<GlassVariant, number> = {
-  classic: 0.6,
-  whisked: 0.6,
-  ice: 0.68,
-  pour: 0.3,
-  empty: 0.1,
-};
+/** The brand ribbon, as printed on the pack. */
+export const FILET_PATH =
+  "M-6 120 C24 96 40 150 66 128 C92 106 104 150 132 132";
 
-/**
- * The glass reduced to what survives at pack scale: silhouette, liquid, rim.
- * Drawn inline rather than reusing <MatochaGlass /> because the stroke weights
- * have to be tuned for a 40px-wide print area.
- */
-function PrintedGlass({
-  cx,
-  cy,
-  ink,
-  liquid,
-  variant,
-  uid,
+export function ProductStick({
+  view = "face",
+  accent = "#8DB33A",
+  recipe = "Original",
+  format = "Poudre",
+  className,
+  title,
 }: {
-  cx: number;
-  cy: number;
-  ink: string;
-  liquid: string;
-  variant: GlassVariant;
-  uid: string;
+  view?: StickView;
+  accent?: string;
+  recipe?: string;
+  format?: "Poudre" | "Concentré";
+  className?: string;
+  title?: string;
 }) {
-  const top = -14;
-  const bottom = 26;
-  const surface = top + (1 - LEVELS[variant]) * (bottom - top);
-  const body =
-    "M-19 -18 C-18 0 -15 16 -12 23 C-11 26 -8 27 -5 27 L5 27 C8 27 11 26 12 23 C15 16 18 0 19 -18";
+  const label = title ?? `Stick Matocha ${recipe}, vue ${view}`;
+
+  if (view === "profil") {
+    return (
+      <svg viewBox="0 0 30 440" className={cn("h-full w-auto", className)} role="img" aria-label={label}>
+        <path d="M6 6 L24 6 L22 40 L26 400 L24 434 L6 434 L4 400 L8 40 Z" fill={LAIT} stroke={INK} strokeWidth="2" />
+        <rect x="6" y="6" width="18" height="34" fill={FORET} />
+        <rect x="5" y="400" width="20" height="34" fill={FORET} />
+        <rect x="7" y="330" width="16" height="60" fill={accent} />
+      </svg>
+    );
+  }
 
   return (
-    <g transform={`translate(${cx} ${cy})`}>
+    <svg viewBox="0 0 120 440" className={cn("h-full w-auto", className)} role="img" aria-label={label}>
       <defs>
-        <clipPath id={`pg-${uid}`}>
-          <path d={`${body} Z`} />
+        <clipPath id={`stick-${view}-${recipe}`}>
+          <rect x="4" y="4" width="112" height="432" rx="6" />
         </clipPath>
       </defs>
+      <g clipPath={`url(#stick-${view}-${recipe})`}>
+        <rect x="4" y="4" width="112" height="432" fill={LAIT} />
+        {/* Crimped seals */}
+        <rect x="4" y="4" width="112" height="34" fill={FORET} />
+        <rect x="4" y="402" width="112" height="34" fill={FORET} />
+        {Array.from({ length: 14 }).map((_, i) => (
+          <line key={i} x1={8 + i * 8} y1="6" x2={8 + i * 8} y2="36" stroke="#2A5039" strokeWidth="1.5" />
+        ))}
 
-      <g clipPath={`url(#pg-${uid})`}>
-        <path
-          d={`M-24 ${surface + 1} C-14 ${surface - 4} -6 ${surface + 3} 2 ${surface} C10 ${surface - 3} 18 ${surface + 4} 26 ${surface} L26 30 L-24 30 Z`}
-          fill={liquid}
-        />
-        {variant === "ice" && (
+        {view === "face" ? (
           <>
-            <rect
-              x="-13"
-              y={surface - 1}
-              width="11"
-              height="10"
-              rx="2"
-              fill={brand.colors.ivory}
-              opacity="0.9"
-            />
-            <rect
-              x="2"
-              y={surface + 5}
-              width="10"
-              height="9"
-              rx="2"
-              fill={brand.colors.ivory}
-              opacity="0.9"
-            />
+            {/* Tear notch + dotted tear line */}
+            <line x1="4" y1="52" x2="116" y2="52" stroke={INK} strokeWidth="1.2" strokeDasharray="3 4" opacity="0.5" />
+            {/* Le Filet */}
+            <path d={FILET_PATH} transform="translate(0 0)" fill="none" stroke={accent} strokeWidth="9" strokeLinecap="round" />
+            <path d={FILET_PATH} transform="translate(0 196)" fill="none" stroke={accent} strokeWidth="5" strokeLinecap="round" opacity="0.6" />
+            <text
+              x="64"
+              y="350"
+              transform="rotate(-90 64 350)"
+              fontFamily="var(--font-sans)"
+              fontWeight="700"
+              fontSize="40"
+              letterSpacing="-1"
+              fill={FORET}
+            >
+              MATOCHA
+            </text>
+            {/* Recipe block */}
+            <rect x="4" y="360" width="112" height="42" fill={accent} />
+            <text x="60" y="380" textAnchor="middle" fontFamily="var(--font-sans)" fontWeight="700" fontSize="12" letterSpacing="1.5" fill={INK}>
+              {recipe.toUpperCase()}
+            </text>
+            <text x="60" y="395" textAnchor="middle" fontFamily="var(--font-sans)" fontWeight="500" fontSize="9" letterSpacing="1.2" fill={INK}>
+              {format.toUpperCase()}
+            </text>
+          </>
+        ) : (
+          <>
+            <text x="60" y="66" textAnchor="middle" fontFamily="var(--font-sans)" fontWeight="700" fontSize="13" fill={FORET}>
+              MATOCHA
+            </text>
+            {/* Three gestures */}
+            {(format === "Poudre" ? ["OUVRIR", "VERSER", "PRÉPARER"] : ["OUVRIR", "VERSER", "MÉLANGER"]).map((g, i) => (
+              <g key={g} transform={`translate(0 ${96 + i * 92})`}>
+                <circle cx="60" cy="24" r="22" fill="none" stroke={FORET} strokeWidth="2" />
+                <text x="60" y="30" textAnchor="middle" fontFamily="var(--font-serif)" fontSize="20" fill={FORET}>
+                  {i + 1}
+                </text>
+                <text x="60" y="66" textAnchor="middle" fontFamily="var(--font-sans)" fontWeight="600" fontSize="10" letterSpacing="1" fill={INK}>
+                  {g}
+                </text>
+              </g>
+            ))}
+            {/* Mandatory-information area, left blank until confirmed */}
+            <rect x="14" y="368" width="92" height="28" fill="none" stroke={INK} strokeDasharray="3 3" opacity="0.45" />
+            <text x="60" y="386" textAnchor="middle" fontFamily="var(--font-sans)" fontSize="7" fill={INK} opacity="0.7">
+              LOT · DDM · MENTIONS
+            </text>
           </>
         )}
       </g>
-
-      {variant === "pour" && (
-        <path
-          d="M1 -34 C0 -28 -2 -24 -1 -19"
-          stroke={liquid}
-          strokeWidth="4.5"
-          strokeLinecap="round"
-          fill="none"
-        />
-      )}
-
-      <path
-        d={body}
-        stroke={ink}
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-      <ellipse
-        cx="0"
-        cy="-18"
-        rx="19"
-        ry="3.4"
-        stroke={ink}
-        strokeWidth="3"
-        fill="none"
-      />
-      <path d="M-7 27 L7 27" stroke={ink} strokeWidth="4.5" strokeLinecap="round" />
-    </g>
-  );
-}
-
-export function ProductStick({
-  tone = "green",
-  className,
-  torn = false,
-  glass = "classic",
-}: {
-  tone?: StickTone;
-  className?: string;
-  torn?: boolean;
-  /** Which state of the glass this pack carries. */
-  glass?: GlassVariant;
-}) {
-  const t = TONES[tone];
-  /* Unique per instance — see the note in ProductBox. */
-  const uid = useId().replace(/:/g, "");
-
-  return (
-    <svg
-      viewBox="0 0 132 520"
-      className={cn("h-full w-auto", className)}
-      preserveAspectRatio="xMidYMid meet"
-      aria-hidden="true"
-    >
-      <defs>
-        <linearGradient id={`sheen-${uid}`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor={t.shade} stopOpacity="0.9" />
-          <stop offset="16%" stopColor={t.shade} stopOpacity="0.22" />
-          <stop offset="38%" stopColor="#ffffff" stopOpacity="0.14" />
-          <stop offset="60%" stopColor="#ffffff" stopOpacity="0.02" />
-          <stop offset="82%" stopColor={t.shade} stopOpacity="0.3" />
-          <stop offset="100%" stopColor={t.shade} stopOpacity="0.92" />
-        </linearGradient>
-
-        <clipPath id={`clip-${uid}`}>
-          {torn ? (
-            <path d="M8 34 L20 26 L32 36 L44 27 L56 37 L68 28 L80 38 L92 29 L104 37 L116 28 L124 34 L124 509 A7 7 0 0 1 117 516 L15 516 A7 7 0 0 1 8 509 Z" />
-          ) : (
-            <rect x="8" y="4" width="116" height="512" rx="7" />
-          )}
-        </clipPath>
-      </defs>
-
-      <g clipPath={`url(#clip-${uid})`}>
-        <rect x="8" y="4" width="116" height="512" fill={t.base} />
-        <rect
-          x="8"
-          y="4"
-          width="116"
-          height="512"
-          fill={`url(#sheen-${uid})`}
-        />
-
-        {/* Crimped seals */}
-        {!torn && <rect x="8" y="4" width="116" height="46" fill={t.crimp} />}
-        <rect x="8" y="470" width="116" height="46" fill={t.crimp} />
-
-        <PrintedGlass
-          cx={66}
-          cy={torn ? 118 : 134}
-          ink={t.ink}
-          liquid={t.liquid}
-          variant={glass}
-          uid={uid}
-        />
-
-        {/* Wordmark running up the length */}
-        <text
-          transform="rotate(-90 66 318)"
-          x="66"
-          y="318"
-          textAnchor="middle"
-          fill={t.ink}
-          fontSize="25"
-          letterSpacing="0.5"
-          fontWeight="600"
-          fontFamily="var(--font-sans)"
-        >
-          MATOCHA
-        </text>
-
-        <text
-          x="66"
-          y="424"
-          textAnchor="middle"
-          fill={t.ink}
-          fontSize="12"
-          letterSpacing="4"
-          fontWeight="500"
-          opacity="0.72"
-          fontFamily="var(--font-sans)"
-        >
-          MATCHA
-        </text>
-
-        <text
-          x="66"
-          y="452"
-          textAnchor="middle"
-          fill={t.ink}
-          fontSize="16"
-          letterSpacing="2"
-          fontWeight="600"
-          fontFamily="var(--font-sans)"
-        >
-          2G
-        </text>
-
-        <text
-          x="66"
-          y="500"
-          textAnchor="middle"
-          fill={t.ink}
-          fontSize="7.5"
-          letterSpacing="1.2"
-          opacity="0.6"
-          fontFamily="var(--font-sans)"
-        >
-          100% JAPANESE MATCHA
-        </text>
-      </g>
-
-      {/* Tear notch */}
-      {!torn && <path d="M9 60 L20 54 L9 48 Z" fill={t.shade} opacity="0.6" />}
-
-      <rect
-        x="8"
-        y="4"
-        width="116"
-        height="512"
-        rx="7"
-        fill="none"
-        stroke={t.shade}
-        strokeOpacity="0.3"
-      />
+      <rect x="4" y="4" width="112" height="432" rx="6" fill="none" stroke={INK} strokeWidth="2" />
     </svg>
   );
 }

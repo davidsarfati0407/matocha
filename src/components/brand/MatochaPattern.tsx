@@ -1,19 +1,24 @@
 "use client";
 
 import { useId } from "react";
-import { brand } from "@/data/brand";
 import { cn } from "@/lib/utils";
+
+const BRAND = {
+  ink: "#16241B",
+  matcha: "#8DB33A",
+  lait: "#EEEDE0",
+} as const;
 
 /*
  * The MATOCHA pattern.
  *
  * A tile built from the brand's own parts — the glass silhouette, the liquid
- * wave, and the 2G mark — offset row to row so the repeat never reads as a
+ * wave and a stick — offset row to row so the repeat never reads as a
  * grid. Used as a band between sections, behind the footer and inside the cart.
  */
 export function MatochaPattern({
   className,
-  color = brand.colors.ivory,
+  color = BRAND.lait,
   opacity = 0.16,
   scale = 1,
 }: {
@@ -58,18 +63,11 @@ export function MatochaPattern({
             <path d="M70 30 C78 24 86 36 94 30" opacity="0.75" />
           </g>
 
-          {/* 2G, bottom-left */}
-          <text
-            x={12 * scale}
-            y={100 * scale}
-            fill={color}
-            fontFamily="var(--font-sans)"
-            fontSize={15 * scale}
-            fontWeight="600"
-            letterSpacing={1 * scale}
-          >
-            2G
-          </text>
+          {/* A stick, bottom-left */}
+          <g transform={`scale(${scale})`} fill="none" stroke={color} strokeWidth={2.2}>
+            <rect x="14" y="78" width="10" height="34" rx="2" />
+            <line x1="14" y1="86" x2="24" y2="86" />
+          </g>
         </pattern>
       </defs>
       <rect width="100%" height="100%" fill={`url(#${id})`} />

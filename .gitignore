@@ -42,3 +42,10 @@ next-env.d.ts
 
 # business plan build artefacts
 !MATOCHA_Master_Business_Plan.pdf
+
+# example env file is documentation, keep it
+!.env.example
+
+# playwright
+/test-results/
+/playwright-report/

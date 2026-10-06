@@ -1,46 +1,24 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-/*
- * Buttons are rectangular and typographic — no pills, no shadows.
- * Deep green carries the commerce actions; coral arrives on hover, which is
- * where the accent earns its place without ever becoming a surface.
- */
-
-type Variant = "solid" | "coral" | "ivory" | "outline" | "outlineLight";
+type Variant = "solid" | "light" | "outline" | "outlineLight";
 type Size = "md" | "lg";
 
+/*
+ * Buttons stay rectangular and typographic (v1). Forêt carries the main
+ * action; on hover a field of matcha rises from the bottom, like a glass
+ * filling.
+ */
 const VARIANTS: Record<Variant, { base: string; wipe: string }> = {
-  /* The commerce action on ivory grounds. */
-  solid: {
-    base: "bg-green text-ivory hover:text-black",
-    wipe: "bg-coral",
-  },
-  /* The accent CTA, used once per page at most. */
-  coral: {
-    base: "bg-coral text-black hover:text-ivory",
-    wipe: "bg-green",
-  },
-  /* The commerce action on green grounds. */
-  ivory: {
-    base: "bg-ivory text-black hover:text-black",
-    wipe: "bg-coral",
-  },
-  /* Secondary on ivory. */
-  outline: {
-    base: "border border-black/25 text-black hover:text-black",
-    wipe: "bg-coral",
-  },
-  /* Secondary on green. */
-  outlineLight: {
-    base: "border border-ivory/35 text-ivory hover:text-black",
-    wipe: "bg-coral",
-  },
+  solid: { base: "bg-foret text-lait hover:text-encre", wipe: "bg-matcha" },
+  light: { base: "bg-lait text-encre", wipe: "bg-mousse" },
+  outline: { base: "border border-encre/35 text-encre", wipe: "bg-mousse" },
+  outlineLight: { base: "border border-lait/45 text-lait hover:text-encre", wipe: "bg-mousse" },
 };
 
 const SIZES: Record<Size, string> = {
-  md: "h-12 px-6 text-[0.7rem]",
-  lg: "h-14 px-8 text-[0.72rem] sm:h-16 sm:px-10",
+  md: "min-h-12 px-6 text-[0.75rem]",
+  lg: "min-h-14 px-8 text-[0.8rem]",
 };
 
 type CommonProps = {
@@ -54,7 +32,7 @@ type CommonProps = {
 function classes({ variant = "solid", size = "lg", full, className }: CommonProps) {
   return cn(
     "group relative inline-flex items-center justify-center overflow-hidden",
-    "u-label font-semibold whitespace-nowrap",
+    "u-label font-semibold text-center",
     "transition-colors duration-500 ease-[var(--ease-matocha)]",
     "disabled:pointer-events-none disabled:opacity-45",
     VARIANTS[variant].base,
@@ -120,10 +98,7 @@ export function ButtonLink({
   );
 }
 
-/**
- * Secondary action: a label, a rule that redraws on hover, and an arrow that
- * steps forward. No box.
- */
+/** Secondary action: an underlined label. No arrow, no box. */
 export function TextLink({
   href,
   children,
@@ -137,19 +112,11 @@ export function TextLink({
     <Link
       href={href}
       className={cn(
-        "group u-label relative inline-flex items-center gap-2 pb-1 font-semibold",
+        "font-semibold underline decoration-matcha decoration-2 underline-offset-[6px] transition-colors hover:decoration-foret",
         className,
       )}
     >
       {children}
-      <span
-        aria-hidden="true"
-        className="transition-transform duration-500 ease-[var(--ease-matocha)] group-hover:translate-x-1"
-      >
-        →
-      </span>
-      <span className="absolute inset-x-0 bottom-0 h-px origin-left scale-x-100 bg-current opacity-30 transition-transform duration-500 ease-[var(--ease-matocha)] group-hover:scale-x-0" />
-      <span className="absolute inset-x-0 bottom-0 h-px origin-right scale-x-0 bg-coral transition-transform delay-150 duration-500 ease-[var(--ease-matocha)] group-hover:origin-left group-hover:scale-x-100" />
     </Link>
   );
 }

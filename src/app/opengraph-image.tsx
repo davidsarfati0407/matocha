@@ -1,55 +1,14 @@
 import { ImageResponse } from "next/og";
-import { brand } from "@/data/brand";
 
-export const alt = "MATOCHA — Matcha. Made simple.";
+export const alt = "Matocha — Le matcha, en plus simple. Visuel de concept.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 /**
- * Social card, generated at build time from the brand tokens.
- * The glass is drawn inline: Satori renders a subset of SVG, so the component
- * is restated here rather than imported.
+ * Social card. Pre-launch: no price, no claim, and the product drawing is
+ * labelled as a concept (media-manifest id "og-concept").
  */
 export default function OpengraphImage() {
-  const glass = (
-    <svg width="360" height="396" viewBox="0 0 200 220">
-      <defs>
-        <clipPath id="og-inside">
-          <path d="M42 50 C43 98 49 148 56 175 C58 185 63 189 72 189 L128 189 C137 189 142 185 144 175 C151 148 157 98 158 50 Z" />
-        </clipPath>
-      </defs>
-      <g clipPath="url(#og-inside)">
-        <path
-          d="M28 108 C48 97 66 113 92 107 C118 100 140 115 172 105 L172 202 L28 202 Z"
-          fill={brand.colors.matcha}
-        />
-      </g>
-      <path
-        d="M36 47 C37 97 43 149 50 178 C52 190 60 196 72 196 L129 196 C141 196 148 189 150 177 C157 148 162 96 164 47"
-        stroke={brand.colors.ivory}
-        strokeWidth="7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-      <ellipse
-        cx="100"
-        cy="47"
-        rx="64"
-        ry="9.5"
-        stroke={brand.colors.ivory}
-        strokeWidth="7"
-        fill="none"
-      />
-      <path
-        d="M64 196 L136 196"
-        stroke={brand.colors.ivory}
-        strokeWidth="11"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-
   return new ImageResponse(
     (
       <div
@@ -57,56 +16,32 @@ export default function OpengraphImage() {
           width: "100%",
           height: "100%",
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          background: brand.colors.green,
-          padding: "68px 76px",
+          background: "#EEEDE0",
+          color: "#16241B",
+          padding: 72,
           fontFamily: "sans-serif",
-          color: brand.colors.ivory,
         }}
       >
-        <div style={{ position: "absolute", right: 96, top: 118, display: "flex" }}>
-          {glass}
-        </div>
-
-        <div style={{ display: "flex", fontSize: 26, letterSpacing: 8 }}>
-          MATOCHA
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          {["MATCHA.", "MADE SIMPLE."].map((line) => (
-            <div
-              key={line}
-              style={{
-                display: "flex",
-                fontSize: 108,
-                fontWeight: 700,
-                letterSpacing: -4,
-                lineHeight: 0.88,
-              }}
-            >
-              {line}
+        <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", flex: 1 }}>
+          <div style={{ fontSize: 34, fontWeight: 700, letterSpacing: -1 }}>MATOCHA</div>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ fontSize: 92, fontWeight: 700, lineHeight: 0.95, letterSpacing: -3, textTransform: "uppercase", maxWidth: 640 }}>
+              Le matcha, en plus simple.
             </div>
-          ))}
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            fontSize: 22,
-            opacity: 0.8,
-          }}
-        >
-          <div style={{ display: "flex" }}>
-            Premium Japanese matcha, portioned into {brand.servingWeight}
-            {brand.servingUnit} sticks.
+            <div style={{ fontSize: 28, marginTop: 24 }}>Pré-lancement · Soyez prévenu du lancement</div>
           </div>
-          <div style={{ display: "flex", letterSpacing: 4 }}>
-            {brand.sticksPerBox} × {brand.servingWeight}
-            {brand.servingUnit.toUpperCase()}
-          </div>
+          <div style={{ fontSize: 20, opacity: 0.8 }}>Visuel de concept</div>
         </div>
+        <svg width="360" height="486" viewBox="0 0 400 540">
+          <path d="M110 170 C112 282 122 380 134 430 C137 442 148 450 162 450 L238 450 C252 450 263 442 266 430 C278 380 288 282 290 170 Z" fill="#A9C46A" />
+          <path d="M110 170 C112 282 122 380 134 430 C137 442 148 450 162 450 L238 450 C252 450 263 442 266 430 C278 380 288 282 290 170" fill="none" stroke="#16241B" strokeWidth="8" />
+          <ellipse cx="200" cy="170" rx="90" ry="12" fill="#E9EFCF" stroke="#16241B" strokeWidth="8" />
+          <g transform="translate(250 20) rotate(14)">
+            <rect width="40" height="170" rx="5" fill="#F4F2E6" stroke="#16241B" strokeWidth="5" />
+            <rect width="40" height="22" fill="#1B3B2A" />
+            <rect y="136" width="40" height="34" fill="#8DB33A" />
+          </g>
+        </svg>
       </div>
     ),
     size,

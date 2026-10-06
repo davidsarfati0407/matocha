@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Matocha — site v2
 
-## Getting Started
-
-First, run the development server:
+Le matcha, en plus simple. Site de marque en **pré-lancement** (Next.js 16, App Router, Tailwind 4, Vercel), avec back-office, API Ops pour l'agent Instinct et serveur MCP.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev            # http://localhost:3000
+npm run build && npm start
+npm test               # tests unitaires (Vitest)
+npm run test:e2e       # Playwright : lancer `npm run build` avant
+npm run check:claims   # chaînes interdites hors champs Proof
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+En local, pour tester l'inscription et `/admin` sans services externes :
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+MATOCHA_STORE=memory MATOCHA_EMAIL=console ADMIN_DEV_LOGIN=true \
+ADMIN_EMAILS=vous@exemple.fr ADMIN_SESSION_SECRET=$(openssl rand -hex 32) npm run dev
+# puis http://localhost:3000/admin/dev-login
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Où est quoi
 
-## Learn More
+| Chemin | Contenu |
+|---|---|
+| `src/content/catalog/` | Catalogue typé : familles, recettes, packs. Chaque fait est un `Proof` |
+| `src/content/i18n/fr.ts` | Textes d'interface (français) |
+| `src/content/media-manifest.json` | Statut et licence de chaque média |
+| `src/lib/commerce/cta.ts` | Résolveur de CTA, seul juge de ce qui est achetable |
+| `src/lib/mode.ts` | Mode du site, décidé côté serveur |
+| `src/components/scenes/` | Scènes motion M01–M14 et Le Filet |
+| `src/lib/ops/`, `src/app/api/ops/v1/` | API Ops ; `src/app/mcp/` pour le MCP |
+| `supabase/migrations/` | Schéma de la base |
+| `docs/` | Audit, décisions, rapport, prompts médias, API |
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+À lire en premier : `docs/RAPPORT_V2.md`.

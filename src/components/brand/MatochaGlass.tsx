@@ -1,8 +1,13 @@
 "use client";
 
 import { useId } from "react";
-import { brand } from "@/data/brand";
 import { cn } from "@/lib/utils";
+
+const BRAND = {
+  ink: "#16241B",
+  matcha: "#8DB33A",
+  lait: "#EEEDE0",
+} as const;
 
 /*
  * THE MATOCHA GLASS
@@ -58,8 +63,8 @@ function wavePath(y: number) {
 export function MatochaGlass({
   variant = "classic",
   className,
-  ink = brand.colors.black,
-  liquid = brand.colors.matcha,
+  ink = BRAND.ink,
+  liquid = BRAND.matcha,
   /** Overrides the variant's fill level, 0 → 1. */
   fill,
   /** Plays the liquid-rise animation once on mount. */
@@ -114,12 +119,12 @@ export function MatochaGlass({
 
           {/* Whisked: foam sitting on the surface */}
           {variant === "whisked" && (
-            <g stroke={brand.colors.ivory} strokeWidth="3" strokeLinecap="round">
+            <g stroke={BRAND.lait} strokeWidth="3" strokeLinecap="round">
               <path d={`M52 ${surfaceY - 4} q 12 -7 24 -1`} opacity="0.9" />
               <path d={`M92 ${surfaceY - 8} q 14 -6 26 0`} opacity="0.75" />
               <path d={`M126 ${surfaceY + 2} q 10 -6 20 -2`} opacity="0.6" />
-              <circle cx="72" cy={surfaceY + 6} r="2.4" fill={brand.colors.ivory} stroke="none" opacity="0.7" />
-              <circle cx="116" cy={surfaceY + 11} r="1.8" fill={brand.colors.ivory} stroke="none" opacity="0.55" />
+              <circle cx="72" cy={surfaceY + 6} r="2.4" fill={BRAND.lait} stroke="none" opacity="0.7" />
+              <circle cx="116" cy={surfaceY + 11} r="1.8" fill={BRAND.lait} stroke="none" opacity="0.55" />
             </g>
           )}
 
@@ -128,19 +133,19 @@ export function MatochaGlass({
             <g>
               <rect
                 x="58" y={surfaceY - 6} width="34" height="32" rx="6"
-                fill={brand.colors.ivory} fillOpacity="0.92"
+                fill={BRAND.lait} fillOpacity="0.92"
                 stroke={ink} strokeWidth="4"
                 transform={`rotate(-11 75 ${surfaceY + 10})`}
               />
               <rect
                 x="104" y={surfaceY + 6} width="30" height="29" rx="6"
-                fill={brand.colors.ivory} fillOpacity="0.92"
+                fill={BRAND.lait} fillOpacity="0.92"
                 stroke={ink} strokeWidth="4"
                 transform={`rotate(9 119 ${surfaceY + 20})`}
               />
               <rect
                 x="76" y={surfaceY + 30} width="27" height="26" rx="5"
-                fill={brand.colors.ivory} fillOpacity="0.88"
+                fill={BRAND.lait} fillOpacity="0.88"
                 stroke={ink} strokeWidth="4"
                 transform={`rotate(-4 89 ${surfaceY + 43})`}
               />
@@ -200,7 +205,7 @@ export function MatochaGlass({
  */
 export function MatochaWave({
   className,
-  color = brand.colors.matcha,
+  color = BRAND.matcha,
   strokeWidth = 6,
 }: {
   className?: string;

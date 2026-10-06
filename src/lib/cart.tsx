@@ -10,183 +10,134 @@ import {
   useRef,
   useState,
 } from "react";
-import { dailyBox, subscriptionPrice, type Product } from "@/data/product";
 
-export type PurchaseMode = "one-time" | "subscription";
+/**
+ * Cart (sale mode only — mounted by <SaleShell>).
+ *
+ * Lines are keyed by pack + recipe and counted in DOSES as well as items. The
+ * unit price shown here is only a display copy; the server recomputes every
+ * total from the catalogue at checkout and refuses anything that is not
+ * purchasable (src/lib/commerce/cta.ts).
+ */
 
 export type CartLine = {
-  /** `${slug}:${mode}` — one-time and subscription are distinct lines. */
   id: string;
-  slug: string;
+  packKey: string;
+  recipeKey: string;
   name: string;
-  mode: PurchaseMode;
-  /** Unit price in cents, already discounted for subscriptions. */
+  dosesPerUnit: number;
+  /** TTC euros, confirmed price at the time of adding. */
   unitPrice: number;
   quantity: number;
 };
 
-type CartState = { lines: CartLine[] };
-
-type CartAction =
-  | { type: "add"; product: Product; mode: PurchaseMode; quantity: number }
-  | { type: "setQuantity"; id: string; quantity: number }
-  | { type: "remove"; id: string }
+type State = { lines: CartLine[] };
+type Action =
+  | { type: "add"; line: Omit<CartLine, "id" | "quantity">; quantity: number }
+  | { type: "set"; id: string; quantity: number }
   | { type: "hydrate"; lines: CartLine[] };
 
-const STORAGE_KEY = "matocha-cart-v1";
-const MAX_QUANTITY = 12;
+const KEY = "matocha-cart-v2";
+const MAX = 12;
 
-function reducer(state: CartState, action: CartAction): CartState {
+function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "hydrate":
       return { lines: action.lines };
-
     case "add": {
-      const id = `${action.product.slug}:${action.mode}`;
-      const existing = state.lines.find((line) => line.id === id);
-      if (existing) {
+      const id = `${action.line.packKey}:${action.line.recipeKey}`;
+      const found = state.lines.find((l) => l.id === id);
+      if (found)
         return {
-          lines: state.lines.map((line) =>
-            line.id === id
-              ? {
-                  ...line,
-                  quantity: Math.min(
-                    line.quantity + action.quantity,
-                    MAX_QUANTITY,
-                  ),
-                }
-              : line,
+          lines: state.lines.map((l) =>
+            l.id === id ? { ...l, quantity: Math.min(MAX, l.quantity + action.quantity) } : l,
           ),
         };
-      }
-      return {
-        lines: [
-          ...state.lines,
-          {
-            id,
-            slug: action.product.slug,
-            name: action.product.name,
-            mode: action.mode,
-            unitPrice:
-              action.mode === "subscription"
-                ? subscriptionPrice
-                : action.product.price,
-            quantity: Math.min(action.quantity, MAX_QUANTITY),
-          },
-        ],
-      };
+      return { lines: [...state.lines, { ...action.line, id, quantity: Math.min(MAX, action.quantity) }] };
     }
-
-    case "setQuantity": {
-      if (action.quantity <= 0) {
-        return { lines: state.lines.filter((line) => line.id !== action.id) };
-      }
+    case "set":
       return {
-        lines: state.lines.map((line) =>
-          line.id === action.id
-            ? { ...line, quantity: Math.min(action.quantity, MAX_QUANTITY) }
-            : line,
-        ),
+        lines:
+          action.quantity <= 0
+            ? state.lines.filter((l) => l.id !== action.id)
+            : state.lines.map((l) => (l.id === action.id ? { ...l, quantity: Math.min(MAX, action.quantity) } : l)),
       };
-    }
-
-    case "remove":
-      return { lines: state.lines.filter((line) => line.id !== action.id) };
   }
 }
 
-type CartContextValue = {
+type Ctx = {
   lines: CartLine[];
-  count: number;
+  doses: number;
   subtotal: number;
   isOpen: boolean;
+  /** Increments on each add — drives the M11 "fly to cart" animation. */
+  pulse: number;
   open: () => void;
   close: () => void;
-  add: (product: Product, mode?: PurchaseMode, quantity?: number) => void;
+  add: (line: Omit<CartLine, "id" | "quantity">, quantity?: number) => void;
   setQuantity: (id: string, quantity: number) => void;
-  remove: (id: string) => void;
 };
 
-const CartContext = createContext<CartContextValue | null>(null);
+const CartContext = createContext<Ctx | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, { lines: [] });
-  const [isOpen, setIsOpen] = useState(false);
-  /* Skips the write that would otherwise fire before the stored cart is read. */
-  const firstWrite = useRef(true);
+  const [isOpen, setOpen] = useState(false);
+  const [pulse, setPulse] = useState(0);
+  const first = useRef(true);
 
-  // Restore a previous cart on mount. The server and the first client render
-  // both start empty, so hydration always matches.
   useEffect(() => {
     try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as CartLine[];
-        if (Array.isArray(parsed)) dispatch({ type: "hydrate", lines: parsed });
-      }
+      const raw = localStorage.getItem(KEY);
+      const parsed = raw ? (JSON.parse(raw) as CartLine[]) : null;
+      if (Array.isArray(parsed)) dispatch({ type: "hydrate", lines: parsed });
     } catch {
-      // Corrupt or unavailable storage — start with an empty cart.
+      /* empty cart */
     }
   }, []);
 
   useEffect(() => {
-    if (firstWrite.current) {
-      firstWrite.current = false;
+    if (first.current) {
+      first.current = false;
       return;
     }
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state.lines));
+      localStorage.setItem(KEY, JSON.stringify(state.lines));
     } catch {
-      // Quota or private mode — the cart simply will not persist.
+      /* not persisted */
     }
   }, [state.lines]);
 
-  // Lock body scroll while the drawer is open.
-  useEffect(() => {
-    if (!isOpen) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, [isOpen]);
+  const add = useCallback((line: Omit<CartLine, "id" | "quantity">, quantity = 1) => {
+    dispatch({ type: "add", line, quantity });
+    setPulse((p) => p + 1);
+  }, []);
 
-  const add = useCallback(
-    (product: Product, mode: PurchaseMode = "one-time", quantity = 1) => {
-      dispatch({ type: "add", product, mode, quantity });
-      setIsOpen(true);
-    },
-    [],
-  );
-
-  const value = useMemo<CartContextValue>(() => {
-    const count = state.lines.reduce((total, line) => total + line.quantity, 0);
-    const subtotal = state.lines.reduce(
-      (total, line) => total + line.quantity * line.unitPrice,
-      0,
-    );
-    return {
+  const value = useMemo<Ctx>(
+    () => ({
       lines: state.lines,
-      count,
-      subtotal,
+      doses: state.lines.reduce((n, l) => n + l.quantity * l.dosesPerUnit, 0),
+      subtotal: state.lines.reduce((n, l) => n + l.quantity * l.unitPrice, 0),
       isOpen,
-      open: () => setIsOpen(true),
-      close: () => setIsOpen(false),
+      pulse,
+      open: () => setOpen(true),
+      close: () => setOpen(false),
       add,
-      setQuantity: (id, quantity) =>
-        dispatch({ type: "setQuantity", id, quantity }),
-      remove: (id) => dispatch({ type: "remove", id }),
-    };
-  }, [state.lines, isOpen, add]);
+      setQuantity: (id, quantity) => dispatch({ type: "set", id, quantity }),
+    }),
+    [state.lines, isOpen, pulse, add],
+  );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
 export function useCart() {
-  const context = useContext(CartContext);
-  if (!context) throw new Error("useCart must be used inside <CartProvider>");
-  return context;
+  const ctx = useContext(CartContext);
+  if (!ctx) throw new Error("useCart must be used inside <CartProvider>");
+  return ctx;
 }
 
-/** Convenience for CTAs that always mean "the hero product". */
-export const heroProduct = dailyBox;
+/** For components that may render outside sale mode. */
+export function useOptionalCart() {
+  return useContext(CartContext);
+}

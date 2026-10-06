@@ -1,37 +1,22 @@
-import { NextResponse } from "next/server";
+import { MESSAGES, subscribe } from "@/lib/waitlist/service";
 
 /**
- * Waitlist / newsletter capture.
+ * Waitlist sign-up with double opt-in.
  *
- * TODO(launch): connect an email provider (Klaviyo, Resend Audiences, Brevo…)
- * here. Until then the endpoint validates the address and acknowledges it
- * without storing anything — nothing is silently lost because nothing is
- * silently promised.
+ * 200 {ok:true,status:"pending"} — always the same answer for a new, pending
+ * or already-confirmed address, so the endpoint does not reveal who is listed.
+ * 503 not_configured when storage or e-mail is missing: never a fake "you're in".
  */
 export async function POST(request: Request) {
-  let payload: { email?: unknown; source?: unknown };
-
-  try {
-    payload = await request.json();
-  } catch {
-    return NextResponse.json(
-      { ok: false, message: "Invalid request." },
-      { status: 400 },
+  const result = await subscribe(request);
+  if (result.ok) {
+    return Response.json(
+      { ok: true, status: "pending", message: MESSAGES.pending },
+      { status: 200 },
     );
   }
-
-  const email = typeof payload.email === "string" ? payload.email.trim() : "";
-  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
-
-  if (!valid) {
-    return NextResponse.json(
-      { ok: false, message: "Please enter a valid email address." },
-      { status: 422 },
-    );
-  }
-
-  return NextResponse.json({
-    ok: true,
-    message: "You're on the list. We'll write before the first box ships.",
-  });
+  return Response.json(
+    { ok: false, code: result.code, message: result.message },
+    { status: result.httpStatus },
+  );
 }

@@ -2,83 +2,72 @@ import type { Metadata, Viewport } from "next";
 import { Archivo, Instrument_Serif } from "next/font/google";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { CartDrawer } from "@/components/layout/CartDrawer";
-import { MotionProvider } from "@/components/layout/MotionProvider";
-import { CartProvider } from "@/lib/cart";
-import { site } from "@/data/site";
+import { SaleShell } from "@/components/commerce/SaleShell";
+import { fr } from "@/content/i18n/fr";
+import { getCatalog } from "@/lib/catalog";
+import { getSiteMode } from "@/lib/mode";
+import { SITE_URL } from "@/lib/site-url";
 import "./globals.css";
 
-/* UI + body. Variable weights keep this to a single file. */
+/* Kept from v1: Archivo carries the identity (tight caps), Instrument Serif
+   only for numerals and quotes. */
 const archivo = Archivo({
   variable: "--font-archivo",
   subsets: ["latin"],
   display: "swap",
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
 });
 
-/* Editorial serif, used for accents and selected headline words. */
 const instrument = Instrument_Serif({
   variable: "--font-instrument",
   subsets: ["latin"],
   display: "swap",
   weight: "400",
-  style: ["normal", "italic"],
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(site.url),
-  title: {
-    default: "MATOCHA — Premium Japanese Matcha Sticks",
-    template: `%s — ${site.name}`,
-  },
-  description: site.description,
-  applicationName: site.name,
-  keywords: [
-    "matcha",
-    "Japanese matcha",
-    "matcha sticks",
-    "matcha stick",
-    "premium matcha",
-    "matcha France",
-    "matcha Paris",
-  ],
-  alternates: { canonical: "/" },
-  openGraph: {
-    type: "website",
-    siteName: site.name,
-    title: "MATOCHA — Premium Japanese Matcha Sticks",
-    description: site.description,
-    url: site.url,
-    locale: "fr_FR",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "MATOCHA — Premium Japanese Matcha Sticks",
-    description: site.description,
-  },
-  robots: { index: true, follow: true },
-};
+/* Catalogue overrides and the site mode are re-read at most every 5 minutes;
+   approvals in /admin revalidate immediately. */
+export const revalidate = 300;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const mode = await getSiteMode();
+  const description =
+    mode === "sale" ? fr.meta.descriptionSale : fr.meta.descriptionPrelaunch;
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: { default: fr.meta.titleDefault, template: `%s — Matocha` },
+    description,
+    applicationName: "Matocha",
+    alternates: { canonical: "/" },
+    openGraph: {
+      type: "website",
+      siteName: "Matocha",
+      title: fr.meta.titleDefault,
+      description,
+      locale: "fr_FR",
+    },
+    twitter: { card: "summary_large_image", title: fr.meta.titleDefault, description },
+  };
+}
 
 export const viewport: Viewport = {
-  themeColor: "#f1ece1",
+  themeColor: "#eeede0",
   colorScheme: "light",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const [mode, catalog] = await Promise.all([getSiteMode(), getCatalog()]);
+  const sale = mode === "sale";
+
   return (
-    <html
-      lang="en"
-      className={`${archivo.variable} ${instrument.variable} h-full antialiased`}
-    >
+    <html lang="fr" className={`${archivo.variable} ${instrument.variable} h-full antialiased`}>
       <body className="grain flex min-h-full flex-col">
-        <MotionProvider>
-          <CartProvider>
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-            <CartDrawer />
-          </CartProvider>
-        </MotionProvider>
+        <SaleShell enabled={sale} header={(cart) => <Header sale={sale} cartSlot={cart} />}>
+          <main id="contenu" className="flex-1">
+            {children}
+          </main>
+          <Footer catalog={catalog} />
+        </SaleShell>
       </body>
     </html>
   );

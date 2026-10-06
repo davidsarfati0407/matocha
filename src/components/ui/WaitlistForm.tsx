@@ -1,136 +1,222 @@
 "use client";
 
-import { useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
-import { MatochaGlass } from "@/components/brand/MatochaGlass";
-import { EASE } from "@/lib/motion";
+import { useId, useRef, useState, useSyncExternalStore } from "react";
+import Link from "next/link";
+import { Whisk } from "@/components/scenes/Whisk";
+import { fr } from "@/content/i18n/fr";
 import { cn } from "@/lib/utils";
 
-type Status = "idle" | "loading" | "done" | "error";
+const INTERESTS = [
+  { id: "poudre", label: "La poudre" },
+  { id: "concentre", label: "Le concentré" },
+  { id: "original", label: "Original" },
+  { id: "vanille", label: "Vanille (piste)" },
+  { id: "fraise", label: "Fraise (piste)" },
+] as const;
+
+type Status = "idle" | "loading" | "done" | "error" | "closed";
+
+const noop = () => () => {};
+
+function readWanted() {
+  const wanted = new URLSearchParams(window.location.search).get("interet");
+  return wanted && INTERESTS.some((i) => i.id === wanted) ? wanted : null;
+}
+
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 /**
- * Email capture, used by the waitlist section and the footer.
- *
- * Posts to /api/waitlist — the single place to connect an email provider at
- * launch. On success the matcha in the glass waves once, then settles.
+ * Waitlist (pre-launch). Double opt-in: success means "check your inbox", never
+ * "you're in". If the server has no e-mail service it says so, and the form
+ * is not shown at all — there is never a fake confirmation.
  */
 export function WaitlistForm({
-  tone = "dark",
+  open,
+  consentText,
+  consentVersion,
+  source,
+  tone = "light",
   className,
-  buttonLabel = "Join the list",
-  source = "waitlist",
-  size = "md",
 }: {
-  tone?: "dark" | "light";
+  open: boolean;
+  consentText: string;
+  consentVersion: string;
+  source: string;
+  tone?: "light" | "dark";
   className?: string;
-  buttonLabel?: string;
-  source?: string;
-  size?: "md" | "lg";
 }) {
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<Status>("idle");
+  const id = useId();
+  const [status, setStatus] = useState<Status>(open ? "idle" : "closed");
   const [message, setMessage] = useState("");
+  const [field, setField] = useState<"email" | "consent" | null>(null);
+  const [interests, setInterests] = useState<string[]>(["poudre"]);
+  const inflight = useRef(false);
+  /* Until hydrated, a native submit would put the address in the URL: keep it disabled. */
+  const ready = useSyncExternalStore(noop, () => true, () => false);
+  const dark = tone === "dark";
 
-  const light = tone === "light";
-  const height = size === "lg" ? "h-14 sm:h-16" : "h-13 sm:h-14";
+  /* ?interet=fraise preselects a flavour coming from "Je veux goûter celui-ci",
+     until the visitor changes the selection themselves. */
+  const wanted = useSyncExternalStore(noop, readWanted, () => null);
+  const [touched, setTouched] = useState(false);
+  const selected = !touched && wanted && !interests.includes(wanted) ? [...interests, wanted] : interests;
+
+  if (status === "closed") {
+    return (
+      <div className={cn("border p-5", dark ? "border-lait/30" : "border-encre/20", className)} role="status">
+        <p className="text-lg font-semibold">{fr.waitlist.closed}</p>
+        <p className="mt-2 text-sm">{fr.waitlist.closedDetail}</p>
+      </div>
+    );
+  }
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (status === "loading") return;
+    if (inflight.current) return;
+    const form = new FormData(event.currentTarget);
+    const email = String(form.get("email") ?? "").trim();
+    const consent = form.get("consent") === "on";
 
+    if (!EMAIL.test(email)) {
+      setStatus("error");
+      setField("email");
+      setMessage(fr.waitlist.invalid);
+      return;
+    }
+    if (!consent) {
+      setStatus("error");
+      setField("consent");
+      setMessage(fr.waitlist.consentRequired);
+      return;
+    }
+
+    inflight.current = true;
     setStatus("loading");
+    setField(null);
     try {
-      const response = await fetch("/api/waitlist", {
+      const res = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, source }),
+        body: JSON.stringify({ email, interests: selected, consent, consentVersion, source }),
       });
-      const data = (await response.json()) as { message?: string };
-
-      if (!response.ok) {
+      const data = (await res.json().catch(() => ({}))) as { code?: string; message?: string };
+      if (res.ok) {
+        setStatus("done");
+        setMessage(fr.waitlist.success);
+      } else if (res.status === 503 || data.code === "not_configured") {
+        setStatus("closed");
+      } else {
         setStatus("error");
-        setMessage(data.message ?? "Something went wrong. Please try again.");
-        return;
+        setField(data.code === "invalid_email" ? "email" : data.code === "consent_required" ? "consent" : null);
+        setMessage(data.message ?? fr.waitlist.generic);
       }
-
-      setStatus("done");
-      setMessage(data.message ?? "You're on the list.");
-      setEmail("");
     } catch {
       setStatus("error");
-      setMessage("Network error. Please try again.");
+      setMessage(fr.waitlist.network);
+    } finally {
+      inflight.current = false;
     }
   }
 
-  return (
-    <div className={className}>
-      <form onSubmit={onSubmit} className="flex flex-col gap-3 sm:flex-row">
-        <label className="sr-only" htmlFor={`email-${source}`}>
-          Email address
-        </label>
-        <input
-          id={`email-${source}`}
-          type="email"
-          required
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          placeholder="your@email.com"
-          autoComplete="email"
-          disabled={status === "loading"}
-          className={cn(
-            "min-w-0 flex-1 border-b bg-transparent px-1 text-base outline-none transition-colors duration-300 placeholder:opacity-45 focus:border-coral",
-            height,
-            light ? "border-ivory/35" : "border-black/25",
-          )}
-        />
-        <button
-          type="submit"
-          disabled={status === "loading"}
-          className={cn(
-            "group relative shrink-0 overflow-hidden px-8",
-            "u-label font-semibold transition-colors duration-500 ease-[var(--ease-matocha)] disabled:opacity-50",
-            height,
-            light ? "bg-ivory text-black" : "bg-coral text-black",
-          )}
-        >
-          <span
-            aria-hidden="true"
-            className="absolute inset-0 origin-bottom scale-y-0 bg-[#F7DE9A] transition-transform duration-500 ease-[var(--ease-matocha)] group-hover:scale-y-100"
-          />
-          <span className="relative z-10">
-            {status === "loading" ? "Sending" : buttonLabel}
-          </span>
-        </button>
-      </form>
+  if (status === "done") {
+    return (
+      <div className={cn("relative overflow-hidden border p-5", dark ? "border-lait/30" : "border-encre/20", className)} role="status">
+        <div className="powder-rain pointer-events-none absolute inset-x-0 top-0 h-14" aria-hidden="true">
+          {Array.from({ length: 18 }).map((_, i) => (
+            <i key={i} style={{ left: `${6 + i * 5.2}%`, animationDelay: `${(i % 6) * 80}ms` }} />
+          ))}
+        </div>
+        <p className="pt-8 text-lg font-semibold">{message}</p>
+      </div>
+    );
+  }
 
-      <AnimatePresence mode="wait">
-        {status !== "idle" && status !== "loading" && (
-          <motion.p
-            key={message}
-            role="status"
-            data-matocha-motion
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: EASE }}
-            className={cn(
-              "mt-4 flex items-center gap-3 text-sm",
-              status === "error" ? "opacity-90" : "opacity-75",
-            )}
-          >
-            {status === "done" && (
-              <span className="block h-5 w-5 shrink-0">
-                <MatochaGlass
-                  variant="classic"
-                  pulse
-                  ink={light ? "#F3EFE5" : "#161713"}
-                />
-              </span>
-            )}
-            {message}
-          </motion.p>
+  const errorId = `${id}-error`;
+
+  return (
+    <form onSubmit={onSubmit} method="post" noValidate className={className} aria-describedby={status === "error" ? errorId : undefined}>
+      <label htmlFor={`${id}-email`} className="block font-semibold">
+        {fr.waitlist.label}
+      </label>
+      <input
+        id={`${id}-email`}
+        name="email"
+        type="email"
+        autoComplete="email"
+        inputMode="email"
+        required
+        placeholder={fr.waitlist.placeholder}
+        aria-invalid={field === "email" || undefined}
+        aria-describedby={field === "email" ? errorId : undefined}
+        className={cn(
+          "mt-2 h-13 w-full border-b-2 bg-transparent px-1 text-lg outline-none placeholder:opacity-60 focus:border-matcha",
+          dark ? "border-lait/60" : "border-encre/50",
+          field === "email" && "border-rhubarbe",
         )}
-      </AnimatePresence>
-    </div>
+      />
+
+      <fieldset className="mt-5">
+        <legend className="text-sm font-semibold">{fr.waitlist.interests}</legend>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {INTERESTS.map((item) => {
+            const checked = selected.includes(item.id);
+            return (
+              <label
+                key={item.id}
+                className={cn(
+                  "flex min-h-11 cursor-pointer items-center gap-2 rounded-full border px-3 text-sm",
+                  checked ? (dark ? "border-lait bg-lait text-encre" : "border-foret bg-foret text-lait") : dark ? "border-lait/40" : "border-encre/30",
+                )}
+              >
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={checked}
+                  onChange={() => {
+                    setTouched(true);
+                    setInterests(checked ? selected.filter((x) => x !== item.id) : [...selected, item.id]);
+                  }}
+                />
+                {item.label}
+              </label>
+            );
+          })}
+        </div>
+      </fieldset>
+
+      <label className="mt-5 flex items-start gap-3 text-sm">
+        <input
+          name="consent"
+          type="checkbox"
+          defaultChecked={false}
+          aria-invalid={field === "consent" || undefined}
+          className="mt-1 h-5 w-5 shrink-0 accent-[var(--foret)]"
+        />
+        <span>
+          {consentText}{" "}
+          <Link href="/legal/confidentialite" className="underline underline-offset-2">
+            {fr.waitlist.consentLink}
+          </Link>
+          .
+        </span>
+      </label>
+
+      <button
+        type="submit"
+        disabled={!ready || status === "loading"}
+        className={cn(
+          "mt-6 flex min-h-14 w-full items-center justify-center gap-2 px-8 text-sm font-semibold tracking-wide uppercase sm:w-auto",
+          dark ? "bg-lait text-encre hover:bg-mousse" : "bg-foret text-lait hover:bg-matcha hover:text-encre",
+          "disabled:opacity-60",
+        )}
+      >
+        {status === "loading" && <Whisk className="h-5 w-5" />}
+        {status === "loading" ? fr.waitlist.sending : fr.waitlist.submit}
+      </button>
+
+      <p id={errorId} role="alert" className={cn("mt-3 min-h-6 text-sm font-semibold", status !== "error" && "sr-only")}>
+        {status === "error" ? message : ""}
+      </p>
+    </form>
   );
 }
