@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Photo } from "@/components/media/Photo";
+import { HeroStage } from "@/components/motion/HeroStage";
+import { ParallaxRoot } from "@/components/motion/ParallaxRoot";
+import { ProductStage } from "@/components/motion/ProductStage";
+import { SplitWords } from "@/components/motion/SplitWords";
 import { ProductCard } from "@/components/blocks/ProductCard";
 import { FaqList, faqJsonLd } from "@/components/blocks/FaqList";
 import { ProofValue } from "@/components/blocks/ProofValue";
@@ -14,6 +18,7 @@ import { getCatalog } from "@/lib/catalog";
 import { getSiteMode } from "@/lib/mode";
 import { SITE_URL } from "@/lib/site-url";
 import { CONSENT_TEXT, CONSENT_VERSION, isWaitlistOpen } from "@/lib/waitlist/status";
+import { isConfirmed } from "@/lib/proof";
 import { insideRows, productView } from "@/lib/view";
 
 export const metadata: Metadata = {
@@ -25,6 +30,10 @@ export default async function HomePage() {
   const { recipe, family } = theProduct(catalog);
   const product = productView(catalog, mode);
   const homeFaq = faq.filter((f) => f.home);
+  /* The badge shows the serving only once it is a confirmed fact. */
+  const serving = isConfirmed(recipe.servingTotal)
+    ? `${recipe.servingTotal.value.value.toLocaleString("fr-FR")}\u00a0${recipe.servingTotal.value.unit}`
+    : null;
   const waitlistOpen = isWaitlistOpen();
 
   const jsonLd = [
@@ -36,45 +45,49 @@ export default async function HomePage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      {/* ---------------------------------------------------- 1. Hero */}
+      {/* ---------------------------------------------------- 1. Hero
+          Entrance in steps (title word by word, product with a bounce, badge
+          and CTA in cascade), then continuous micro-movement: depth parallax
+          between text and product, the stick floating. */}
       <section aria-labelledby="hero-title" className="pt-24 pb-12 lg:pt-28 lg:pb-20">
-        <Container wide className="grid items-center gap-10 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
-          <div>
-            <p className="flex flex-wrap items-center gap-2 text-sm">
-              <span className="font-semibold">{fr.hero.productShown}</span>
-              {mode !== "sale" && <span className="concept-tag">{fr.status.prelaunch}</span>}
-            </p>
-            <h1 id="hero-title" className="mt-5 text-5xl u-caps max-w-[12ch]">
-              {fr.hero.title}
-            </h1>
-            <p className="mt-6 max-w-[40ch] text-lg">{fr.hero.subtitle}</p>
-            {mode !== "sale" && <p className="mt-3 max-w-[40ch]">{fr.hero.prelaunchLine}</p>}
-            <div className="mt-8">
-              {product.cta.kind === "buy" ? (
-                <ButtonLink href="/daily-box#acheter">{fr.hero.ctaSale}</ButtonLink>
-              ) : (
-                <ButtonLink href="#inscription">{fr.hero.ctaPrelaunch}</ButtonLink>
+        <ParallaxRoot origin="top" strength={2.2}>
+          <Container wide className="grid items-center gap-10 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
+            <div data-depth="-18" className="parallax">
+              <p className="cascade flex flex-wrap items-center gap-2 text-sm" style={{ "--d": "0s" } as React.CSSProperties}>
+                <span className="font-semibold">{fr.hero.productShown}</span>
+                {mode !== "sale" && <span className="concept-tag">{fr.status.prelaunch}</span>}
+              </p>
+              <h1 id="hero-title" className="mt-5 text-5xl u-caps max-w-[12ch]">
+                <SplitWords text={fr.hero.title} />
+              </h1>
+              <p className="cascade mt-6 max-w-[40ch] text-lg" style={{ "--d": "0.45s" } as React.CSSProperties}>
+                {fr.hero.subtitle}
+              </p>
+              {mode !== "sale" && (
+                <p className="cascade mt-3 max-w-[40ch]" style={{ "--d": "0.55s" } as React.CSSProperties}>
+                  {fr.hero.prelaunchLine}
+                </p>
               )}
+              <div className="cascade mt-8" style={{ "--d": "0.7s" } as React.CSSProperties}>
+                {product.cta.kind === "buy" ? (
+                  <ButtonLink href="/daily-box#acheter">{fr.hero.ctaSale}</ButtonLink>
+                ) : (
+                  <ButtonLink href="#inscription">{fr.hero.ctaPrelaunch}</ButtonLink>
+                )}
+              </div>
             </div>
-          </div>
-          <Photo
-            id="matocha-latte"
-            priority
-            kenBurns
-            parallax
-            sizes="(min-width: 1024px) 45vw, 100vw"
-            ratio="aspect-[4/5] lg:aspect-auto lg:h-[min(76vh,720px)]"
-          />
-        </Container>
+            <HeroStage servingLabel={serving} />
+          </Container>
+        </ParallaxRoot>
       </section>
 
       {/* ---------------------------------------------------- 2. Le geste */}
       <section id="geste" aria-labelledby="geste-title" className="sec">
         <Container wide className="grid items-center gap-10 lg:grid-cols-[1fr_1fr] lg:gap-16">
           <div>
-            <h2 id="geste-title" className="text-4xl u-caps">{fr.gesture.title}</h2>
-            <p className="mt-4 measure text-lg">{fr.gesture.intro}</p>
-            <ol className="mt-8 space-y-4">
+            <h2 id="geste-title" data-reveal className="text-4xl u-caps">{fr.gesture.title}</h2>
+            <p data-reveal style={{ "--d": "0.08s" } as React.CSSProperties} className="mt-4 measure text-lg">{fr.gesture.intro}</p>
+            <ol data-reveal style={{ "--d": "0.16s" } as React.CSSProperties} className="mt-8 space-y-4">
               {family.gesture.map((step, i) => (
                 <li key={step} className="grid grid-cols-[3rem_1fr] gap-x-4 border-t border-encre/15 pt-4">
                   <span className="font-serif text-4xl leading-none">{i + 1}</span>
@@ -94,11 +107,13 @@ export default async function HomePage() {
       {/* ---------------------------------------------------- 3. La Daily Box */}
       <section id="produit" aria-labelledby="produit-title" className="sec">
         <Container wide className="grid items-center gap-10 lg:grid-cols-[1fr_1fr] lg:gap-16">
-          <Photo id="matocha-box" parallax sizes="(min-width: 1024px) 45vw, 100vw" />
+          <ProductStage />
           <div>
-            <h2 id="produit-title" className="text-4xl u-caps">{fr.product.title}</h2>
-            <p className="mt-4 measure text-lg">{fr.product.intro}</p>
-            <ProductCard product={product} className="mt-8" />
+            <h2 id="produit-title" data-reveal className="text-4xl u-caps">{fr.product.title}</h2>
+            <p data-reveal style={{ "--d": "0.08s" } as React.CSSProperties} className="mt-4 measure text-lg">{fr.product.intro}</p>
+            <div data-reveal style={{ "--d": "0.16s" } as React.CSSProperties}>
+              <ProductCard product={product} className="mt-8" />
+            </div>
           </div>
         </Container>
       </section>
@@ -107,9 +122,9 @@ export default async function HomePage() {
       <section id="journee" aria-labelledby="journee-title" className="sec">
         <Container wide className="grid items-center gap-10 lg:grid-cols-[1fr_1fr] lg:gap-16">
           <div className="lg:order-2">
-            <h2 id="journee-title" className="text-4xl u-caps">{fr.day.title}</h2>
-            <p className="mt-4 measure text-lg">{fr.day.intro}</p>
-            <ul className="mt-8 divide-y divide-encre/15 border-y border-encre/15">
+            <h2 id="journee-title" data-reveal className="text-4xl u-caps">{fr.day.title}</h2>
+            <p data-reveal style={{ "--d": "0.08s" } as React.CSSProperties} className="mt-4 measure text-lg">{fr.day.intro}</p>
+            <ul data-reveal style={{ "--d": "0.16s" } as React.CSSProperties} className="mt-8 divide-y divide-encre/15 border-y border-encre/15">
               {fr.day.scenes.map((scene) => (
                 <li key={scene.time} className="grid grid-cols-[5.5rem_1fr] items-baseline gap-x-4 py-3">
                   <span className="font-serif text-3xl">{scene.time}</span>
@@ -136,15 +151,15 @@ export default async function HomePage() {
       <section id="dedans" aria-labelledby="dedans-title" className="sec">
         <Container wide className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:gap-16">
           <div>
-            <h2 id="dedans-title" className="text-4xl u-caps">{fr.inside.title}</h2>
-            <p className="mt-4 measure text-lg">{fr.inside.intro}</p>
+            <h2 id="dedans-title" data-reveal className="text-4xl u-caps">{fr.inside.title}</h2>
+            <p data-reveal style={{ "--d": "0.08s" } as React.CSSProperties} className="mt-4 measure text-lg">{fr.inside.intro}</p>
             <h3 className="mt-10 text-2xl u-caps">{fr.inside.suspensionTitle}</h3>
             <p className="mt-3 measure">{fr.inside.suspensionText}</p>
             <TextLink href="/preparer" className="mt-2">
               Comment préparer
             </TextLink>
           </div>
-          <dl className="self-start divide-y divide-encre/15 border-y border-encre/15">
+          <dl data-reveal style={{ "--d": "0.12s" } as React.CSSProperties} className="self-start divide-y divide-encre/15 border-y border-encre/15">
             {insideRows(recipe).map((row) => (
               <div key={row.key} className="grid grid-cols-[10rem_1fr] gap-4 py-3">
                 <dt className="font-semibold">{row.label}</dt>
@@ -160,8 +175,8 @@ export default async function HomePage() {
       {/* ---------------------------------------------------- 6. Plus simple */}
       <section id="rituel" aria-labelledby="rituel-title" className="sec bg-mousse/45">
         <Container wide>
-          <h2 id="rituel-title" className="text-4xl u-caps">{fr.ritual.title}</h2>
-          <p className="mt-4 max-w-[44ch] font-serif text-3xl leading-tight">« {fr.ritual.quote} »</p>
+          <h2 id="rituel-title" data-reveal className="text-4xl u-caps">{fr.ritual.title}</h2>
+          <p data-reveal style={{ "--d": "0.08s" } as React.CSSProperties} className="mt-4 max-w-[44ch] font-serif text-3xl leading-tight">« {fr.ritual.quote} »</p>
           <p className="mt-4 measure">{fr.ritual.intro}</p>
           {/* Phones: one card per step, both answers stacked. */}
           <dl className="mt-8 divide-y divide-encre/15 border-y border-encre/15 md:hidden">
@@ -211,8 +226,8 @@ export default async function HomePage() {
       <section id="fin" aria-labelledby="faq-title" className="sec">
         <Container wide className="grid gap-14 lg:grid-cols-[1.1fr_1fr]">
           <div>
-            <h2 id="faq-title" className="text-4xl u-caps">{fr.final.faqTitle}</h2>
-            <div className="mt-8">
+            <h2 id="faq-title" data-reveal className="text-4xl u-caps">{fr.final.faqTitle}</h2>
+            <div data-reveal style={{ "--d": "0.1s" } as React.CSSProperties} className="mt-8">
               <FaqList items={homeFaq} />
             </div>
             <TextLink href="/faq" className="mt-4">
@@ -220,7 +235,7 @@ export default async function HomePage() {
             </TextLink>
           </div>
           <div id="inscription" className="scroll-mt-24">
-            <h2 className="text-3xl u-caps">{fr.final.ctaTitle}</h2>
+            <h2 data-reveal className="text-3xl u-caps">{fr.final.ctaTitle}</h2>
             <p className="mt-3 text-lg">{fr.final.ctaText}</p>
             <WaitlistForm
               open={waitlistOpen}

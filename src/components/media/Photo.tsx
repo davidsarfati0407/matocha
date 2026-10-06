@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
  * A render from the media manifest, never anything else.
  *
  * - The box reserves its aspect ratio: nothing moves when the image arrives.
- * - `kenBurns`: a very slow scale/drift of the image (CSS only).
+ * - `reveal`: the frame slides in with a light unveil when it scrolls in.
  * - `parallax`: the image glides a few pixels against the scroll, written
  *   straight to the DOM, only while the frame is on screen.
  * - Reduced motion: both are off; the photo is simply shown.
@@ -21,7 +21,7 @@ export function Photo({
   className,
   sizes,
   priority = false,
-  kenBurns = false,
+  reveal = !priority,
   parallax = false,
   objectPosition = "50% 50%",
   ratio = "aspect-[4/5]",
@@ -30,7 +30,8 @@ export function Photo({
   className?: string;
   sizes: string;
   priority?: boolean;
-  kenBurns?: boolean;
+  /** Slides in when its section scrolls into view (default for non-hero photos). */
+  reveal?: boolean;
   parallax?: boolean;
   objectPosition?: string;
   /** Tailwind aspect class; the renders are 4:5. */
@@ -74,10 +75,14 @@ export function Photo({
   if (!isShowable(item)) return null;
 
   return (
-    <figure ref={frame} className={cn("relative overflow-hidden bg-lait-profond", ratio, className)}>
+    <figure
+      ref={frame}
+      data-reveal={reveal ? "image" : undefined}
+      className={cn("relative overflow-hidden bg-lait-profond", ratio, className)}
+    >
       {/* The layer is a little taller than the frame so parallax never shows an edge. */}
       <div ref={layer} className={cn("absolute", parallax ? "-inset-y-6 inset-x-0" : "inset-0")}>
-        <div className={cn("absolute inset-0", kenBurns && "ken-burns")}>
+        <div className="absolute inset-0">
           <Image
             src={item.files.desktop}
             alt={item.decorative ? "" : item.alt}

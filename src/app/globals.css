@@ -163,18 +163,149 @@
 
 /* ---------------------------------------------------------------- motion */
 
-/* Hero renders: a very slow Ken Burns drift. */
-@keyframes matocha-kenburns {
+/* ==========================================================================
+   MOTION — product layers cut from the renders (public/renders/layers/).
+   Everything below is transform/opacity only (compositor-friendly) and is
+   switched off under prefers-reduced-motion. Entrance animations are pure
+   CSS: they play without JavaScript and end on the visible state.
+   ========================================================================== */
+
+:root {
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  /* A small overshoot: the "rebond" of the product's arrival. */
+  --ease-bounce: cubic-bezier(0.34, 1.42, 0.64, 1);
+}
+
+/* Title revealed word by word through a mask. */
+.word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.06em;
+  margin-bottom: -0.06em;
+}
+.word > span {
+  display: inline-block;
+  animation: matocha-word 0.75s var(--ease-out-soft) both;
+  animation-delay: calc(0.08s + var(--i, 0) * 0.07s);
+}
+@keyframes matocha-word {
   from {
-    transform: scale(1.02) translate3d(0, 0, 0);
+    transform: translate3d(0, 105%, 0);
   }
   to {
-    transform: scale(1.1) translate3d(-1.5%, -1.2%, 0);
+    transform: translate3d(0, 0, 0);
   }
 }
-.ken-burns {
-  animation: matocha-kenburns 22s ease-in-out infinite alternate;
+
+/* Cascade for the lines that follow the title. */
+.cascade {
+  animation: matocha-rise 0.7s var(--ease-out-soft) both;
+  animation-delay: var(--d, 0s);
+}
+@keyframes matocha-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* The product arrives with a light bounce. */
+.arrive {
+  animation: matocha-arrive 1.05s var(--ease-bounce) both;
+  animation-delay: var(--d, 0.2s);
+}
+@keyframes matocha-arrive {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 46px, 0) scale(0.96) rotate(var(--r0, 0deg));
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1) rotate(var(--r1, 0deg));
+  }
+}
+
+/* The badge pops in. */
+.pop {
+  animation: matocha-pop 0.6s var(--ease-bounce) both;
+  animation-delay: var(--d, 1s);
+}
+@keyframes matocha-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Continuous micro-movement: the stick floats. */
+.float {
+  animation: matocha-float 6.5s ease-in-out infinite;
+  animation-delay: var(--d, 1.4s);
+}
+@keyframes matocha-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0) rotate(1.2deg);
+  }
+}
+
+/* The floor shadow breathes with the float. */
+.float-shadow {
+  animation: matocha-float-shadow 6.5s ease-in-out infinite;
+  animation-delay: var(--d, 1.4s);
+}
+@keyframes matocha-float-shadow {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scaleX(0.9);
+    opacity: 0.38;
+  }
+}
+
+/* Scroll parallax: a layer reads --py (set by a tiny script). */
+.parallax {
+  transform: translate3d(0, var(--py, 0px), 0);
   will-change: transform;
+}
+
+/* Section reveals: hidden only when JS has confirmed motion is welcome. */
+html.motion-ok [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition:
+    opacity 0.8s var(--ease-out-soft),
+    transform 0.9s var(--ease-out-soft);
+  transition-delay: var(--d, 0s);
+}
+html.motion-ok [data-reveal="image"] {
+  transform: translate3d(0, 36px, 0);
+  clip-path: inset(6% 0 0 0);
+  transition:
+    opacity 0.9s var(--ease-out-soft),
+    transform 1.1s var(--ease-out-soft),
+    clip-path 1.1s var(--ease-out-soft);
+  transition-delay: var(--d, 0s);
+}
+html.motion-ok [data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+  clip-path: inset(0 0 0 0);
 }
 
 /* Loading indicator: a plain ring. */
@@ -198,9 +329,18 @@
     scroll-behavior: auto;
   }
 
-  .ken-burns,
-  .spinner {
+  .spinner,
+  .word > span,
+  .cascade,
+  .arrive,
+  .pop,
+  .float,
+  .float-shadow {
     animation: none !important;
+  }
+
+  .parallax {
+    transform: none !important;
   }
 
   [data-matocha-motion] {

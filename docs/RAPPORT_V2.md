@@ -1,5 +1,7 @@
 # MATOCHA v2 — Rapport de livraison
 
+> **Mise à jour — motion design** (décisions F31 à F33) : le hero est une composition à calques détourés localement dans les renders (verre, stick, boîte). Entrée en plusieurs temps : titre mot par mot, produit avec un léger rebond, badge « 2 g » et CTA en cascade. Puis stick qui flotte et parallaxe de profondeur au scroll. La Daily Box est animée de la même façon ; les sections se révèlent en décalé et les images glissent légèrement. Tout est en CSS (pas de GSAP, pas de vidéo), coupé en reduced-motion et visible sans JavaScript. Lighthouse mobile 95 / 100, CLS 0, LCP 2,9 s. Tests : 69 unitaires et 68 e2e verts.
+>
 > **Mise à jour du 6 octobre — mode réaliste et produit unique** (décisions F26 à F30)
 > - **Visuels** : le site ne montre plus que les 4 renders photoréalistes de `public/renders/` (sticks, latte, Daily Box, jet), chacun marqué « Visuel de concept ». Plus aucune illustration dessinée : 0 SVG et 0 canvas sur les pages, vérifié par un test e2e. Seuls mouvements : Ken Burns sur le hero et parallaxe légère, coupés en reduced-motion.
 > - **Catalogue** : un seul produit, le Matcha Original en poudre (stick de 2 g, Daily Box de 30). Plus de goûts, de concentré ni de packs. `/daily-box` remplace `/formats` (301).

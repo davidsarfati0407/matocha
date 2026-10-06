@@ -3,6 +3,7 @@ import { Archivo, Instrument_Serif } from "next/font/google";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SaleShell } from "@/components/commerce/SaleShell";
+import { ScrollReveal } from "@/components/motion/ScrollReveal";
 import { fr } from "@/content/i18n/fr";
 import { getCatalog } from "@/lib/catalog";
 import { getSiteMode } from "@/lib/mode";
@@ -60,8 +61,23 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const sale = mode === "sale";
 
   return (
-    <html lang="fr" className={`${archivo.variable} ${instrument.variable} h-full antialiased`}>
+    <html
+      lang="fr"
+      className={`${archivo.variable} ${instrument.variable} h-full antialiased`}
+      suppressHydrationWarning
+    >
+      <head>
+        {/* Before first paint: section reveals start hidden only if JS runs and
+            the visitor has not asked for reduced motion. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('motion-ok')",
+          }}
+        />
+      </head>
       <body className="flex min-h-full flex-col">
+        <ScrollReveal />
         <SaleShell enabled={sale} header={(cart) => <Header sale={sale} cartSlot={cart} />}>
           <main id="contenu" className="flex-1">
             {children}

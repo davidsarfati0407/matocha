@@ -56,17 +56,16 @@ test.describe("produit unique, mode réaliste", () => {
       await expect(page.locator("main svg, footer svg, header svg"), path).toHaveCount(0);
       await expect(page.locator("canvas"), path).toHaveCount(0);
       const srcs = await page.locator("main img").evaluateAll((imgs) => imgs.map((i) => decodeURIComponent((i as HTMLImageElement).currentSrc)));
-      for (const src of srcs) expect(src, path).toMatch(/\/renders\/matocha-(sticks|latte|box|jet)\.png/);
+      for (const src of srcs) expect(src, path).toMatch(/\/renders\/(layers\/)?matocha-(sticks|latte|box|jet|verre|stick|boite)\.png/);
     }
-    await page.goto("/");
-    await expect(page.locator("main img")).toHaveCount(4);
   });
 
-  test("every render carries the concept mention", async ({ page }) => {
+  test("every visual carries the concept mention", async ({ page }) => {
     await page.goto("/");
-    const figures = page.locator("main figure");
-    await expect(figures).toHaveCount(4);
-    for (const f of await figures.all()) await expect(f.getByText("Visuel de concept")).toBeVisible();
+    /* Hero composition, Daily Box composition, two photos. */
+    const frames = page.locator("main figure, main [role=img]");
+    await expect(frames).toHaveCount(4);
+    for (const f of await frames.all()) await expect(f.getByText("Visuel de concept")).toHaveCount(1);
   });
 
   test("one product, one price slot, one CTA — no flavour or format left", async ({ page }) => {
@@ -84,15 +83,42 @@ test.describe("produit unique, mode réaliste", () => {
     }
   });
 
-  test("the hero photo drifts (Ken Burns) only when motion is allowed", async ({ browser }) => {
+  test("motion design: staged entrance and floating stick, all off in reduced motion", async ({ browser }) => {
     for (const motion of ["no-preference", "reduce"] as const) {
       const ctx = await browser.newContext({ reducedMotion: motion });
       const page = await ctx.newPage();
       await page.goto("/");
-      const anim = await page.locator(".ken-burns").first().evaluate((el) => getComputedStyle(el).animationName);
-      expect(anim).toBe(motion === "reduce" ? "none" : "matocha-kenburns");
+      const names = await page.evaluate(() =>
+        [".word > span", ".arrive", ".float", ".pop", ".cascade"].map((sel) => getComputedStyle(document.querySelector(sel)!).animationName),
+      );
+      if (motion === "reduce") expect(names.every((n) => n === "none")).toBe(true);
+      else expect(names).toEqual(["matocha-word", "matocha-arrive", "matocha-float", "matocha-pop", "matocha-rise"]);
+      /* The title is readable text, not split letters for screen readers. */
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText("Le matcha, en plus simple.");
       await ctx.close();
     }
+  });
+
+  test("sections reveal on scroll, and nothing stays hidden after a fast jump", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveClass(/motion-ok/);
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(150);
+    const hidden = await page.evaluate(() =>
+      [...document.querySelectorAll("[data-reveal]:not(.is-in)")].filter((e) => e.getBoundingClientRect().top < innerHeight).length,
+    );
+    expect(hidden).toBe(0);
+  });
+
+  test("without JavaScript every section is visible", async ({ browser }) => {
+    const ctx = await browser.newContext({ javaScriptEnabled: false });
+    const page = await ctx.newPage();
+    await page.goto("/");
+    const invisible = await page.evaluate(() =>
+      [...document.querySelectorAll("[data-reveal]")].filter((e) => getComputedStyle(e).opacity !== "1").length,
+    );
+    expect(invisible).toBe(0);
+    await ctx.close();
   });
 
   test("FAQ opens with the keyboard; /preparer says when a combination is untested", async ({ page }) => {

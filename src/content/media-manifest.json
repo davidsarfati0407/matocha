@@ -117,6 +117,90 @@
     "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée."
   },
   {
+    "id": "layer-verre",
+    "family": "poudre",
+    "recipe": "original",
+    "status": "concept",
+    "kind": "image",
+    "source": "calque détouré de matocha-latte.png (masque Vision macOS, découpe locale)",
+    "license": {
+      "name": "Renders Matocha fournis par David Sarfati",
+      "url": "",
+      "commercialUse": true,
+      "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
+    },
+    "files": {
+      "desktop": "/renders/layers/matocha-verre.png",
+      "mobile": "/renders/layers/matocha-verre.png",
+      "poster": ""
+    },
+    "width": 465,
+    "height": 840,
+    "alt": "Un matcha latte glacé dans un grand verre.",
+    "decorative": true,
+    "usedIn": [
+      "home/hero",
+      "home/produit"
+    ],
+    "notes": "Calque PNG transparent issu d'un render existant. Seul un raccord de 20 px sur l'arête de la boîte a été reconstitué, à partir de ses propres pixels."
+  },
+  {
+    "id": "layer-stick",
+    "family": "poudre",
+    "recipe": "original",
+    "status": "concept",
+    "kind": "image",
+    "source": "calque détouré de matocha-box.png (masque Vision macOS, découpe locale)",
+    "license": {
+      "name": "Renders Matocha fournis par David Sarfati",
+      "url": "",
+      "commercialUse": true,
+      "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
+    },
+    "files": {
+      "desktop": "/renders/layers/matocha-stick.png",
+      "mobile": "/renders/layers/matocha-stick.png",
+      "poster": ""
+    },
+    "width": 246,
+    "height": 719,
+    "alt": "Un stick Matocha de 2 g.",
+    "decorative": true,
+    "usedIn": [
+      "home/hero",
+      "home/produit"
+    ],
+    "notes": "Calque PNG transparent issu d'un render existant. Seul un raccord de 20 px sur l'arête de la boîte a été reconstitué, à partir de ses propres pixels."
+  },
+  {
+    "id": "layer-boite",
+    "family": "poudre",
+    "recipe": "original",
+    "status": "concept",
+    "kind": "image",
+    "source": "calque détouré de matocha-box.png (masque Vision macOS, découpe locale)",
+    "license": {
+      "name": "Renders Matocha fournis par David Sarfati",
+      "url": "",
+      "commercialUse": true,
+      "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
+    },
+    "files": {
+      "desktop": "/renders/layers/matocha-boite.png",
+      "mobile": "/renders/layers/matocha-boite.png",
+      "poster": ""
+    },
+    "width": 609,
+    "height": 852,
+    "alt": "La Daily Box Matocha, 30 × 2 g.",
+    "decorative": true,
+    "usedIn": [
+      "home/hero",
+      "home/produit"
+    ],
+    "notes": "Calque PNG transparent issu d'un render existant. Seul un raccord de 20 px sur l'arête de la boîte a été reconstitué, à partir de ses propres pixels."
+  },
+  {
     "id": "hero-pour-poudre",
     "family": "poudre",
     "recipe": "original",
