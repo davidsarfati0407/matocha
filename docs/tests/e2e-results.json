@@ -4,7 +4,7 @@
       "/opt/homebrew/Cellar/node@22/22.22.2_1/bin/node",
       "/Users/davidsarfati/Desktop/Matocha/node_modules/.bin/playwright",
       "test",
-      "tests/e2e/home.spec.ts"
+      "tests/e2e/waitlist.spec.ts"
     ],
     "configFile": "/Users/davidsarfati/Desktop/Matocha/playwright.config.ts",
     "rootDir": "/Users/davidsarfati/Desktop/Matocha/tests/e2e",
@@ -82,20 +82,20 @@
   },
   "suites": [
     {
-      "title": "home.spec.ts",
-      "file": "home.spec.ts",
+      "title": "waitlist.spec.ts",
+      "file": "waitlist.spec.ts",
       "column": 0,
       "line": 0,
       "specs": [],
       "suites": [
         {
-          "title": "pré-lancement",
-          "file": "home.spec.ts",
-          "line": 3,
+          "title": "waitlist form",
+          "file": "waitlist.spec.ts",
+          "line": 4,
           "column": 6,
           "specs": [
             {
-              "title": "hero title, promise and CTA are in the server HTML (no JS needed)",
+              "title": "invalid e-mail shows the precise message",
               "ok": true,
               "tags": [],
               "tests": [
@@ -103,19 +103,19 @@
                   "timeout": 90000,
                   "annotations": [],
                   "expectedStatus": "passed",
-                  "projectId": "prod",
-                  "projectName": "prod",
+                  "projectId": "dev",
+                  "projectName": "dev",
                   "results": [
                     {
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 39,
+                      "duration": 3760,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-06T20:06:32.808Z",
+                      "startTime": "2026-10-06T20:42:50.100Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -123,13 +123,13 @@
                   "status": "expected"
                 }
               ],
-              "id": "d318381359a9b96acb1e-d6b7046d03e4f5b85432",
-              "file": "home.spec.ts",
-              "line": 4,
+              "id": "90c188d746fc87c78b58-585e3b0a0b08585ac99c",
+              "file": "waitlist.spec.ts",
+              "line": 12,
               "column": 7
             },
             {
-              "title": "hero stays readable and actionable with JavaScript disabled",
+              "title": "consent box is not pre-checked and is required",
               "ok": true,
               "tags": [],
               "tests": [
@@ -137,19 +137,19 @@
                   "timeout": 90000,
                   "annotations": [],
                   "expectedStatus": "passed",
-                  "projectId": "prod",
-                  "projectName": "prod",
+                  "projectId": "dev",
+                  "projectName": "dev",
                   "results": [
                     {
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 479,
+                      "duration": 2356,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-06T20:06:32.866Z",
+                      "startTime": "2026-10-06T20:42:54.010Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -157,13 +157,13 @@
                   "status": "expected"
                 }
               ],
-              "id": "d318381359a9b96acb1e-1111e459885fd1d5faa3",
-              "file": "home.spec.ts",
-              "line": 11,
+              "id": "90c188d746fc87c78b58-8422c78091c0b55330fe",
+              "file": "waitlist.spec.ts",
+              "line": 19,
               "column": 7
             },
             {
-              "title": "no purchase control exists anywhere in pre-launch",
+              "title": "success after the real API answer, then double opt-in message",
               "ok": true,
               "tags": [],
               "tests": [
@@ -171,19 +171,19 @@
                   "timeout": 90000,
                   "annotations": [],
                   "expectedStatus": "passed",
-                  "projectId": "prod",
-                  "projectName": "prod",
+                  "projectId": "dev",
+                  "projectName": "dev",
                   "results": [
                     {
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 315,
+                      "duration": 3200,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-06T20:06:33.664Z",
+                      "startTime": "2026-10-06T20:42:56.381Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -191,13 +191,13 @@
                   "status": "expected"
                 }
               ],
-              "id": "d318381359a9b96acb1e-706f740b15f7139df506",
-              "file": "home.spec.ts",
-              "line": 22,
+              "id": "90c188d746fc87c78b58-6999ea007e81a8baf95e",
+              "file": "waitlist.spec.ts",
+              "line": 27,
               "column": 7
             },
             {
-              "title": "waitlist says it is not open yet instead of faking a confirmation",
+              "title": "submitting the same address twice does not duplicate (API)",
               "ok": true,
               "tags": [],
               "tests": [
@@ -205,19 +205,19 @@
                   "timeout": 90000,
                   "annotations": [],
                   "expectedStatus": "passed",
-                  "projectId": "prod",
-                  "projectName": "prod",
+                  "projectId": "dev",
+                  "projectName": "dev",
                   "results": [
                     {
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 139,
+                      "duration": 368,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-10-06T20:06:33.986Z",
+                      "startTime": "2026-10-06T20:42:59.593Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -225,331 +225,9 @@
                   "status": "expected"
                 }
               ],
-              "id": "d318381359a9b96acb1e-9785629820aff9d23c46",
-              "file": "home.spec.ts",
-              "line": 31,
-              "column": 7
-            },
-            {
-              "title": "checkout API refuses in pre-launch",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 90000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "prod",
-                  "projectName": "prod",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 5,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-10-06T20:06:34.130Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "d318381359a9b96acb1e-a514913a9da2f3bf18fb",
-              "file": "home.spec.ts",
-              "line": 37,
-              "column": 7
-            },
-            {
-              "title": "no link to a social network root",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 90000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "prod",
-                  "projectName": "prod",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 133,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-10-06T20:06:34.139Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "d318381359a9b96acb1e-5cbd6711347cd54ef628",
-              "file": "home.spec.ts",
-              "line": 45,
-              "column": 7
-            }
-          ]
-        },
-        {
-          "title": "interactions",
-          "file": "home.spec.ts",
-          "line": 52,
-          "column": 6,
-          "specs": [
-            {
-              "title": "flavour change switches colour, ingredients, status and CTA together",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 90000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "prod",
-                  "projectName": "prod",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 1729,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-10-06T20:06:34.277Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "d318381359a9b96acb1e-ce51d2029a6fbdf7a129",
-              "file": "home.spec.ts",
-              "line": 53,
-              "column": 7
-            },
-            {
-              "title": "the box opens with the exact number of doses of the selected pack",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 90000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "prod",
-                  "projectName": "prod",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 2671,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-10-06T20:06:36.011Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "d318381359a9b96acb1e-38ddc062f0bc839bf9b7",
-              "file": "home.spec.ts",
-              "line": 65,
-              "column": 7
-            },
-            {
-              "title": "ritual comparator handle works with the keyboard",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 90000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "prod",
-                  "projectName": "prod",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 167,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-10-06T20:06:38.689Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "d318381359a9b96acb1e-8e11ce321e7ee9c7d367",
-              "file": "home.spec.ts",
-              "line": 79,
-              "column": 7
-            },
-            {
-              "title": "FAQ opens with the keyboard and the dose calculator updates",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 90000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "prod",
-                  "projectName": "prod",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 146,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-10-06T20:06:38.862Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "d318381359a9b96acb1e-52d5e0ea60ab605f1366",
-              "file": "home.spec.ts",
-              "line": 89,
-              "column": 7
-            },
-            {
-              "title": "the gesture shows powder needing a tool, and /preparer says when a combination is untested",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 90000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "prod",
-                  "projectName": "prod",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 170,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-10-06T20:06:39.014Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "d318381359a9b96acb1e-86566a78706af236c4a7",
-              "file": "home.spec.ts",
-              "line": 100,
-              "column": 7
-            }
-          ]
-        },
-        {
-          "title": "mobile",
-          "file": "home.spec.ts",
-          "line": 109,
-          "column": 6,
-          "specs": [
-            {
-              "title": "every touch target is at least 44 px (inline text links excepted)",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 90000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "prod",
-                  "projectName": "prod",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 203,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-10-06T20:06:39.188Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "d318381359a9b96acb1e-51e5d9da1438b6e7fbab",
-              "file": "home.spec.ts",
-              "line": 112,
-              "column": 7
-            },
-            {
-              "title": "Le Filet is not drawn on phones and nothing overflows",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 90000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "prod",
-                  "projectName": "prod",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 124,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-10-06T20:06:39.395Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "d318381359a9b96acb1e-2e11ce504763a6324ec4",
-              "file": "home.spec.ts",
-              "line": 131,
+              "id": "90c188d746fc87c78b58-6527291b64416690a91d",
+              "file": "waitlist.spec.ts",
+              "line": 41,
               "column": 7
             }
           ]
@@ -559,9 +237,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-10-06T20:06:31.548Z",
-    "duration": 8007.882,
-    "expected": 13,
+    "startTime": "2026-10-06T20:42:48.894Z",
+    "duration": 11137.800000000001,
+    "expected": 4,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

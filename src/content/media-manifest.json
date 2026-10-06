@@ -1,233 +1,120 @@
 [
   {
-    "id": "scene-versement-poudre",
+    "id": "matocha-latte",
     "family": "poudre",
     "recipe": "original",
     "status": "concept",
-    "kind": "svg",
-    "source": "illustration interne",
+    "kind": "image",
+    "source": "render fourni par David (dossier « Image Matocha », 6 oct. 2026)",
     "license": {
-      "name": "Création interne Matocha (code SVG du site)",
+      "name": "Renders Matocha fournis par David Sarfati",
       "url": "",
       "commercialUse": true,
-      "proofStored": "Dépôt git du site"
+      "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
     },
     "files": {
-      "desktop": "",
-      "mobile": "",
+      "desktop": "/renders/matocha-latte.png",
+      "mobile": "/renders/matocha-latte.png",
       "poster": ""
     },
-    "alt": "Illustration : un stick Matocha est ouvert, la poudre tombe sur un verre de lait glacé, un mousseur la mélange et la boisson devient verte et uniforme.",
+    "width": 1122,
+    "height": 1402,
+    "alt": "Une main tient un stick Matocha de 2 g devant un matcha latte glacé ; deux autres sticks sont posés sur la table.",
     "decorative": false,
     "usedIn": [
       "home/hero",
+      "/preparer",
+      "/daily-box"
+    ],
+    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée."
+  },
+  {
+    "id": "matocha-box",
+    "family": "poudre",
+    "recipe": "original",
+    "status": "concept",
+    "kind": "image",
+    "source": "render fourni par David (dossier « Image Matocha », 6 oct. 2026)",
+    "license": {
+      "name": "Renders Matocha fournis par David Sarfati",
+      "url": "",
+      "commercialUse": true,
+      "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
+    },
+    "files": {
+      "desktop": "/renders/matocha-box.png",
+      "mobile": "/renders/matocha-box.png",
+      "poster": ""
+    },
+    "width": 1122,
+    "height": 1402,
+    "alt": "La Daily Box Matocha, 30 × 2 g, avec trois sticks posés devant elle.",
+    "decorative": false,
+    "usedIn": [
+      "home/produit",
+      "/daily-box",
+      "home/fin",
+      "metadata/og"
+    ],
+    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée."
+  },
+  {
+    "id": "matocha-sticks",
+    "family": "poudre",
+    "recipe": "original",
+    "status": "concept",
+    "kind": "image",
+    "source": "render fourni par David (dossier « Image Matocha », 6 oct. 2026)",
+    "license": {
+      "name": "Renders Matocha fournis par David Sarfati",
+      "url": "",
+      "commercialUse": true,
+      "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
+    },
+    "files": {
+      "desktop": "/renders/matocha-sticks.png",
+      "mobile": "/renders/matocha-sticks.png",
+      "poster": ""
+    },
+    "width": 1122,
+    "height": 1402,
+    "alt": "Une quinzaine de sticks Matocha éparpillés sur une nappe blanche, un bol de matcha en arrière-plan.",
+    "decorative": false,
+    "usedIn": [
       "home/geste",
-      "/preparer"
+      "home/dedans",
+      "/daily-box",
+      "/notre-produit",
+      "404"
     ],
-    "notes": "Illustration conceptuelle codée en SVG. Mention « Visuel de concept » affichée."
+    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée."
   },
   {
-    "id": "scene-versement-concentre",
-    "family": "concentre",
-    "recipe": "original",
-    "status": "concept",
-    "kind": "svg",
-    "source": "illustration interne",
-    "license": {
-      "name": "Création interne Matocha (code SVG du site)",
-      "url": "",
-      "commercialUse": true,
-      "proofStored": "Dépôt git du site"
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "Illustration : un sachet de concentré est versé dans du lait, marbre, puis devient uniforme après quelques tours de cuillère.",
-    "decorative": false,
-    "usedIn": [
-      "home/hero",
-      "home/geste",
-      "/formats/concentre"
-    ],
-    "notes": "Illustration conceptuelle codée en SVG. Mention « Visuel de concept » affichée."
-  },
-  {
-    "id": "packaging-stick-flats",
+    "id": "matocha-jet",
     "family": "poudre",
     "recipe": "original",
     "status": "concept",
-    "kind": "svg",
-    "source": "illustration interne",
+    "kind": "image",
+    "source": "render fourni par David (dossier « Image Matocha », 6 oct. 2026)",
     "license": {
-      "name": "Création interne Matocha (code SVG du site)",
+      "name": "Renders Matocha fournis par David Sarfati",
       "url": "",
       "commercialUse": true,
-      "proofStored": "Dépôt git du site"
+      "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
     },
     "files": {
-      "desktop": "",
-      "mobile": "",
+      "desktop": "/renders/matocha-jet.png",
+      "mobile": "/renders/matocha-jet.png",
       "poster": ""
     },
-    "alt": "Aplats du stick Matocha : face, dos avec trois gestes, profil.",
-    "decorative": false,
-    "usedIn": [
-      "home/formats",
-      "/formats/poudre"
-    ],
-    "notes": "Référence packaging route « Everyday icon ». À exporter en PNG HD pour toutes les générations."
-  },
-  {
-    "id": "packaging-boite",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "concept",
-    "kind": "svg",
-    "source": "illustration interne",
-    "license": {
-      "name": "Création interne Matocha (code SVG du site)",
-      "url": "",
-      "commercialUse": true,
-      "proofStored": "Dépôt git du site"
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "Boîte Matocha qui s'ouvre et laisse voir les sticks rangés.",
-    "decorative": false,
-    "usedIn": [
-      "home/formats"
-    ],
-    "notes": "Illustration conceptuelle codée en SVG. Mention « Visuel de concept » affichée."
-  },
-  {
-    "id": "scene-journee",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "concept",
-    "kind": "svg",
-    "source": "illustration interne",
-    "license": {
-      "name": "Création interne Matocha (code SVG du site)",
-      "url": "",
-      "commercialUse": true,
-      "proofStored": "Dépôt git du site"
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "Illustrations de cinq moments : cuisine, bureau, campus, sport, terrasse.",
+    "width": 1122,
+    "height": 1402,
+    "alt": "Des sticks Matocha sur une tablette d'avion, près d'un hublot, d'une bouteille d'eau et d'un sac.",
     "decorative": false,
     "usedIn": [
       "home/journee"
     ],
-    "notes": "Illustration conceptuelle codée en SVG. Mention « Visuel de concept » affichée."
-  },
-  {
-    "id": "scene-loupe",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "concept",
-    "kind": "svg",
-    "source": "illustration interne",
-    "license": {
-      "name": "Création interne Matocha (code SVG du site)",
-      "url": "",
-      "commercialUse": true,
-      "proofStored": "Dépôt git du site"
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "Gros plan illustré d'un stick ouvert avec quatre points d'intérêt.",
-    "decorative": false,
-    "usedIn": [
-      "home/dedans"
-    ],
-    "notes": "Illustration conceptuelle codée en SVG. Mention « Visuel de concept » affichée."
-  },
-  {
-    "id": "scene-rituel",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "concept",
-    "kind": "svg",
-    "source": "illustration interne",
-    "license": {
-      "name": "Création interne Matocha (code SVG du site)",
-      "url": "",
-      "commercialUse": true,
-      "proofStored": "Dépôt git du site"
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "Objets du rituel traditionnel face à un stick et un shaker.",
-    "decorative": false,
-    "usedIn": [
-      "home/rituel"
-    ],
-    "notes": "Illustration conceptuelle codée en SVG. Mention « Visuel de concept » affichée."
-  },
-  {
-    "id": "scene-derniere-gorgee",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "concept",
-    "kind": "svg",
-    "source": "illustration interne",
-    "license": {
-      "name": "Création interne Matocha (code SVG du site)",
-      "url": "",
-      "commercialUse": true,
-      "proofStored": "Dépôt git du site"
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "Grand verre qui se remplit au fil du défilement.",
-    "decorative": false,
-    "usedIn": [
-      "home/fin"
-    ],
-    "notes": "Illustration conceptuelle codée en SVG. Mention « Visuel de concept » affichée."
-  },
-  {
-    "id": "scene-404",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "concept",
-    "kind": "svg",
-    "source": "illustration interne",
-    "license": {
-      "name": "Création interne Matocha (code SVG du site)",
-      "url": "",
-      "commercialUse": true,
-      "proofStored": "Dépôt git du site"
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "Stick renversé et petit tas de poudre.",
-    "decorative": true,
-    "usedIn": [
-      "404"
-    ],
-    "notes": "Illustration conceptuelle codée en SVG. Mention « Visuel de concept » affichée."
+    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée."
   },
   {
     "id": "hero-pour-poudre",
@@ -243,20 +130,20 @@
       "proofStored": ""
     },
     "files": {
-      "desktop": "/media/hero/pour-poudre-1920x1080.webm",
-      "mobile": "/media/hero/pour-poudre-1080x1350.mp4",
-      "poster": "/media/hero/pour-poudre-poster.avif"
+      "desktop": "",
+      "mobile": "",
+      "poster": ""
     },
-    "alt": "Une main ouvre un stick Matocha, verse la poudre dans un verre de lait glacé, la mélange au mousseur, puis boit.",
+    "alt": "",
     "decorative": false,
     "usedIn": [
       "home/hero"
     ],
-    "notes": "Plan M01. Voir PROMPTS.md#m01-poudre"
+    "notes": "Film du geste réel (déchirure, versement, mousseur, gorgée). Voir docs/media/PROMPTS.md#m01-poudre"
   },
   {
-    "id": "hero-pour-concentre",
-    "family": "concentre",
+    "id": "plan-geste",
+    "family": "poudre",
     "recipe": "original",
     "status": "missing",
     "kind": "video",
@@ -268,31 +155,6 @@
       "proofStored": ""
     },
     "files": {
-      "desktop": "/media/hero/pour-concentre-1920x1080.webm",
-      "mobile": "/media/hero/pour-concentre-1080x1350.mp4",
-      "poster": "/media/hero/pour-concentre-poster.avif"
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "home/hero"
-    ],
-    "notes": "Plan M01 concentré. Ne pas produire avant formule définie. PROMPTS.md#m01-concentre"
-  },
-  {
-    "id": "stick-face",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "image",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
       "desktop": "",
       "mobile": "",
       "poster": ""
@@ -300,134 +162,9 @@
     "alt": "",
     "decorative": false,
     "usedIn": [
-      "/formats/poudre"
+      "home/geste"
     ],
-    "notes": "Render produit du stick, vue face. PROMPTS.md#packaging"
-  },
-  {
-    "id": "stick-dos",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "image",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "/formats/poudre"
-    ],
-    "notes": "Render produit du stick, vue dos. PROMPTS.md#packaging"
-  },
-  {
-    "id": "stick-profil",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "image",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "/formats/poudre"
-    ],
-    "notes": "Render produit du stick, vue profil. PROMPTS.md#packaging"
-  },
-  {
-    "id": "boite-fermee",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "image",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "home/formats"
-    ],
-    "notes": "Render boîte fermee. PROMPTS.md#packaging"
-  },
-  {
-    "id": "boite-ouverte",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "image",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "home/formats"
-    ],
-    "notes": "Render boîte ouverte. PROMPTS.md#packaging"
-  },
-  {
-    "id": "boite-doses-rangees",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "image",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "home/formats"
-    ],
-    "notes": "Render boîte doses-rangees. PROMPTS.md#packaging"
+    "notes": "Trois plans courts Ouvrir / Verser / Préparer. PROMPTS.md#m02"
   },
   {
     "id": "macro-stick",
@@ -452,185 +189,7 @@
     "usedIn": [
       "home/dedans"
     ],
-    "notes": "PROMPTS.md#macro"
-  },
-  {
-    "id": "plan-dechirure",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "video",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "home/geste"
-    ],
-    "notes": "PROMPTS.md#m02"
-  },
-  {
-    "id": "plan-versement-poudre",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "video",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "home/geste"
-    ],
-    "notes": "PROMPTS.md#m02"
-  },
-  {
-    "id": "plan-versement-concentre",
-    "family": "concentre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "video",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "home/geste"
-    ],
-    "notes": "PROMPTS.md#m02"
-  },
-  {
-    "id": "plan-fouet",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "video",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "home/geste",
-      "/preparer"
-    ],
-    "notes": "PROMPTS.md#m02"
-  },
-  {
-    "id": "plan-shaker",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "video",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "home/geste",
-      "/preparer"
-    ],
-    "notes": "PROMPTS.md#m02"
-  },
-  {
-    "id": "plan-mousseur",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "video",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "home/geste",
-      "/preparer"
-    ],
-    "notes": "PROMPTS.md#m02"
-  },
-  {
-    "id": "boisson-glacee",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "image",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "/recettes"
-    ],
-    "notes": "PROMPTS.md#boissons"
+    "notes": "Macro du stick ouvert. PROMPTS.md#macro"
   },
   {
     "id": "boisson-chaude",
@@ -655,281 +214,6 @@
     "usedIn": [
       "/recettes"
     ],
-    "notes": "PROMPTS.md#boissons"
-  },
-  {
-    "id": "plan-gorgee",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "video",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "home/hero"
-    ],
-    "notes": "PROMPTS.md#m01-poudre"
-  },
-  {
-    "id": "vie-cuisine",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "video",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "home/journee"
-    ],
-    "notes": "Moment de vie M06. PROMPTS.md#m06"
-  },
-  {
-    "id": "vie-bureau",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "video",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "home/journee"
-    ],
-    "notes": "Moment de vie M06. PROMPTS.md#m06"
-  },
-  {
-    "id": "vie-campus",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "video",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "home/journee"
-    ],
-    "notes": "Moment de vie M06. PROMPTS.md#m06"
-  },
-  {
-    "id": "vie-sport",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "video",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "home/journee"
-    ],
-    "notes": "Moment de vie M06. PROMPTS.md#m06"
-  },
-  {
-    "id": "vie-terrasse",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "video",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "home/journee"
-    ],
-    "notes": "Moment de vie M06. PROMPTS.md#m06"
-  },
-  {
-    "id": "pack-decouverte-poudre",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "image",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "home/formats"
-    ],
-    "notes": "Render pack. PROMPTS.md#packaging"
-  },
-  {
-    "id": "pack-quotidien-poudre",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "image",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "home/formats"
-    ],
-    "notes": "Render pack. PROMPTS.md#packaging"
-  },
-  {
-    "id": "pack-duo-poudre",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "image",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "home/formats"
-    ],
-    "notes": "Render pack. PROMPTS.md#packaging"
-  },
-  {
-    "id": "pack-decouverte-concentre",
-    "family": "concentre",
-    "recipe": "original",
-    "status": "missing",
-    "kind": "image",
-    "source": "",
-    "license": {
-      "name": "",
-      "url": "",
-      "commercialUse": false,
-      "proofStored": ""
-    },
-    "files": {
-      "desktop": "",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "",
-    "decorative": false,
-    "usedIn": [
-      "/formats/concentre"
-    ],
-    "notes": "Seulement après définition du format concentré."
-  },
-  {
-    "id": "og-concept",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "concept",
-    "kind": "image",
-    "source": "illustration interne",
-    "license": {
-      "name": "Création interne Matocha (code SVG du site)",
-      "url": "",
-      "commercialUse": true,
-      "proofStored": "Dépôt git du site"
-    },
-    "files": {
-      "desktop": "/opengraph-image",
-      "mobile": "",
-      "poster": ""
-    },
-    "alt": "Matocha — le matcha, en plus simple. Visuel de concept.",
-    "decorative": false,
-    "usedIn": [
-      "metadata"
-    ],
-    "notes": "Image Open Graph générée par next/og, marquée « Visuel de concept »."
+    "notes": "Matcha chaud terminé. PROMPTS.md#boissons"
   }
 ]

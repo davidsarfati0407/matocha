@@ -11,7 +11,7 @@ const req = (body: unknown) =>
     body: JSON.stringify(body),
   });
 
-const line = { lines: [{ packKey: "poudre-decouverte", recipeKey: "poudre-original", quantity: 1 }] };
+const line = { lines: [{ packKey: "poudre-daily-box", recipeKey: "poudre-original", quantity: 1 }] };
 
 beforeEach(() => setupEnv({ STRIPE_SECRET_KEY: "sk_test_x", STRIPE_WEBHOOK_SECRET: "whsec_x" }));
 

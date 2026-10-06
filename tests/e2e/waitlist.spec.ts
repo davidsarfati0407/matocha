@@ -9,7 +9,7 @@ test.describe("waitlist form", () => {
     await expect(page.getByRole("button", { name: "Être prévenu du lancement" })).toBeEnabled({ timeout: 60_000 });
   });
 
-  test("invalid e-mail shows the precise message, without any celebration", async ({ page }) => {
+  test("invalid e-mail shows the precise message", async ({ page }) => {
     await page.getByRole("textbox", { name: "Adresse e-mail" }).fill("david@gmail");
     await page.getByRole("button", { name: "Être prévenu du lancement" }).click();
     await expect(page.locator("#inscription").getByRole("alert")).toHaveText("Cette adresse e-mail semble incomplète. Vérifiez le @ et le domaine.");
@@ -34,7 +34,7 @@ test.describe("waitlist form", () => {
     await button.click();
     await button.click({ force: true, timeout: 500 }).catch(() => {});
     await expect(page.locator("#inscription").getByRole("status")).toContainText("Vous recevrez un e-mail pour confirmer votre inscription.");
-    await expect(page.locator(".powder-rain")).toHaveCount(1);
+    await expect(page.locator(".powder-rain")).toHaveCount(0);
     expect(posts).toBe(1);
   });
 

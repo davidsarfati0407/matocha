@@ -7,26 +7,16 @@ export type FaqEntry = {
   id: string;
   question: string;
   answer: string[];
-  topic: "formats" | "preparation" | "produit" | "commande";
+  topic: "preparation" | "produit" | "commande";
   home?: boolean;
 };
 
 export const faq: FaqEntry[] = [
   {
-    id: "poudre-ou-concentre",
-    topic: "formats",
-    home: true,
-    question: "Poudre ou concentré : quelle différence ?",
-    answer: [
-      "La poudre est une dose de matcha prête dans un stick : vous la versez, puis vous la fouettez, la moussez ou la secouez.",
-      "Le concentré est une portion liquide ou en pâte, pensée pour se mélanger à la cuillère. Il est en développement : sa formule n'est pas encore définie.",
-    ],
-  },
-  {
     id: "comment-preparer",
     topic: "preparation",
     home: true,
-    question: "Comment prépare-t-on la poudre ?",
+    question: "Comment prépare-t-on un stick ?",
     answer: [
       "Ouvrez le stick, versez la poudre, puis mélangez avec un fouet, un mousseur à lait ou un shaker.",
       "Les volumes de liquide et les temps de préparation sont en cours de test. Nous les publierons sur la page Comment préparer dès qu'ils seront validés.",
@@ -38,13 +28,13 @@ export const faq: FaqEntry[] = [
     home: true,
     question: "Faut-il vraiment un fouet ?",
     answer: [
-      "Pour la poudre, oui, ou un mousseur, ou un shaker. Le matcha ne se dissout pas : ce sont des feuilles broyées très finement qui restent en suspension. Sans mouvement, la poudre forme des amas et retombe.",
-      "Le concentré vise justement à se passer de fouet. C'est un objectif de développement, pas encore une performance prouvée.",
+      "Un fouet, un mousseur ou un shaker. Le matcha ne se dissout pas : ce sont des feuilles broyées très finement qui restent en suspension. Sans mouvement, la poudre forme des amas et retombe.",
     ],
   },
   {
     id: "liquides",
     topic: "preparation",
+    home: true,
     question: "Avec quels liquides ?",
     answer: [
       "Eau, lait ou boisson végétale : nous testons ces combinaisons une par une. Tant qu'une combinaison n'est pas testée, nous ne la recommandons pas.",
@@ -65,7 +55,6 @@ export const faq: FaqEntry[] = [
     question: "Y a-t-il du sucre ?",
     answer: [
       "La composition de la recette Original n'est pas encore confirmée sur le lot retenu. La présence ou non de sucre sera indiquée sur la fiche produit, avec la liste des ingrédients, dès qu'elle sera vérifiée.",
-      "Les pistes Vanille et Fraise auront leur propre composition, qui n'est pas définie.",
     ],
   },
   {

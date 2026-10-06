@@ -91,7 +91,7 @@ describe("scopes", () => {
 
   it("refuses writes with a read-only scope", async () => {
     const { token: t } = await token(["catalog:read"]);
-    const res = await call("PATCH", "/catalog/packs/poudre-decouverte/price", { token: t, body: { price: 9 } });
+    const res = await call("PATCH", "/catalog/packs/poudre-daily-box/price", { token: t, body: { price: 9 } });
     expect(res.status).toBe(403);
   });
 });
@@ -99,7 +99,7 @@ describe("scopes", () => {
 describe("idempotency", () => {
   it("requires Idempotency-Key on writes", async () => {
     const { token: t } = await token(["catalog:write"]);
-    const res = await call("PATCH", "/catalog/packs/poudre-decouverte/price", {
+    const res = await call("PATCH", "/catalog/packs/poudre-daily-box/price", {
       token: t,
       body: { price: 9.9 },
       idem: null,
@@ -110,8 +110,8 @@ describe("idempotency", () => {
 
   it("replays the same response and creates a single change request", async () => {
     const { token: t } = await token(["catalog:write"]);
-    const first = await call("PATCH", "/catalog/packs/poudre-decouverte/price", { token: t, body: { price: 9.9 }, idem: "abc" });
-    const second = await call("PATCH", "/catalog/packs/poudre-decouverte/price", { token: t, body: { price: 9.9 }, idem: "abc" });
+    const first = await call("PATCH", "/catalog/packs/poudre-daily-box/price", { token: t, body: { price: 9.9 }, idem: "abc" });
+    const second = await call("PATCH", "/catalog/packs/poudre-daily-box/price", { token: t, body: { price: 9.9 }, idem: "abc" });
     expect(first.status).toBe(202);
     expect(second.status).toBe(202);
     expect(second.body).toEqual(first.body);
@@ -122,8 +122,8 @@ describe("idempotency", () => {
 
   it("rejects a key reused for a different request", async () => {
     const { token: t } = await token(["catalog:write"]);
-    await call("PATCH", "/catalog/packs/poudre-decouverte/price", { token: t, body: { price: 9.9 }, idem: "same" });
-    const res = await call("PATCH", "/catalog/packs/poudre-decouverte/price", { token: t, body: { price: 12 }, idem: "same" });
+    await call("PATCH", "/catalog/packs/poudre-daily-box/price", { token: t, body: { price: 9.9 }, idem: "same" });
+    const res = await call("PATCH", "/catalog/packs/poudre-daily-box/price", { token: t, body: { price: 12 }, idem: "same" });
     expect(res.status).toBe(422);
     expect(res.body.error.code).toBe("idempotency_key_reused");
   });
@@ -163,8 +163,8 @@ describe("change requests (human validation)", () => {
         token: t,
         body: { field: "origin", value: "Japon", source: "COA lot 1" },
       }),
-      call("PATCH", "/catalog/packs/poudre-decouverte/price", { token: t, body: { price: 9.9 } }),
-      call("POST", "/catalog/packs/poudre-decouverte/status", { token: t, body: { status: "available" } }),
+      call("PATCH", "/catalog/packs/poudre-daily-box/price", { token: t, body: { price: 9.9 } }),
+      call("POST", "/catalog/packs/poudre-daily-box/status", { token: t, body: { status: "available" } }),
       call("POST", `/content/blocks/${block.body.id}/publish`, { token: t }),
       call("POST", "/orders/ord_1/refunds", { token: t, body: { reason: "Colis abîmé" } }),
       call("POST", "/media/incoming", {
@@ -187,14 +187,14 @@ describe("change requests (human validation)", () => {
     );
     /* Nothing changed before approval. */
     const catalog = await getCatalog();
-    expect(catalog.packs.find((p) => p.key === "poudre-decouverte")!.price.status).toBe("to_confirm");
+    expect(catalog.packs.find((p) => p.key === "poudre-daily-box")!.price.status).toBe("to_confirm");
   });
 
   it("applies non-sensitive status changes directly", async () => {
     const { token: t } = await token(["catalog:write"]);
-    const res = await call("POST", "/catalog/packs/poudre-quotidien/status", { token: t, body: { status: "preorder" } });
+    const res = await call("POST", "/catalog/packs/poudre-daily-box/status", { token: t, body: { status: "preorder" } });
     expect(res.status).toBe(200);
-    expect((await getCatalog()).packs.find((p) => p.key === "poudre-quotidien")!.commercialStatus).toBe("preorder");
+    expect((await getCatalog()).packs.find((p) => p.key === "poudre-daily-box")!.commercialStatus).toBe("preorder");
     expect(await getStore()!.list("change_requests")).toHaveLength(0);
   });
 
@@ -217,10 +217,10 @@ describe("change requests (human validation)", () => {
 
   it("approve → applied updates the catalogue; reject leaves it", async () => {
     const { token: t } = await token(["catalog:write"]);
-    const res = await call("PATCH", "/catalog/packs/poudre-decouverte/price", { token: t, body: { price: 9.9, source: "Devis" } });
+    const res = await call("PATCH", "/catalog/packs/poudre-daily-box/price", { token: t, body: { price: 9.9, source: "Devis" } });
     const applied = await decideChangeRequest(res.body.change_request.id, "approve", "david@matocha.test");
     expect(applied.status).toBe("applied");
-    const pack = (await getCatalog()).packs.find((p) => p.key === "poudre-decouverte")!;
+    const pack = (await getCatalog()).packs.find((p) => p.key === "poudre-daily-box")!;
     expect(pack.price).toMatchObject({ value: 9.9, status: "confirmed" });
 
     const res2 = await call("POST", "/catalog/recipes/poudre-original/proofs", {
@@ -235,7 +235,7 @@ describe("change requests (human validation)", () => {
 
   it("the agent can follow its change request", async () => {
     const { token: t } = await token(["catalog:write", "catalog:read"]);
-    const res = await call("PATCH", "/catalog/packs/poudre-decouverte/price", { token: t, body: { price: 5 } });
+    const res = await call("PATCH", "/catalog/packs/poudre-daily-box/price", { token: t, body: { price: 5 } });
     const follow = await call("GET", `/change-requests/${res.body.change_request.id}`, { token: t });
     expect(follow.status).toBe(200);
     expect(follow.body.status).toBe("pending");

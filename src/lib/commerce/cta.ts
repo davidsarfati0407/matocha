@@ -16,10 +16,7 @@ import type {
 
 export type Cta =
   | { kind: "buy"; label: "Ajouter au panier" }
-  | {
-      kind: "interest";
-      label: "Être prévenu du lancement" | "Je veux goûter celui-ci";
-    }
+  | { kind: "interest"; label: "Être prévenu du lancement" }
   | { kind: "none" };
 
 export type BlockReason =
@@ -91,8 +88,5 @@ export function resolveCta(
     return { kind: "buy", label: "Ajouter au panier" };
   }
   if (pack.commercialStatus === "retired") return { kind: "none" };
-  if (recipe.status === "test_track") {
-    return { kind: "interest", label: "Je veux goûter celui-ci" };
-  }
   return { kind: "interest", label: "Être prévenu du lancement" };
 }

@@ -16,7 +16,7 @@ export default async function Page() {
     <StatusPage
       title="Commande interrompue."
       body={["Vous avez quitté le paiement : rien n'a été débité. Votre panier est conservé sur cet appareil."]}
-      cta={{ href: "/formats", label: "Revenir aux formats" }}
+      cta={{ href: "/daily-box", label: "Revenir à la Daily Box" }}
     />
   );
 }

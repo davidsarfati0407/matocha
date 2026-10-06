@@ -14,7 +14,7 @@ export default function Page() {
         "Merci. Votre adresse est confirmée : vous serez prévenu du lancement de Matocha.",
         "Chaque e-mail contient un lien pour vous désinscrire en un clic.",
       ]}
-      secondary={{ href: "/formats", label: "Voir les formats" }}
+      secondary={{ href: "/daily-box", label: "Voir la Daily Box" }}
     />
   );
 }

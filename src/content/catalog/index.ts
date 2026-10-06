@@ -1,22 +1,16 @@
 /**
  * MATOCHA — the catalogue, single source of truth.
  *
- * Nothing in here is a commercial fact until its `status` says `confirmed`.
- * The demo values of v1 (30 × 2 g, 39 €, Japan, "100 % matcha") are recorded
- * as `target` hypotheses where useful and never as values.
+ * One product: Matcha Original in powder, a 2 g stick, sold in the Daily Box
+ * of 30 sticks. The product definition (2 g per stick, 30 sticks, 60 g net)
+ * was confirmed by David on 6 October 2026. Everything else — price,
+ * composition, origin, nutrition — stays `to_confirm` until documented.
  *
  * The Ops API can override textual fields and propose confirmations; those
  * overrides are merged at read time by `src/lib/catalog.ts`.
  */
 
-import type {
-  Catalog,
-  Company,
-  Family,
-  Pack,
-  Proof,
-  Recipe,
-} from "./types";
+import type { Catalog, Company, Family, Pack, Proof, Recipe } from "./types";
 
 export * from "./types";
 
@@ -29,12 +23,19 @@ const pending = <T,>(target?: string): Proof<T> => ({
 
 const unknown = <T,>(): Proof<T> => ({ value: null, status: "unknown" });
 
-/* ---------------------------------------------------------------- families */
+/** Facts of the product definition, confirmed by David. */
+const DEFINITION = {
+  status: "confirmed",
+  source: "Définition produit validée par David Sarfati (6 octobre 2026)",
+  verifiedAt: "2026-10-06",
+} as const;
+
+/* ---------------------------------------------------------------- product */
 
 export const families: Family[] = [
   {
     id: "poudre",
-    name: "Original Poudre",
+    name: "Matcha Original",
     workingName: "Poudre prédosée",
     formatIcon: "stick",
     devStatus: "in_development",
@@ -49,163 +50,60 @@ export const families: Family[] = [
     },
     servingFormat: "Stick de poudre",
   },
-  {
-    id: "concentre",
-    name: "Original Concentré",
-    workingName: "Concentré liquide ou pâte",
-    formatIcon: "drop",
-    devStatus: "concept",
-    promise: "Ouvrez. Versez. Mélangez.",
-    gesture: ["Ouvrir", "Verser", "Mélanger"],
-    gestureNote:
-      "Objectif de développement : une portion liquide qui se mélange à la cuillère. La formule n'est pas encore définie.",
-    equipment: pending("Une cuillère, si la formule le permet"),
-    servingFormat: "Sachet de concentré",
-  },
 ];
 
-/* ----------------------------------------------------------------- recipes */
-
-const COLORS = {
-  original: { liquid: "#A9C46A", matter: "#6E9A2E" },
-  vanille: { liquid: "#CFD39A", matter: "#B9B067" },
-  fraise: { liquid: "#B7C377", matter: "#E2718C" },
-} as const;
-
-function recipe(
-  familyId: Recipe["familyId"],
-  id: Recipe["id"],
-  overrides: Partial<Recipe>,
-): Recipe {
-  const isPowder = familyId === "poudre";
-  return {
-    key: `${familyId}-${id}`,
-    id,
-    familyId,
-    name: { original: "Original", vanille: "Vanille", fraise: "Fraise" }[id],
-    accentToken: (
-      { original: "--matcha", vanille: "--vanille", fraise: "--rhubarbe" } as const
-    )[id],
-    liquidColor: COLORS[id].liquid,
-    matterColor: COLORS[id].matter,
-    description: "",
-    denomination: pending(),
-    ingredients: pending(),
-    allergens: pending(),
-    matchaPerServingG: pending(),
-    servingTotal: pending(),
-    origin: pending(),
-    claims: [],
-    preparation: isPowder
-      ? {
-          value: [
-            { method: "whisk", liquidMl: null, hot: true, iced: true },
-            { method: "frother", liquidMl: null, hot: true, iced: true },
-            { method: "shaker", liquidMl: null, hot: false, iced: true },
-          ],
-          status: "to_confirm",
-          target: "Volumes et temps mesurés pendant nos tests internes",
-        }
-      : {
-          value: [{ method: "spoon", liquidMl: null, hot: true, iced: true }],
-          status: "to_confirm",
-          target: "Geste visé ; dépend de la formule",
-        },
-    storage: pending(),
-    nutrition: pending(),
-    caffeineMg: unknown(),
-    status: "test_track",
-    ...overrides,
-  };
-}
-
 export const recipes: Recipe[] = [
-  recipe("poudre", "original", {
-    status: "in_development",
-    description:
-      "Le goût du matcha, tel quel. C'est la recette de référence, celle qu'on met au point en premier.",
+  {
+    key: "poudre-original",
+    id: "original",
+    familyId: "poudre",
+    name: "Matcha Original",
+    accentToken: "--matcha",
+    liquidColor: "#A9C46A",
+    matterColor: "#6E9A2E",
+    description: "Le goût du matcha, tel quel.",
+    denomination: pending(),
     ingredients: pending("Matcha seul, à confirmer sur le lot retenu"),
-    matchaPerServingG: pending("Autour de 2 g, à confirmer"),
-    servingTotal: pending(),
+    allergens: pending(),
+    matchaPerServingG: pending("À confirmer avec la composition du lot retenu"),
+    servingTotal: { value: { value: 2, unit: "g" }, ...DEFINITION },
     origin: pending("Japon, à confirmer avec le fournisseur retenu"),
-    storage: pending("À l'abri de l'humidité, de la lumière et de la chaleur"),
     claims: [
       { label: "Sans sucre ajouté", proof: pending() },
       { label: "Sans arômes ajoutés", proof: pending() },
     ],
-  }),
-  recipe("poudre", "vanille", {
-    description:
-      "Une piste plus douce. On veut savoir si elle vous donne envie avant de la développer.",
-  }),
-  recipe("poudre", "fraise", {
-    description:
-      "Une piste gourmande, pensée pour les lattes glacés. Elle reste à tester.",
-  }),
-  recipe("concentre", "original", {
-    status: "in_development",
-    description:
-      "Le même goût de départ, sous forme de concentré à verser. Formule, portion et conservation sont encore à définir.",
     preparation: {
-      value: [{ method: "spoon", liquidMl: null, hot: true, iced: true }],
+      value: [
+        { method: "whisk", liquidMl: null, hot: true, iced: true },
+        { method: "frother", liquidMl: null, hot: true, iced: true },
+        { method: "shaker", liquidMl: null, hot: false, iced: true },
+      ],
       status: "to_confirm",
-      target: "Geste visé ; dépend de la formule",
+      target: "Volumes et temps mesurés pendant nos tests internes",
     },
-    storage: pending("Dépend de la formule et du procédé"),
-  }),
-  recipe("concentre", "vanille", {
-    description: "Piste en test, uniquement si le concentré Original est validé.",
-  }),
-  recipe("concentre", "fraise", {
-    description: "Piste en test, uniquement si le concentré Original est validé.",
-  }),
+    storage: pending("À l'abri de l'humidité, de la lumière et de la chaleur"),
+    nutrition: pending(),
+    caffeineMg: unknown(),
+    status: "in_development",
+  },
 ];
 
-/* ------------------------------------------------------------------- packs */
-
-function pack(
-  familyId: Pack["familyId"],
-  id: Pack["id"],
-  overrides: Partial<Pack> & Pick<Pack, "doses" | "dosesRange">,
-): Pack {
-  return {
-    key: `${familyId}-${id}`,
-    id,
-    familyId,
-    name: { decouverte: "Découverte", quotidien: "Quotidien", duo: "Duo" }[id],
-    purpose: "",
+export const packs: Pack[] = [
+  {
+    id: "daily-box",
+    key: "poudre-daily-box",
+    familyId: "poudre",
+    name: "Daily Box",
+    purpose: "30 sticks de 2 g, un par jour.",
     recipeIds: ["original"],
-    dosesStatus: "to_confirm",
-    netQuantity: pending(),
+    doses: 30,
+    dosesStatus: "confirmed",
+    dosesRange: "30 sticks de 2 g",
+    netQuantity: { value: "60 g (30 × 2 g)", ...DEFINITION },
     price: pending(),
     commercialStatus: "waitlist",
-    media: [`pack-${id}-${familyId}`],
-    ...overrides,
-  };
-}
-
-export const packs: Pack[] = [
-  pack("poudre", "decouverte", {
-    doses: 8,
-    dosesRange: "6 ou 8 doses",
-    purpose: "Pour goûter sans engager une grosse première commande.",
-  }),
-  pack("poudre", "quotidien", {
-    doses: 30,
-    dosesRange: "20 ou 30 doses",
-    purpose: "Pour celles et ceux qui en boivent presque tous les jours.",
-  }),
-  pack("poudre", "duo", {
-    doses: 60,
-    dosesRange: "Deux boîtes Quotidien",
-    purpose: "Deux boîtes, pour la maison et le bureau, ou à partager.",
-  }),
-  pack("concentre", "decouverte", {
-    doses: 6,
-    dosesRange: "À définir avec la formule",
-    purpose: "Le premier pack du concentré, quand il sera validé.",
-    commercialStatus: "concept",
-  }),
+    media: ["matocha-box"],
+  },
 ];
 
 /* ----------------------------------------------------------------- company */
@@ -254,10 +152,14 @@ export function packsOf(catalog: Catalog, familyId: Family["id"]) {
   return catalog.packs.filter((p) => p.familyId === familyId);
 }
 
-export function findRecipe(
-  catalog: Catalog,
-  familyId: Family["id"],
-  id: Recipe["id"],
-) {
+export function findRecipe(catalog: Catalog, familyId: Family["id"], id: Recipe["id"]) {
   return catalog.recipes.find((r) => r.familyId === familyId && r.id === id);
+}
+
+/** The one product the site sells: the Daily Box of Matcha Original. */
+export function theProduct(catalog: Catalog) {
+  const pack = catalog.packs.find((p) => p.key === "poudre-daily-box") ?? catalog.packs[0];
+  const recipe = catalog.recipes.find((r) => r.key === "poudre-original") ?? catalog.recipes[0];
+  const family = findFamily(catalog, "poudre");
+  return { pack, recipe, family };
 }

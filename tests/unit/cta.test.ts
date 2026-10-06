@@ -22,7 +22,7 @@ function purchasable() {
     origin: ok("Japon"),
   };
   const pack: Pack = {
-    ...structuredClone(baseCatalog.packs.find((p) => p.key === "poudre-quotidien")!),
+    ...structuredClone(baseCatalog.packs.find((p) => p.key === "poudre-daily-box")!),
     commercialStatus: "available",
     price: ok(24),
     netQuantity: ok("30 × 2 g"),
@@ -69,27 +69,22 @@ describe("resolveCta — buy requires every condition", () => {
     expect(buyBlockers("sale", pack, recipe, company)).toContain("price_not_confirmed");
   });
 
-  it.each(["in_development", "test_track"] as const)("blocks when the recipe is %s", (status) => {
+  it.each(["in_development"] as const)("blocks when the recipe is %s", (status) => {
     const { recipe, pack, company } = purchasable();
     recipe.status = status;
     expect(resolveCta("sale", pack, recipe, company).kind).toBe("interest");
   });
 
-  it("offers the tasting interest CTA for a test-track flavour", () => {
-    const { recipe, pack, company } = purchasable();
-    recipe.status = "test_track";
-    expect(resolveCta("sale", pack, recipe, company)).toEqual({ kind: "interest", label: "Je veux goûter celui-ci" });
-  });
-
   it("blocks a flavour that is not in the pack", () => {
     const { recipe, pack, company } = purchasable();
-    recipe.id = "fraise";
+    /* A flavour outside the pack (none exists today; the guard must still hold). */
+    (recipe as { id: string }).id = "autre";
     expect(buyBlockers("sale", pack, recipe, company)).toContain("recipe_not_in_pack");
   });
 
   it("blocks a recipe from the other family", () => {
     const { recipe, pack, company } = purchasable();
-    recipe.familyId = "concentre";
+    (recipe as { familyId: string }).familyId = "autre-format";
     expect(buyBlockers("sale", pack, recipe, company)).toContain("recipe_not_in_pack");
   });
 

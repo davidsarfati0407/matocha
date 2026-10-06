@@ -32,7 +32,7 @@ curl -s $API/health
 
 # Catalogue
 curl -s -H "$AUTH" $API/catalog
-curl -s -H "$AUTH" $API/catalog/packs/poudre-decouverte
+curl -s -H "$AUTH" $API/catalog/packs/poudre-daily-box
 curl -s -X PATCH -H "$AUTH" -H "$(idem)" -H "Content-Type: application/json" \
   -d '{"fields":{"description":"Le goût du matcha, tel quel.","origin":{"value":"Japon","target":"Japon, COA attendu"}}}' \
   $API/catalog/recipes/poudre-original
@@ -40,11 +40,11 @@ curl -s -X POST -H "$AUTH" -H "$(idem)" -H "Content-Type: application/json" \
   -d '{"field":"origin","value":"Japon","source":"COA lot 2026-11 (Drive/Qualité)"}' \
   $API/catalog/recipes/poudre-original/proofs                       # → 202 validation
 curl -s -X PATCH -H "$AUTH" -H "$(idem)" -H "Content-Type: application/json" \
-  -d '{"price":9.90,"source":"Grille tarifaire v1"}' $API/catalog/packs/poudre-decouverte/price   # → 202
+  -d '{"price":9.90,"source":"Grille tarifaire v1"}' $API/catalog/packs/poudre-daily-box/price   # → 202
 curl -s -X POST -H "$AUTH" -H "$(idem)" -H "Content-Type: application/json" \
-  -d '{"status":"preorder"}' $API/catalog/packs/poudre-decouverte/status          # appliqué (200)
+  -d '{"status":"preorder"}' $API/catalog/packs/poudre-daily-box/status          # appliqué (200)
 curl -s -X POST -H "$AUTH" -H "$(idem)" -H "Content-Type: application/json" \
-  -d '{"status":"available"}' $API/catalog/packs/poudre-decouverte/status         # → 202
+  -d '{"status":"available"}' $API/catalog/packs/poudre-daily-box/status         # → 202
 
 # Contenu
 curl -s -H "$AUTH" "$API/content/blocks?status=draft"
@@ -53,10 +53,10 @@ curl -s -X POST -H "$AUTH" -H "$(idem)" -H "Content-Type: application/json" \
 curl -s -X POST -H "$AUTH" -H "$(idem)" $API/content/blocks/<id>/publish      # → 202
 
 # Inscrits (confirmés uniquement)
-curl -s -H "$AUTH" "$API/leads?interest=fraise"
+curl -s -H "$AUTH" "$API/leads?interest=original"
 curl -s -H "$AUTH" $API/leads/export -o waitlist.csv
 curl -s -X PATCH -H "$AUTH" -H "$(idem)" -H "Content-Type: application/json" \
-  -d '{"add":["test-fraise"]}' $API/leads/<id>/tags
+  -d '{"add":["premier-lot"]}' $API/leads/<id>/tags
 
 # Commandes (mode vente)
 curl -s -H "$AUTH" "$API/orders?status=paid"
@@ -89,7 +89,7 @@ curl -s -H "$AUTH" $API/change-requests/<id>
 curl -s -X POST https://matocha.vercel.app/mcp -H "$AUTH" -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 curl -s -X POST https://matocha.vercel.app/mcp -H "$AUTH" -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"catalog_pack_price","arguments":{"id":"poudre-decouverte","price":9.9,"idempotency_key":"…"}}}'
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"catalog_pack_price","arguments":{"id":"poudre-daily-box","price":9.9,"idempotency_key":"…"}}}'
 ```
 
 Outils : `health`, `catalog_get`, `catalog_pack_get`, `catalog_recipe_patch`, `catalog_recipe_proof_confirm`, `catalog_pack_price`, `catalog_pack_status`, `content_list`, `content_create`, `content_publish`, `leads_list`, `leads_export`, `leads_tags`, `orders_list`, `orders_get`, `orders_shipment_create`, `orders_refund_request`, `media_incoming`, `analytics_summary`, `settings_mode_propose`, `change_request_get`. Les outils d'écriture exigent l'argument `idempotency_key`.

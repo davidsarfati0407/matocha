@@ -59,7 +59,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
     <StatusPage
       title="Le paiement n'a pas abouti."
       body={["Aucun montant n'a été validé. Vous pouvez réessayer depuis votre panier."]}
-      cta={{ href: "/formats", label: "Revenir aux formats" }}
+      cta={{ href: "/daily-box", label: "Revenir à la Daily Box" }}
     />
   );
 }

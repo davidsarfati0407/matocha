@@ -12,7 +12,7 @@ export function isWaitlistOpen(): boolean {
 }
 
 /** Bump when the consent text changes; stored with each lead. */
-export const CONSENT_VERSION = "2026-10-06.v1";
+export const CONSENT_VERSION = "2026-10-06.v2";
 
 export const CONSENT_TEXT =
-  "J'accepte de recevoir des e-mails de Matocha sur le lancement et les goûts en test. Je peux me désinscrire à tout moment, en un clic.";
+  "J'accepte de recevoir des e-mails de Matocha sur le lancement de la Daily Box. Je peux me désinscrire à tout moment, en un clic.";

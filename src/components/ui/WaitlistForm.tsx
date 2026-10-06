@@ -2,26 +2,12 @@
 
 import { useId, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { Whisk } from "@/components/scenes/Whisk";
 import { fr } from "@/content/i18n/fr";
 import { cn } from "@/lib/utils";
-
-const INTERESTS = [
-  { id: "poudre", label: "La poudre" },
-  { id: "concentre", label: "Le concentré" },
-  { id: "original", label: "Original" },
-  { id: "vanille", label: "Vanille (piste)" },
-  { id: "fraise", label: "Fraise (piste)" },
-] as const;
 
 type Status = "idle" | "loading" | "done" | "error" | "closed";
 
 const noop = () => () => {};
-
-function readWanted() {
-  const wanted = new URLSearchParams(window.location.search).get("interet");
-  return wanted && INTERESTS.some((i) => i.id === wanted) ? wanted : null;
-}
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -49,17 +35,11 @@ export function WaitlistForm({
   const [status, setStatus] = useState<Status>(open ? "idle" : "closed");
   const [message, setMessage] = useState("");
   const [field, setField] = useState<"email" | "consent" | null>(null);
-  const [interests, setInterests] = useState<string[]>(["poudre"]);
   const inflight = useRef(false);
   /* Until hydrated, a native submit would put the address in the URL: keep it disabled. */
   const ready = useSyncExternalStore(noop, () => true, () => false);
   const dark = tone === "dark";
 
-  /* ?interet=fraise preselects a flavour coming from "Je veux goûter celui-ci",
-     until the visitor changes the selection themselves. */
-  const wanted = useSyncExternalStore(noop, readWanted, () => null);
-  const [touched, setTouched] = useState(false);
-  const selected = !touched && wanted && !interests.includes(wanted) ? [...interests, wanted] : interests;
 
   if (status === "closed") {
     return (
@@ -97,7 +77,7 @@ export function WaitlistForm({
       const res = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, interests: selected, consent, consentVersion, source }),
+        body: JSON.stringify({ email, interests: ["original"], consent, consentVersion, source }),
       });
       const data = (await res.json().catch(() => ({}))) as { code?: string; message?: string };
       if (res.ok) {
@@ -121,12 +101,7 @@ export function WaitlistForm({
   if (status === "done") {
     return (
       <div className={cn("relative overflow-hidden border p-5", dark ? "border-lait/30" : "border-encre/20", className)} role="status">
-        <div className="powder-rain pointer-events-none absolute inset-x-0 top-0 h-14" aria-hidden="true">
-          {Array.from({ length: 18 }).map((_, i) => (
-            <i key={i} style={{ left: `${6 + i * 5.2}%`, animationDelay: `${(i % 6) * 80}ms` }} />
-          ))}
-        </div>
-        <p className="pt-8 text-lg font-semibold">{message}</p>
+        <p className="text-lg font-semibold">{message}</p>
       </div>
     );
   }
@@ -154,35 +129,6 @@ export function WaitlistForm({
           field === "email" && "border-rhubarbe",
         )}
       />
-
-      <fieldset className="mt-5">
-        <legend className="text-sm font-semibold">{fr.waitlist.interests}</legend>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {INTERESTS.map((item) => {
-            const checked = selected.includes(item.id);
-            return (
-              <label
-                key={item.id}
-                className={cn(
-                  "flex min-h-11 cursor-pointer items-center gap-2 rounded-full border px-3 text-sm",
-                  checked ? (dark ? "border-lait bg-lait text-encre" : "border-foret bg-foret text-lait") : dark ? "border-lait/40" : "border-encre/30",
-                )}
-              >
-                <input
-                  type="checkbox"
-                  className="sr-only"
-                  checked={checked}
-                  onChange={() => {
-                    setTouched(true);
-                    setInterests(checked ? selected.filter((x) => x !== item.id) : [...selected, item.id]);
-                  }}
-                />
-                {item.label}
-              </label>
-            );
-          })}
-        </div>
-      </fieldset>
 
       <label className="mt-5 flex items-start gap-2 text-sm">
         {/* 44 px hit area around a 24 px box. */}
@@ -222,7 +168,7 @@ export function WaitlistForm({
           "disabled:opacity-60",
         )}
       >
-        {status === "loading" && <Whisk className="h-5 w-5" />}
+        {status === "loading" && <span className="spinner" aria-hidden="true" />}
         {status === "loading" ? fr.waitlist.sending : fr.waitlist.submit}
       </button>
 

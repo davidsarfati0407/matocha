@@ -1,5 +1,12 @@
 # MATOCHA v2 — Rapport de livraison
 
+> **Mise à jour du 6 octobre — mode réaliste et produit unique** (décisions F26 à F30)
+> - **Visuels** : le site ne montre plus que les 4 renders photoréalistes de `public/renders/` (sticks, latte, Daily Box, jet), chacun marqué « Visuel de concept ». Plus aucune illustration dessinée : 0 SVG et 0 canvas sur les pages, vérifié par un test e2e. Seuls mouvements : Ken Burns sur le hero et parallaxe légère, coupés en reduced-motion.
+> - **Catalogue** : un seul produit, le Matcha Original en poudre (stick de 2 g, Daily Box de 30). Plus de goûts, de concentré ni de packs. `/daily-box` remplace `/formats` (301).
+> - **Parcours** : une carte produit, un prix (« Prix fixé après validation du fournisseur » tant qu'il n'est pas confirmé), un CTA.
+> - **Mesures** : home desktop 6 319 px ; Lighthouse mobile 96 / 100, LCP 2,8 s, CLS 0, JS 153 Kio. Tests : 69 unitaires et 65 e2e verts.
+> - Certaines sections ci-dessous (scènes M01–M14, Le Filet, goûts, packs) décrivent l'état précédent et ne s'appliquent plus.
+
 6 octobre 2026. Travail réalisé en local dans `~/Desktop/Matocha` : **rien n'a été déployé, poussé ni commité** en dehors du commit de référence `0a6f138` (état v1, créé avant toute modification). Les fichiers de cadrage sont dans `docs/` : `PROMPT_V2.md`, `BRIEF.md`, `AUDIT.md`, `DECISIONS.md`.
 
 ## 1. Résumé des changements

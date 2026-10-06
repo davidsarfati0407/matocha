@@ -17,7 +17,7 @@ const submit = (body: unknown, ip = "203.0.113.7") =>
     }),
   );
 
-const valid = { email: "Lea@Example.fr ", interests: ["poudre", "fraise", "hack"], consent: true, consentVersion: CONSENT_VERSION, source: "home" };
+const valid = { email: "Lea@Example.fr ", interests: ["original", "poudre", "hack"], consent: true, consentVersion: CONSENT_VERSION, source: "home" };
 
 beforeEach(() => setupEnv());
 
@@ -28,7 +28,7 @@ describe("POST /api/waitlist", () => {
     expect(await res.json()).toMatchObject({ ok: true, status: "pending" });
     const [lead] = await getStore()!.list<LeadRow>("leads");
     expect(lead.email).toBe("lea@example.fr");
-    expect(lead.interests).toEqual(["poudre", "fraise"]);
+    expect(lead.interests).toEqual(["original"]);
     expect(lead.status).toBe("pending");
     expect(lead.consent_version).toBe(CONSENT_VERSION);
     expect(lead.ip_hash).toMatch(/^[0-9a-f]{64}$/);
@@ -68,11 +68,11 @@ describe("POST /api/waitlist", () => {
 
   it("handles double submission without duplicates or a second e-mail", async () => {
     await submit(valid);
-    const again = await submit({ ...valid, interests: ["vanille"] });
+    const again = await submit({ ...valid, interests: ["original"] });
     expect(again.status).toBe(200);
     const leads = await getStore()!.list<LeadRow>("leads");
     expect(leads).toHaveLength(1);
-    expect(leads[0].interests.sort()).toEqual(["fraise", "poudre", "vanille"]);
+    expect(leads[0].interests).toEqual(["original"]);
     expect(consoleOutbox()).toHaveLength(1);
   });
 

@@ -5,11 +5,14 @@ const nextConfig: NextConfig = {
   /* A stray package-lock.json in the home folder made Turbopack guess the wrong root. */
   turbopack: { root: path.resolve(__dirname) },
 
-  /* v1 English routes → their French equivalents (301). */
+  /* Old routes → their current equivalents (301). */
   async redirects() {
     return [
-      { source: "/product", destination: "/formats/poudre", statusCode: 301 },
-      { source: "/why-sticks", destination: "/formats", statusCode: 301 },
+      { source: "/product", destination: "/daily-box", statusCode: 301 },
+      { source: "/why-sticks", destination: "/daily-box", statusCode: 301 },
+      /* One product: the v2 format pages now point to it. */
+      { source: "/formats", destination: "/daily-box", statusCode: 301 },
+      { source: "/formats/:famille", destination: "/daily-box", statusCode: 301 },
       { source: "/our-matcha", destination: "/notre-produit", statusCode: 301 },
       { source: "/shipping", destination: "/aide#livraison", statusCode: 301 },
       { source: "/returns", destination: "/aide#retours", statusCode: 301 },

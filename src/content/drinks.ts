@@ -1,13 +1,12 @@
-import type { FamilyId, PrepMethod } from "./catalog/types";
+import type { PrepMethod } from "./catalog/types";
 
 /**
- * Drink recipes made WITH a format. Each has its own test status: a recipe is
+ * Drink recipes made with a Matocha stick. Each has its own test status: a recipe is
  * only "validée" once volumes and times have been measured in internal tests.
  */
 export type Drink = {
   id: string;
   name: string;
-  families: FamilyId[];
   temp: "hot" | "iced";
   methods: PrepMethod[];
   liquids: string[];
@@ -21,13 +20,12 @@ export const drinks: Drink[] = [
   {
     id: "latte-glace",
     name: "Latte glacé",
-    families: ["poudre", "concentre"],
     temp: "iced",
-    methods: ["frother", "shaker", "spoon"],
+    methods: ["frother", "shaker"],
     liquids: ["Lait", "Boisson végétale"],
     steps: [
-      "Versez la dose dans un verre avec un fond de lait.",
-      "Mélangez jusqu'à ce que la couleur soit uniforme (mousseur ou shaker pour la poudre, cuillère pour le concentré).",
+      "Versez la poudre du stick dans un verre avec un fond de lait.",
+      "Mélangez au mousseur ou au shaker jusqu'à ce que la couleur soit uniforme.",
       "Ajoutez les glaçons, puis complétez avec le lait froid.",
     ],
     status: "a_tester",
@@ -36,7 +34,6 @@ export const drinks: Drink[] = [
   {
     id: "matcha-chaud",
     name: "Matcha chaud",
-    families: ["poudre"],
     temp: "hot",
     methods: ["whisk", "frother"],
     liquids: ["Eau chaude, pas bouillante"],
@@ -51,9 +48,8 @@ export const drinks: Drink[] = [
   {
     id: "latte-chaud",
     name: "Latte chaud",
-    families: ["poudre", "concentre"],
     temp: "hot",
-    methods: ["whisk", "frother", "spoon"],
+    methods: ["whisk", "frother"],
     liquids: ["Lait chaud", "Boisson végétale chaude"],
     steps: [
       "Versez la dose dans une tasse.",
@@ -66,7 +62,6 @@ export const drinks: Drink[] = [
   {
     id: "shaker",
     name: "Au shaker, à emporter",
-    families: ["poudre"],
     temp: "iced",
     methods: ["shaker"],
     liquids: ["Lait froid", "Eau froide"],

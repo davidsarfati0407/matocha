@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("every internal link on the main pages answers", async ({ page, request }) => {
   const seen = new Set<string>();
-  for (const path of ["/", "/formats", "/formats/poudre", "/formats/concentre", "/preparer", "/recettes", "/notre-produit", "/faq", "/aide", "/legal/mentions-legales"]) {
+  for (const path of ["/", "/daily-box", "/preparer", "/recettes", "/notre-produit", "/faq", "/aide", "/legal/mentions-legales"]) {
     await page.goto(path);
     const hrefs = await page.locator("a[href^='/']").evaluateAll((as) => as.map((a) => a.getAttribute("href")!));
     hrefs.forEach((h) => seen.add(h.split("#")[0].split("?")[0] || "/"));
@@ -15,8 +15,11 @@ test("every internal link on the main pages answers", async ({ page, request }) 
 
 test("v1 English routes redirect with 301", async ({ request }) => {
   const map: Record<string, string> = {
-    "/product": "/formats/poudre",
-    "/why-sticks": "/formats",
+    "/product": "/daily-box",
+    "/why-sticks": "/daily-box",
+    "/formats": "/daily-box",
+    "/formats/poudre": "/daily-box",
+    "/formats/concentre": "/daily-box",
     "/our-matcha": "/notre-produit",
     "/shipping": "/aide#livraison",
     "/legal": "/legal/mentions-legales",
@@ -32,7 +35,8 @@ test("SEO: journal is noindex, FAQ has FAQPage schema, sitemap lists French rout
   expect(await (await request.get("/journal")).text()).toContain('name="robots" content="noindex');
   expect(await (await request.get("/faq")).text()).toContain('"@type":"FAQPage"');
   const sitemap = await (await request.get("/sitemap.xml")).text();
-  expect(sitemap).toContain("/formats/poudre");
+  expect(sitemap).toContain("/daily-box");
+  expect(sitemap).not.toContain("/formats");
   expect(sitemap).not.toContain("/journal");
   expect(sitemap).not.toContain("/product");
 });

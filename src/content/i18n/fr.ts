@@ -18,12 +18,12 @@ export const fr = {
 
   nav: {
     primary: [
-      { label: "Les formats", href: "/formats" },
+      { label: "La Daily Box", href: "/daily-box" },
       { label: "Comment préparer", href: "/preparer" },
       { label: "Notre produit", href: "/notre-produit" },
       { label: "FAQ", href: "/faq" },
     ],
-    shop: { label: "Boutique", href: "/formats/poudre#packs" },
+    shop: { label: "Boutique", href: "/daily-box#acheter" },
     home: "Matocha — accueil",
     openMenu: "Ouvrir le menu",
     closeMenu: "Fermer le menu",
@@ -35,7 +35,6 @@ export const fr = {
     concept: "Visuel de concept",
     pending: "En cours de validation",
     inDevelopment: "En développement",
-    testTrack: "Piste en test",
     prelaunch: "Pré-lancement",
     priceIndicative: "Prix indicatif, non définitif",
     priceAbsent: "Prix fixé après validation du fournisseur",
@@ -45,10 +44,9 @@ export const fr = {
     title: "Le matcha, en plus simple.",
     subtitle:
       "Une dose de matcha dans un stick. Vous l'ouvrez, vous la versez, vous la préparez en un geste.",
-    formatShown: "Format présenté",
+    productShown: "Matcha Original · Daily Box de 30 sticks de 2 g",
     ctaPrelaunch: "Être prévenu du lancement",
-    ctaSale: "Découvrir les packs",
-    ctaSecondary: "Voir le geste",
+    ctaSale: "Ajouter au panier",
     prelaunchLine: "Le premier lot se prépare. Soyez prévenu du lancement.",
   },
 
@@ -58,7 +56,6 @@ export const fr = {
       "Trois gestes, et la portion est déjà mesurée. Le texte et l'image montrent exactement la même chose.",
     hot: "Chaud",
     iced: "Glacé",
-    format: "Format",
     temperature: "Température",
     hotDetail: "Lait ou eau chaude, pas bouillante",
     icedDetail: "Lait froid et glaçons",
@@ -67,64 +64,16 @@ export const fr = {
       "Versez la poudre dans le verre ou la tasse.",
       "Fouettez, moussez ou secouez : la poudre se répartit, la couleur devient uniforme.",
     ],
-    stepConcentrate: [
-      "Déchirez le haut du sachet.",
-      "Versez le concentré dans le lait.",
-      "Quelques tours de cuillère, et la couleur s'uniformise.",
-    ],
     volumesPending: "Volumes et temps : en cours de test.",
   },
 
-  formats: {
-    title: "Deux formats, une marque.",
-    intro:
-      "La poudre est notre priorité. Le concentré est développé en parallèle et n'arrivera qu'après ses propres tests.",
-    compareCaption: "Comparer les deux formats",
-    rows: {
-      preparation: "Préparation",
-      equipment: "Matériel",
-      serving: "Portion",
-      composition: "Composition",
-      uses: "Usages",
-      pricePerDrink: "Prix par boisson",
-      storage: "Conservation",
-    },
-    uses: {
-      poudre: "Maison, bureau, campus. Avec un shaker en déplacement.",
-      concentre: "Partout où une cuillère suffit, si la formule le permet.",
-    },
-    packsTitle: "Les packs",
-    packsIntro:
-      "Les quantités et les prix seront fixés après les devis fournisseurs. Rien n'est en vente aujourd'hui.",
-    doses: "doses",
-    seeFamily: "Voir la fiche",
-  },
-
-  box: {
-    open: "Ouvrir la boîte",
-    close: "Refermer la boîte",
-    choose: "Choisir un pack",
-    countLabel: (n: number) => `${n} doses dans cette boîte`,
-  },
-
-  dose: {
-    title: "Ma dose",
-    intro: "Combien de matchas buvez-vous par semaine ? On calcule le pack qui vous irait.",
-    perWeek: "Matchas par semaine",
-    perMonth: "Doses par mois",
-    advice: "Pack conseillé",
-    lasts: "Durée d'un pack",
-    days: (n: number) => (n >= 14 ? `environ ${Math.round(n / 7)} semaines` : `environ ${n} jours`),
-    pricePerDrink: "Prix par boisson",
-  },
-
-  flavour: {
-    title: "À votre goût.",
-    intro:
-      "Original d'abord. Vanille et Fraise sont des pistes : dites-nous si elles vous donnent envie, on les développera dans cet ordre.",
-    ingredients: "Ingrédients",
-    status: "Statut",
-    interestTest: "Je veux goûter celui-ci",
+  product: {
+    title: "La Daily Box.",
+    intro: "Un seul produit : le Matcha Original en poudre, en sticks de 2 g. Trente sticks par boîte, un par jour.",
+    contents: "Contenu",
+    price: "Prix",
+    perDrink: "par boisson",
+    see: "Voir la Daily Box",
   },
 
   day: {
@@ -154,18 +103,9 @@ export const fr = {
       caffeine: "Caféine",
     },
     target: "Objectif",
-    loupeTitle: "Sous la loupe",
-    hotspots: {
-      powder: "La poudre",
-      pack: "Le sachet",
-      seal: "La soudure",
-      batch: "Le lot",
-    },
     suspensionTitle: "Suspension, pas dissolution.",
     suspensionText:
-      "La poudre de matcha ne fond pas : ce sont des feuilles broyées très finement. Sans mouvement, elle retombe. Remuez la boîte ci-contre pour le voir.",
-    suspensionHint: "Glissez le doigt ou la souris dans le verre pour remuer.",
-    suspensionStill: "Au repos, la poudre retombe.",
+      "La poudre de matcha ne fond pas : ce sont des feuilles broyées très finement. Sans mouvement, elle retombe. C'est pour cela qu'on la fouette, qu'on la mousse ou qu'on la secoue.",
   },
 
   ritual: {
@@ -174,7 +114,6 @@ export const fr = {
     intro: "Comparé pour une seule boisson. On simplifie le geste, pas la culture du thé.",
     traditional: "Rituel traditionnel",
     matocha: "Stick Matocha",
-    handle: "Comparer le rituel et le stick",
     rows: [
       { label: "Doser", traditional: "Balance ou cuillère, à chaque fois", matocha: "Déjà fait, dans le stick" },
       { label: "Préparer la poudre", traditional: "Tamiser pour éviter les grumeaux", matocha: "Verser directement" },
@@ -194,7 +133,6 @@ export const fr = {
   waitlist: {
     label: "Adresse e-mail",
     placeholder: "vous@exemple.fr",
-    interests: "Ce qui vous intéresse",
     consentLink: "Politique de confidentialité",
     submit: "Être prévenu du lancement",
     sending: "Envoi…",
@@ -233,8 +171,7 @@ export const fr = {
     title: "Cette page s'est renversée.",
     text: "Le lien est cassé ou la page a changé d'adresse.",
     home: "Retour à l'accueil",
-    formats: "Voir les formats",
-    sweep: "Passez la souris sur la poudre pour la balayer.",
+    product: "Voir la Daily Box",
   },
 
   loading: "Chargement",

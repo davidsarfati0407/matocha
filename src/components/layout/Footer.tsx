@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { WordmarkGiant } from "@/components/brand/MatochaLogo";
-import { MatochaPattern } from "@/components/brand/MatochaPattern";
 import { Container } from "@/components/ui/Section";
 import type { Catalog } from "@/content/catalog/types";
 import { fr } from "@/content/i18n/fr";
@@ -19,9 +18,6 @@ export function Footer({ catalog }: { catalog: Catalog }) {
 
   return (
     <footer className="on-dark relative overflow-hidden bg-foret text-lait">
-      <div aria-hidden="true" className="relative h-16 overflow-hidden border-b border-lait/15">
-        <MatochaPattern color="#EEEDE0" opacity={0.12} scale={0.8} />
-      </div>
 
       <Container wide className="relative pt-12 pb-8">
         <div className="grid gap-12 md:grid-cols-[1.2fr_1fr_1fr_1fr]">

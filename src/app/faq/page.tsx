@@ -6,12 +6,11 @@ import { faq } from "@/content/faq";
 
 export const metadata: Metadata = {
   title: "FAQ",
-  description: "Poudre ou concentré, préparation, liquides, chaud ou froid, sucre, allergènes, conservation, livraison : les réponses, sans promesses non vérifiées.",
+  description: "Préparation, liquides, chaud ou froid, sucre, allergènes, conservation, livraison : les réponses, sans promesses non vérifiées.",
   alternates: { canonical: "/faq" },
 };
 
 const TOPICS = [
-  { id: "formats", title: "Les formats" },
   { id: "preparation", title: "La préparation" },
   { id: "produit", title: "Le produit" },
   { id: "commande", title: "Commander" },

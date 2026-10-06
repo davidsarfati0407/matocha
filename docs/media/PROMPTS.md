@@ -1,5 +1,7 @@
 # MATOCHA — Médias à produire et prompts de génération
 
+Produit unique : Matcha Original en poudre, stick de 2 g, Daily Box de 30. Les renders existants (`public/renders/`) servent de référence de packaging : même sachet, même typographie, même boîte.
+
 Chaque plan correspond à une entrée `missing` de `src/content/media-manifest.json`. Une fois le fichier produit :
 
 1. déposez-le dans `public/media/…` au chemin indiqué par le manifest (ou via `POST /api/ops/v1/media/incoming` pour l'agent) ;
@@ -11,7 +13,6 @@ Chaque plan correspond à une entrée `missing` de `src/content/media-manifest.j
 - **Référence packaging obligatoire** : les aplats SVG du site (`/formats/poudre`, section « Le sachet », face / dos / profil), exportés en PNG HD. Le générateur **ne doit pas inventer la typographie** : MATOCHA en capitales grasses serrées, couleur forêt `#1B3B2A` sur sachet crème `#F4F2E6`, ruban (« filet ») vert matcha `#8DB33A`, bloc de couleur de recette en bas.
 - **Cohérence** : même verre (gobelet droit transparent, légèrement évasé, ~30 cl), même volume, même teinte de matcha d'un plan à l'autre.
 - **Poudre** : la poudre tombe en petit nuage, **reste en surface** et forme des amas tant qu'aucun outil ne bouge. La couleur ne devient uniforme qu'**après** fouet, mousseur ou shaker. Jamais de poudre qui « fond » toute seule dans le lait froid.
-- **Concentré** : filet vert épais, marbrures, quelques tours de cuillère. **Jamais de filet liquide dans une séquence poudre.**
 - Lumière naturelle de fenêtre, latérale, ombres longues et douces. Fond crème légèrement vert (`#EEEDE0`), bois clair ou pierre claire.
 - Vraies mains, gestes plausibles, ongles naturels. Aucun logo d'une autre marque, aucun objet de marque concurrente visible.
 - Interdits : texte en surimpression, verres en plastique 3D sans texture, luxe noir/or, esthétique de complément alimentaire, rotation produit en boucle.
@@ -26,7 +27,7 @@ Chaque plan correspond à une entrée `missing` de `src/content/media-manifest.j
 
 > Product render, studio daylight, of a slim single-dose stick sachet, 2 cm wide × 11 cm long (dimensions to be confirmed with the manufacturer), matte cream paper-like film `#F4F2E6`, crimped seals top and bottom in forest green `#1B3B2A`. The word MATOCHA is printed vertically in bold condensed uppercase sans-serif, forest green, **exactly as in the reference image**. A wavy matcha-green ribbon `#8DB33A` crosses the upper third. Bottom colour block in `#8DB33A` with the words ORIGINAL / POUDRE. Back view: three numbered circles « 1 OUVRIR · 2 VERSER · 3 PRÉPARER » and an empty dashed area for lot and mandatory information. Soft shadow, cream background `#EEEDE0`, 3/4 angle and straight front. No other text, no claims, no weights.
 
-Boîte : carton forêt, ruban matcha, MATOCHA en crème, bloc de recette en bas, couvercle qui s'ouvre vers l'arrière. Sticks rangés debout, serrés : **8** (Découverte), **30** (Quotidien), deux boîtes (Duo). Les quantités sont à confirmer : régénérer si elles changent.
+Boîte : carton forêt, ruban matcha, MATOCHA en crème, bloc de recette en bas, couvercle qui s'ouvre vers l'arrière. La Daily Box contient **30 sticks de 2 g**, rangés debout et serrés. La référence est le render `matocha-box.png`.
 
 ## <a id="m01-poudre"></a>2. M01 — Hero « Le Versement », poudre
 
@@ -36,18 +37,12 @@ Boîte : carton forêt, ruban matcha, MATOCHA en crème, bloc de recette en bas,
 
 Mobile 4:5 : même déroulé, cadrage plus serré sur le verre, le stick reste lisible dans le premier tiers.
 
-## <a id="m01-concentre"></a>3. M01 — variante concentré
-
-**hero-pour-concentre** — **ne pas produire avant que la formule et le sachet soient définis.**
-
-> Same glass, same volume, same light. A wider cream MATOCHA sachet with a drop pictogram (reference image) is torn at the top. A thick ribbon of bright-green concentrate falls into the cold milk, creating marbled swirls that sink and twist. A teaspoon enters and stirs a few turns; the colour evens out into a pale-green latte. A hand lifts the glass, first sip. Muted, no text. Label in the site: « Concentré — en développement ».
-
 ## <a id="m02"></a>4. M02 — Le geste en 3 temps
 
-**plan-dechirure, plan-versement-poudre, plan-versement-concentre, plan-fouet, plan-mousseur, plan-shaker** — trois plans courts de 2 à 3 s chacun, même verre, même cadrage (plan moyen serré, caméra fixe, légère plongée).
+**plan-dechirure, plan-versement-poudre, plan-fouet, plan-mousseur, plan-shaker** — trois plans courts de 2 à 3 s chacun, même verre, même cadrage (plan moyen serré, caméra fixe, légère plongée).
 
 1. **Ouvrir** : gros plan des doigts qui déchirent le stick à l'encoche, film qui cède proprement.
-2. **Verser** : la poudre tombe et **reste en surface** (ou, pour le concentré, le filet marbre le lait).
+2. **Verser** : la poudre tombe et **reste en surface**.
 3. **Préparer** : selon `preparation.method` : fouet en zigzag dans une tasse d'eau chaude (vapeur légère) ; mousseur dans du lait froid avec glaçons ; shaker fermé, secoué, puis versé sur glaçons.
 
 Variante **chaud** : tasse en céramique claire, vapeur, pas de glaçons. Variante **glacé** : verre, glaçons, condensation.
@@ -73,10 +68,6 @@ Variante **chaud** : tasse en céramique claire, vapeur, pas de glaçons. Varian
 - **Samedi, terrasse** : table extérieure au soleil, latte glacé avec paille, une main qui le soulève.
 
 **Interdit** : de la poudre préparée sans fouet, mousseur ni shaker visible dans la scène.
-
-## 8. Goûts
-
-Une variante par goût **validé uniquement**. Vanille (`#EBD7A8`) et Fraise (`#E2718C`) restent des pistes : ne pas produire de sachet ni de boisson pour elles tant qu'elles ne sont pas validées. Le site les dessine en illustration conceptuelle.
 
 ## 9. Ambiances (banques d'images)
 

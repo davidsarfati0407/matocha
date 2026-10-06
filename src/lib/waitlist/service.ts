@@ -7,7 +7,8 @@ import { getStore } from "@/lib/store";
 import type { Row } from "@/lib/store/types";
 import { CONSENT_TEXT, CONSENT_VERSION, isWaitlistOpen } from "./status";
 
-export const INTERESTS = ["poudre", "concentre", "original", "vanille", "fraise"] as const;
+/** One product: the only interest recorded is the Matcha Original Daily Box. */
+export const INTERESTS = ["original"] as const;
 export type Interest = (typeof INTERESTS)[number];
 
 export type LeadRow = Row & {

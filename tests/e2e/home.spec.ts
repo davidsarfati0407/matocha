@@ -20,7 +20,7 @@ test.describe("pré-lancement", () => {
   });
 
   test("no purchase control exists anywhere in pre-launch", async ({ page }) => {
-    for (const path of ["/", "/formats", "/formats/poudre", "/formats/concentre"]) {
+    for (const path of ["/", "/daily-box"]) {
       await page.goto(path);
       await expect(page.getByText("Ajouter au panier")).toHaveCount(0);
       await expect(page.getByRole("button", { name: /Panier/ })).toHaveCount(0);
@@ -37,7 +37,7 @@ test.describe("pré-lancement", () => {
   test("checkout API refuses in pre-launch", async ({ request }) => {
     const res = await request.post("/api/checkout", {
       headers: { "Idempotency-Key": "e2e-1" },
-      data: { lines: [{ packKey: "poudre-quotidien", recipeKey: "poudre-original", quantity: 1 }] },
+      data: { lines: [{ packKey: "poudre-daily-box", recipeKey: "poudre-original", quantity: 1 }] },
     });
     expect(res.status()).toBeGreaterThanOrEqual(400);
   });
@@ -49,55 +49,58 @@ test.describe("pré-lancement", () => {
   });
 });
 
-test.describe("interactions", () => {
-  test("flavour change switches colour, ingredients, status and CTA together", async ({ page }) => {
-    await page.goto("/#gout");
-    const group = page.getByRole("radiogroup", { name: "Choisir un goût" });
-    await group.getByRole("radio", { name: "Fraise" }).click();
-    await expect(page.locator("#gout")).toContainText("Piste en test");
-    await expect(page.locator("#gout").getByRole("link", { name: "Je veux goûter celui-ci" })).toHaveAttribute("href", /interet=fraise/);
-    const accent = await page.evaluate(() => document.documentElement.style.getPropertyValue("--accent"));
-    expect(accent).toContain("--rhubarbe");
-    await group.getByRole("radio", { name: "Original" }).click();
-    await expect(page.locator("#gout")).toContainText("Matcha seul");
+test.describe("produit unique, mode réaliste", () => {
+  test("only the photoreal renders are shown — no drawn illustration anywhere", async ({ page }) => {
+    for (const path of ["/", "/daily-box", "/preparer", "/notre-produit", "/faq", "/page-inexistante"]) {
+      await page.goto(path);
+      await expect(page.locator("main svg, footer svg, header svg"), path).toHaveCount(0);
+      await expect(page.locator("canvas"), path).toHaveCount(0);
+      const srcs = await page.locator("main img").evaluateAll((imgs) => imgs.map((i) => decodeURIComponent((i as HTMLImageElement).currentSrc)));
+      for (const src of srcs) expect(src, path).toMatch(/\/renders\/matocha-(sticks|latte|box|jet)\.png/);
+    }
+    await page.goto("/");
+    await expect(page.locator("main img")).toHaveCount(4);
   });
 
-  test("the box opens with the exact number of doses of the selected pack", async ({ page }) => {
-    await page.goto("/#packs");
-    await page.getByRole("button", { name: "Voir la boîte" }).first().click();
-    await expect(page.getByText("8 doses dans cette boîte")).toBeVisible();
-    const toggle = page.getByRole("button", { name: /la boîte$/ }).filter({ hasText: /Ouvrir|Refermer/ });
-    /* Choosing a pack replays the opening… */
-    await expect(toggle).toHaveAttribute("aria-expanded", "true");
-    /* …and the button closes and reopens it. */
-    await toggle.click();
-    await expect(toggle).toHaveAttribute("aria-expanded", "false");
-    await toggle.click();
-    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  test("every render carries the concept mention", async ({ page }) => {
+    await page.goto("/");
+    const figures = page.locator("main figure");
+    await expect(figures).toHaveCount(4);
+    for (const f of await figures.all()) await expect(f.getByText("Visuel de concept")).toBeVisible();
   });
 
-  test("ritual comparator handle works with the keyboard", async ({ page }) => {
-    await page.goto("/#rituel");
-    const handle = page.getByRole("slider", { name: "Comparer le rituel et le stick" });
-    await handle.focus();
-    await page.keyboard.press("ArrowRight");
-    await expect(handle).toHaveAttribute("aria-valuenow", "55");
-    await page.keyboard.press("Home");
-    await expect(handle).toHaveAttribute("aria-valuenow", "5");
+  test("one product, one price slot, one CTA — no flavour or format left", async ({ page }) => {
+    for (const path of ["/", "/daily-box"]) {
+      await page.goto(path);
+      await expect(page.locator("#acheter")).toHaveCount(1);
+      await expect(page.locator("#acheter")).toContainText("Daily Box");
+      await expect(page.locator("#acheter")).toContainText("30 sticks de 2 g");
+      await expect(page.locator("#acheter")).toContainText("Prix fixé après validation du fournisseur");
+      await expect(page.locator("#acheter a, #acheter button")).toHaveCount(1);
+      const text = (await page.locator("body").innerText()).toLowerCase();
+      for (const word of ["vanille", "fraise", "concentré", "goût", "parfum", "variante", "découverte", "quotidien", "duo"]) {
+        expect(text, `${path}: ${word}`).not.toContain(word);
+      }
+    }
   });
 
-  test("FAQ opens with the keyboard and the dose calculator updates", async ({ page }) => {
+  test("the hero photo drifts (Ken Burns) only when motion is allowed", async ({ browser }) => {
+    for (const motion of ["no-preference", "reduce"] as const) {
+      const ctx = await browser.newContext({ reducedMotion: motion });
+      const page = await ctx.newPage();
+      await page.goto("/");
+      const anim = await page.locator(".ken-burns").first().evaluate((el) => getComputedStyle(el).animationName);
+      expect(anim).toBe(motion === "reduce" ? "none" : "matocha-kenburns");
+      await ctx.close();
+    }
+  });
+
+  test("FAQ opens with the keyboard; /preparer says when a combination is untested", async ({ page }) => {
     await page.goto("/");
     const summary = page.locator("#fin summary").first();
     await summary.focus();
     await page.keyboard.press("Enter");
     await expect(page.locator("#fin details").first()).toHaveAttribute("open", "");
-    const range = page.getByRole("slider", { name: /Matchas par semaine/ });
-    await range.fill("12");
-    await expect(page.getByText("Pack conseillé").locator("..")).toContainText("Duo");
-  });
-
-  test("the gesture shows powder needing a tool, and /preparer says when a combination is untested", async ({ page }) => {
     await page.goto("/preparer");
     await page.getByText("Rien de tout ça").click();
     await expect(page.getByText("La poudre a besoin de mouvement.")).toBeVisible();
@@ -110,7 +113,7 @@ test.describe("mobile", () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
 
   test("every touch target is at least 44 px (inline text links excepted)", async ({ page }) => {
-    for (const path of ["/", "/formats/poudre", "/preparer", "/faq", "/aide"]) {
+    for (const path of ["/", "/daily-box", "/preparer", "/faq", "/aide"]) {
       await page.goto(path);
       const small = await page.evaluate(() =>
         [...document.querySelectorAll("a[href], button, input, summary, [role=slider], [role=radio]")]
@@ -128,9 +131,8 @@ test.describe("mobile", () => {
     }
   });
 
-  test("Le Filet is not drawn on phones and nothing overflows", async ({ page }) => {
+  test("nothing overflows horizontally", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator('main path[stroke="var(--accent)"]')).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
   });
 });

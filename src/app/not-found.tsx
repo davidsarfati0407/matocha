@@ -1,4 +1,4 @@
-import { SpilledPowder } from "@/components/scenes/SpilledPowder";
+import { Photo } from "@/components/media/Photo";
 import { ButtonLink } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Section";
 import { fr } from "@/content/i18n/fr";
@@ -13,15 +13,12 @@ export default function NotFound() {
           <p className="mt-6 text-lg">{fr.notFound.text}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <ButtonLink href="/">{fr.notFound.home}</ButtonLink>
-            <ButtonLink href="/formats" variant="outline">
-              {fr.notFound.formats}
+            <ButtonLink href="/daily-box" variant="outline">
+              {fr.notFound.product}
             </ButtonLink>
           </div>
         </div>
-        <div>
-          <SpilledPowder />
-          <p className="mt-2 text-sm">{fr.notFound.sweep}</p>
-        </div>
+        <Photo id="matocha-sticks" sizes="(min-width: 1024px) 45vw, 100vw" ratio="aspect-[4/3]" />
       </Container>
     </section>
   );

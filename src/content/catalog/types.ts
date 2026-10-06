@@ -24,8 +24,9 @@ export type Proof<T> = {
   target?: string;
 };
 
-export type FamilyId = "poudre" | "concentre";
-export type RecipeId = "original" | "vanille" | "fraise";
+/** One product: Matcha Original in powder. */
+export type FamilyId = "poudre";
+export type RecipeId = "original";
 
 export type Family = {
   id: FamilyId;
@@ -56,10 +57,8 @@ export type PreparationStep = {
 };
 
 export type RecipeStatus =
-  /** The reference recipe, being developed with the supplier. */
+  /** The recipe, being developed with the supplier. */
   | "in_development"
-  /** A flavour idea to test with the waitlist. */
-  | "test_track"
   | "validated";
 
 export type Recipe = {
@@ -69,7 +68,7 @@ export type Recipe = {
   familyId: FamilyId;
   name: string;
   /** CSS custom property carrying the flavour accent. */
-  accentToken: "--matcha" | "--vanille" | "--rhubarbe";
+  accentToken: "--matcha";
   /** Colour of the finished drink in illustrations. */
   liquidColor: string;
   /** Colour of the concentrate / powder itself. */
@@ -98,7 +97,7 @@ export type CommercialStatus =
   | "sold_out"
   | "retired";
 
-export type PackId = "decouverte" | "quotidien" | "duo";
+export type PackId = "daily-box";
 
 export type Pack = {
   id: PackId;
@@ -111,7 +110,7 @@ export type Pack = {
   /** Working quantity used to draw the box. Its own status says if it is final. */
   doses: number;
   dosesStatus: ProofStatus;
-  /** "6 ou 8", "20 ou 30"… — the range still being decided. */
+  /** Human label for the contents, e.g. "30 sticks de 2 g". */
   dosesRange: string;
   netQuantity: Proof<string>;
   /** TTC, euros. */

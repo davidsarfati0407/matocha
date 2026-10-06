@@ -61,7 +61,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
 
   return (
     <html lang="fr" className={`${archivo.variable} ${instrument.variable} h-full antialiased`}>
-      <body className="grain flex min-h-full flex-col">
+      <body className="flex min-h-full flex-col">
         <SaleShell enabled={sale} header={(cart) => <Header sale={sale} cartSlot={cart} />}>
           <main id="contenu" className="flex-1">
             {children}

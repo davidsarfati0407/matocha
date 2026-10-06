@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 /** §14.1 — captures at 360/390/768/1440, normal and reduced motion. Each capture is reviewed by hand. */
 const PAGES = [
   { name: "home", path: "/" },
-  { name: "formats-poudre", path: "/formats/poudre" },
+  { name: "daily-box", path: "/daily-box" },
   { name: "preparer", path: "/preparer" },
   { name: "faq", path: "/faq" },
   { name: "404", path: "/cette-page-nexiste-pas" },

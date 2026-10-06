@@ -205,7 +205,7 @@ paths:
       x-scope: leads:read
       parameters:
         - { name: tag, in: query, schema: { type: string } }
-        - { name: interest, in: query, schema: { type: string, enum: [poudre, concentre, original, vanille, fraise] } }
+        - { name: interest, in: query, schema: { type: string, enum: [original] } }
       responses:
         "200":
           description: Liste
@@ -417,7 +417,7 @@ components:
       name: id
       in: path
       required: true
-      schema: { type: string, enum: [poudre-decouverte, poudre-quotidien, poudre-duo, concentre-decouverte] }
+      schema: { type: string, enum: [poudre-daily-box] }
     RecipeId:
       name: id
       in: path
@@ -492,7 +492,7 @@ components:
       properties:
         key: { type: string }
         id: { type: string, enum: [decouverte, quotidien, duo] }
-        familyId: { type: string, enum: [poudre, concentre] }
+        familyId: { type: string, enum: [poudre] }
         name: { type: string }
         recipeIds: { type: array, items: { type: string } }
         doses: { type: integer }
@@ -543,8 +543,8 @@ components:
       required: [id, status, kind, source, license, files]
       properties:
         id: { type: string, example: hero-pour-poudre-desktop }
-        family: { type: string, enum: [poudre, concentre] }
-        recipe: { type: string, enum: [original, vanille, fraise] }
+        family: { type: string, enum: [poudre] }
+        recipe: { type: string, enum: [original] }
         status: { type: string, enum: [real, concept] }
         kind: { type: string, enum: [video, image, rive, lottie, model3d] }
         source: { type: string, example: "génération IA" }

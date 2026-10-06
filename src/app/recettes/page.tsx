@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { PageIntro } from "@/components/blocks/PageIntro";
 import { Container } from "@/components/ui/Section";
 import { DRINK_STATUS_LABEL, drinks } from "@/content/drinks";
-import { getCatalog } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "Recettes",
@@ -10,11 +9,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/recettes" },
 };
 
-const METHOD: Record<string, string> = { whisk: "fouet", frother: "mousseur", shaker: "shaker", spoon: "cuillère" };
+const METHOD: Record<string, string> = { whisk: "fouet", frother: "mousseur", shaker: "shaker" };
 
-export default async function RecettesPage() {
-  const catalog = await getCatalog();
-  const famName = (id: string) => catalog.families.find((f) => f.id === id)?.name ?? id;
+export default function RecettesPage() {
   return (
     <>
       <PageIntro
@@ -31,8 +28,6 @@ export default async function RecettesPage() {
                   <span className="concept-tag">{DRINK_STATUS_LABEL[d.status]}</span>
                 </div>
                 <dl className="mt-4 grid grid-cols-[8rem_1fr] gap-y-1 text-sm">
-                  <dt className="font-semibold">Formats</dt>
-                  <dd>{d.families.map(famName).join(", ")}</dd>
                   <dt className="font-semibold">Matériel</dt>
                   <dd>{d.methods.map((m) => METHOD[m]).join(", ")}</dd>
                   <dt className="font-semibold">Liquides</dt>

@@ -197,7 +197,7 @@ export const OPERATIONS: Operation[] = [
   },
   {
     name: "catalog_pack_get",
-    description: "Lire un pack par sa clé (ex. poudre-decouverte).",
+    description: "Lire un pack par sa clé (ex. poudre-daily-box).",
     scope: "catalog:read",
     write: false,
     input: { type: "object", properties: idParam, required: ["id"] },
@@ -618,8 +618,8 @@ export const OPERATIONS: Operation[] = [
       type: "object",
       properties: {
         id: { type: "string", description: "Identifiant du manifest, ex. hero-pour-poudre-desktop" },
-        family: { type: "string", enum: ["poudre", "concentre"] },
-        recipe: { type: "string", enum: ["original", "vanille", "fraise"] },
+        family: { type: "string", enum: ["poudre"] },
+        recipe: { type: "string", enum: ["original"] },
         status: { type: "string", enum: ["real", "concept"] },
         kind: { type: "string", enum: ["video", "image", "rive", "lottie", "model3d"] },
         source: { type: "string" },

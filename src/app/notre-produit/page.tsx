@@ -17,23 +17,20 @@ type Item = { label: string; proof: Proof<unknown>; known?: string };
 export default async function NotreProduitPage() {
   const catalog = await getCatalog();
   const poudre = recipesOf(catalog, "poudre").find((r) => r.id === "original")!;
-  const concentre = recipesOf(catalog, "concentre").find((r) => r.id === "original")!;
 
   const items: Item[] = [
     { label: "Origine du matcha", proof: poudre.origin },
     { label: "Fournisseur et fabricant", proof: { value: null, status: "to_confirm", target: "Fournisseurs en cours d'exploration ; aucun n'est retenu" } },
-    { label: "Composition de la poudre Original", proof: poudre.ingredients },
+    { label: "Composition du Matcha Original", proof: poudre.ingredients },
     { label: "Matcha par portion", proof: poudre.matchaPerServingG },
-    { label: "Conservation de la poudre", proof: poudre.storage },
-    { label: "Formule du concentré", proof: concentre.ingredients, known: undefined },
-    { label: "Conservation du concentré", proof: concentre.storage },
+    { label: "Conservation", proof: poudre.storage },
     { label: "Caféine par portion", proof: poudre.caffeineMg },
     { label: "Packaging et recyclabilité", proof: { value: null, status: "to_confirm" } },
   ];
 
   const known = [
     "Matocha est une marque créée par David Sarfati et Gaspard, deux amis qui veulent rendre le matcha plus simple au quotidien.",
-    "Deux formats sont développés : une poudre prédosée en stick, prioritaire, et un concentré à verser, en parallèle.",
+    "Un seul produit : le Matcha Original en poudre, en sticks de 2 g, vendu dans la Daily Box de 30 sticks.",
     "La poudre de matcha ne se dissout pas : elle reste en suspension et demande un fouet, un mousseur ou un shaker.",
     "Le stick en poudre existe déjà chez d'autres marques. Ce que nous voulons construire : un geste vraiment facile, un goût qui donne envie de recommencer, et un premier achat accessible.",
     "Rien n'est en vente aujourd'hui. Le site est en pré-lancement.",

@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { Button } from "@/components/ui/Button";
 import { formatEur } from "@/lib/proof";
-import { Whisk } from "@/components/scenes/Whisk";
 
 /**
  * Cart drawer (sale mode only). Checkout is a hosted Stripe session created
@@ -76,7 +75,7 @@ export function CartDrawer() {
           <p className="flex justify-between font-semibold"><span>Total TTC</span><span>{formatEur(subtotal)}</span></p>
           <p className="mt-1 text-sm">Frais de livraison calculés à l&apos;étape suivante.</p>
           <Button full className="mt-4" onClick={checkout} disabled={lines.length === 0 || state === "loading"}>
-            {state === "loading" ? <span className="flex items-center gap-2"><Whisk className="h-5 w-5" /> Redirection…</span> : "Passer au paiement"}
+            {state === "loading" ? <span className="flex items-center gap-2"><span className="spinner" aria-hidden="true" /> Redirection…</span> : "Passer au paiement"}
           </Button>
           {state === "error" && <p role="alert" className="mt-3 text-sm">{message}</p>}
         </footer>

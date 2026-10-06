@@ -43,7 +43,7 @@ describe("MCP", () => {
     const { token: t } = await token(["catalog:write"]);
     const res = await (
       await rpc(
-        { jsonrpc: "2.0", id: 6, method: "tools/call", params: { name: "catalog_pack_price", arguments: { id: "poudre-decouverte", price: 9 } } },
+        { jsonrpc: "2.0", id: 6, method: "tools/call", params: { name: "catalog_pack_price", arguments: { id: "poudre-daily-box", price: 9 } } },
         t,
       )
     ).json();

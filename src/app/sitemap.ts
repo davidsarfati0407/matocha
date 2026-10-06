@@ -4,9 +4,7 @@ import { SITE_URL } from "@/lib/site-url";
 /* The journal stays out while empty (noindex). */
 const ROUTES = [
   "",
-  "/formats",
-  "/formats/poudre",
-  "/formats/concentre",
+  "/daily-box",
   "/preparer",
   "/recettes",
   "/notre-produit",

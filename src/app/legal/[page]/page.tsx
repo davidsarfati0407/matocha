@@ -68,7 +68,7 @@ function Body({ slug, catalog }: { slug: Slug; catalog: Catalog }) {
           votre adresse IP pour limiter les abus. Votre IP n&apos;est jamais conservée en clair.
         </p>
         <p>
-          <strong>Finalité.</strong> Vous prévenir du lancement et des goûts en test. Base légale : votre consentement, donné par une case non
+          <strong>Finalité.</strong> Vous prévenir du lancement de la Daily Box. Base légale : votre consentement, donné par une case non
           pré-cochée, puis confirmé par e-mail (double opt-in).
         </p>
         <p>
