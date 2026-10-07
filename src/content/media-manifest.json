@@ -1,11 +1,11 @@
 [
   {
-    "id": "matocha-latte",
+    "id": "matocha-v2-hero",
     "family": "poudre",
     "recipe": "original",
     "status": "concept",
     "kind": "image",
-    "source": "render fourni par David (dossier « Image Matocha », 6 oct. 2026)",
+    "source": "render v2 fourni par David (dossier « Image Matocha », 7 oct. 2026, 15 h 15) — JPEG reçu via WhatsApp, master conservé dans assets/renders-v2/",
     "license": {
       "name": "Renders Matocha fournis par David Sarfati",
       "url": "",
@@ -13,27 +13,27 @@
       "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
     },
     "files": {
-      "desktop": "/renders/matocha-latte.png",
-      "mobile": "/renders/matocha-latte.png",
+      "desktop": "/renders/v2/matocha-v2-hero-full-1672.jpg",
+      "mobile": "/renders/v2/matocha-v2-hero-full-1672.jpg",
       "poster": ""
     },
-    "width": 1122,
-    "height": 1402,
-    "alt": "Une main tient un stick Matocha de 2 g devant un matcha latte glacé ; deux autres sticks sont posés sur la table.",
+    "width": 1672,
+    "height": 941,
+    "alt": "Une boîte Matocha vert forêt et deux sticks de 2 g posés sur une pierre claire, devant un fond vert lime.",
     "decorative": false,
     "usedIn": [
-      "/daily-box",
+      "home/hero",
       "metadata/og"
     ],
-    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée. Règle : un visuel = un seul emplacement sur le site."
+    "notes": "Rendu de concept (IA), pas une photo de production. Pack canonique : vert forêt mat, wordmark MATOCHA crème, motifs botaniques crème et olive ; seuls « MATOCHA » et « 2G » sont imprimés. Variantes AVIF/WebP : scripts/build-renders.mjs."
   },
   {
-    "id": "matocha-box",
+    "id": "matocha-v2-marketing",
     "family": "poudre",
     "recipe": "original",
     "status": "concept",
     "kind": "image",
-    "source": "render fourni par David (dossier « Image Matocha », 6 oct. 2026)",
+    "source": "render v2 fourni par David (dossier « Image Matocha », 7 oct. 2026, 15 h 15) — JPEG reçu via WhatsApp, master conservé dans assets/renders-v2/",
     "license": {
       "name": "Renders Matocha fournis par David Sarfati",
       "url": "",
@@ -41,26 +41,27 @@
       "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
     },
     "files": {
-      "desktop": "/renders/matocha-box.png",
-      "mobile": "/renders/matocha-box.png",
+      "desktop": "/renders/v2/matocha-v2-marketing-full-1122.jpg",
+      "mobile": "/renders/v2/matocha-v2-marketing-full-1122.jpg",
       "poster": ""
     },
     "width": 1122,
     "height": 1402,
-    "alt": "La Daily Box Matocha, 30 × 2 g, avec trois sticks posés devant elle.",
+    "alt": "La boîte Matocha vert forêt et un stick de 2 g sur des marches en pierre, au soleil.",
     "decorative": false,
     "usedIn": [
-      "home/daily-box"
+      "home/daily-box",
+      "/daily-box"
     ],
-    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée. Règle : un visuel = un seul emplacement sur le site."
+    "notes": "Rendu de concept (IA), pas une photo de production. Pack canonique : vert forêt mat, wordmark MATOCHA crème, motifs botaniques crème et olive ; seuls « MATOCHA » et « 2G » sont imprimés. Variantes AVIF/WebP : scripts/build-renders.mjs."
   },
   {
-    "id": "matocha-sticks",
+    "id": "matocha-v2-poudre",
     "family": "poudre",
     "recipe": "original",
     "status": "concept",
     "kind": "image",
-    "source": "render fourni par David (dossier « Image Matocha », 6 oct. 2026)",
+    "source": "render v2 fourni par David (dossier « Image Matocha », 7 oct. 2026, 15 h 15) — JPEG reçu via WhatsApp, master conservé dans assets/renders-v2/",
     "license": {
       "name": "Renders Matocha fournis par David Sarfati",
       "url": "",
@@ -68,26 +69,26 @@
       "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
     },
     "files": {
-      "desktop": "/renders/matocha-sticks.png",
-      "mobile": "/renders/matocha-sticks.png",
+      "desktop": "/renders/v2/matocha-v2-poudre-full-1122.jpg",
+      "mobile": "/renders/v2/matocha-v2-poudre-full-1122.jpg",
       "poster": ""
     },
     "width": 1122,
     "height": 1402,
-    "alt": "Une quinzaine de sticks Matocha éparpillés sur une nappe blanche, un bol de matcha en arrière-plan.",
+    "alt": "Un stick Matocha ouvert verse sa poudre de matcha dans un bol en céramique.",
     "decorative": false,
     "usedIn": [
-      "home/hero"
+      "home/preparer"
     ],
-    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée. Règle : un visuel = un seul emplacement sur le site."
+    "notes": "Rendu de concept (IA), pas une photo de production. Pack canonique : vert forêt mat, wordmark MATOCHA crème, motifs botaniques crème et olive ; seuls « MATOCHA » et « 2G » sont imprimés. Variantes AVIF/WebP : scripts/build-renders.mjs."
   },
   {
-    "id": "matocha-jet",
+    "id": "matocha-v2-swirl",
     "family": "poudre",
     "recipe": "original",
     "status": "concept",
     "kind": "image",
-    "source": "render fourni par David (dossier « Image Matocha », 6 oct. 2026)",
+    "source": "render v2 fourni par David (dossier « Image Matocha », 7 oct. 2026, 15 h 15) — JPEG reçu via WhatsApp, master conservé dans assets/renders-v2/",
     "license": {
       "name": "Renders Matocha fournis par David Sarfati",
       "url": "",
@@ -95,18 +96,45 @@
       "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
     },
     "files": {
-      "desktop": "/renders/matocha-jet.png",
-      "mobile": "/renders/matocha-jet.png",
+      "desktop": "/renders/v2/matocha-v2-swirl-full-1672.jpg",
+      "mobile": "/renders/v2/matocha-v2-swirl-full-1672.jpg",
+      "poster": ""
+    },
+    "width": 1672,
+    "height": 941,
+    "alt": "Un fouet en bambou fait mousser un matcha vert vif dans un bol clair.",
+    "decorative": false,
+    "usedIn": [
+      "home/preparer"
+    ],
+    "notes": "Rendu de concept (IA), pas une photo de production. Pack canonique : vert forêt mat, wordmark MATOCHA crème, motifs botaniques crème et olive ; seuls « MATOCHA » et « 2G » sont imprimés. Variantes AVIF/WebP : scripts/build-renders.mjs."
+  },
+  {
+    "id": "matocha-v2-latte",
+    "family": "poudre",
+    "recipe": "original",
+    "status": "concept",
+    "kind": "image",
+    "source": "render v2 fourni par David (dossier « Image Matocha », 7 oct. 2026, 15 h 15) — JPEG reçu via WhatsApp, master conservé dans assets/renders-v2/",
+    "license": {
+      "name": "Renders Matocha fournis par David Sarfati",
+      "url": "",
+      "commercialUse": true,
+      "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
+    },
+    "files": {
+      "desktop": "/renders/v2/matocha-v2-latte-full-1122.jpg",
+      "mobile": "/renders/v2/matocha-v2-latte-full-1122.jpg",
       "poster": ""
     },
     "width": 1122,
     "height": 1402,
-    "alt": "Des sticks Matocha sur une tablette d'avion, près d'un hublot, d'une bouteille d'eau et d'un sac.",
+    "alt": "Du lait versé sur un matcha glacé dans un grand verre, un stick Matocha de 2 g posé à côté.",
     "decorative": false,
     "usedIn": [
-      "home/lifestyle"
+      "home/preparer"
     ],
-    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée. Règle : un visuel = un seul emplacement sur le site."
+    "notes": "Rendu de concept (IA), pas une photo de production. Pack canonique : vert forêt mat, wordmark MATOCHA crème, motifs botaniques crème et olive ; seuls « MATOCHA » et « 2G » sont imprimés. Variantes AVIF/WebP : scripts/build-renders.mjs."
   },
   {
     "id": "hero-pour-poudre",
@@ -199,113 +227,5 @@
     "decorative": false,
     "notes": "Matcha chaud terminé. PROMPTS.md#boissons",
     "usedIn": []
-  },
-  {
-    "id": "matocha-poudre",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "concept",
-    "kind": "image",
-    "source": "render fourni par David (dossier « Image Matocha », 7 oct. 2026)",
-    "license": {
-      "name": "Renders Matocha fournis par David Sarfati",
-      "url": "",
-      "commercialUse": true,
-      "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
-    },
-    "files": {
-      "desktop": "/renders/matocha-poudre.jpg",
-      "mobile": "/renders/matocha-poudre.jpg",
-      "poster": ""
-    },
-    "width": 1122,
-    "height": 1402,
-    "alt": "La poudre de matcha tombe d'un stick Matocha ouvert dans un bol en céramique.",
-    "decorative": false,
-    "usedIn": [
-      "home/geste"
-    ],
-    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée. Règle : un visuel = un seul emplacement sur le site."
-  },
-  {
-    "id": "matocha-swirl",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "concept",
-    "kind": "image",
-    "source": "render fourni par David (dossier « Image Matocha », 7 oct. 2026)",
-    "license": {
-      "name": "Renders Matocha fournis par David Sarfati",
-      "url": "",
-      "commercialUse": true,
-      "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
-    },
-    "files": {
-      "desktop": "/renders/matocha-swirl.jpg",
-      "mobile": "/renders/matocha-swirl.jpg",
-      "poster": ""
-    },
-    "width": 1672,
-    "height": 941,
-    "alt": "Un fouet en bambou fait mousser un matcha vert vif dans un bol clair.",
-    "decorative": false,
-    "usedIn": [
-      "home/mousse"
-    ],
-    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée. Règle : un visuel = un seul emplacement sur le site."
-  },
-  {
-    "id": "matocha-latte-verse",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "concept",
-    "kind": "image",
-    "source": "render fourni par David (dossier « Image Matocha », 7 oct. 2026)",
-    "license": {
-      "name": "Renders Matocha fournis par David Sarfati",
-      "url": "",
-      "commercialUse": true,
-      "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
-    },
-    "files": {
-      "desktop": "/renders/matocha-latte-verse.jpg",
-      "mobile": "/renders/matocha-latte-verse.jpg",
-      "poster": ""
-    },
-    "width": 1122,
-    "height": 1402,
-    "alt": "Du lait versé sur un matcha glacé dans un grand verre, un stick Matocha posé devant.",
-    "decorative": false,
-    "usedIn": [
-      "home/chaud-glace"
-    ],
-    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée. Règle : un visuel = un seul emplacement sur le site."
-  },
-  {
-    "id": "matocha-texture",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "concept",
-    "kind": "image",
-    "source": "render fourni par David (dossier « Image Matocha », 7 oct. 2026)",
-    "license": {
-      "name": "Renders Matocha fournis par David Sarfati",
-      "url": "",
-      "commercialUse": true,
-      "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
-    },
-    "files": {
-      "desktop": "/renders/matocha-texture.jpg",
-      "mobile": "/renders/matocha-texture.jpg",
-      "poster": ""
-    },
-    "width": 1672,
-    "height": 941,
-    "alt": "Gros plan sur de la poudre de matcha répandue sur une surface claire.",
-    "decorative": false,
-    "usedIn": [
-      "home/ingredient"
-    ],
-    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée. Règle : un visuel = un seul emplacement sur le site."
   }
 ]

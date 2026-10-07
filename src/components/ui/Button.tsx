@@ -33,7 +33,7 @@ function classes({ variant = "solid", size = "lg", full, className }: CommonProp
   return cn(
     "group relative inline-flex items-center justify-center overflow-hidden rounded-full",
     "u-label font-semibold text-center",
-    "transition-colors duration-500 ease-[var(--ease-matocha)]",
+    "transition-[color,transform] duration-[180ms] ease-out active:scale-[0.98]",
     "disabled:pointer-events-none disabled:opacity-45",
     VARIANTS[variant].base,
     SIZES[size],
@@ -55,7 +55,7 @@ function Inner({
       <span
         aria-hidden="true"
         className={cn(
-          "absolute inset-0 origin-bottom scale-y-0 transition-transform duration-500 ease-[var(--ease-matocha)] group-hover:scale-y-100",
+          "absolute inset-0 origin-bottom scale-y-0 transition-transform duration-[180ms] ease-out group-hover:scale-y-100 group-focus-visible:scale-y-100",
           VARIANTS[variant].wipe,
         )}
       />

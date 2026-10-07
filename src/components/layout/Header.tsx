@@ -81,7 +81,7 @@ export function Header({
         className={cn(
           "fixed inset-x-0 top-0 z-50 border-b transition-colors duration-300",
           scrolled || menuOpen
-            ? "border-encre/10 bg-lait/92 backdrop-blur-md"
+            ? "border-encre/10 bg-lait"
             : "border-transparent bg-lait/0",
         )}
       >

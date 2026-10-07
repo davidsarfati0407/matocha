@@ -178,7 +178,7 @@ export function WaitlistForm({
         type="submit"
         disabled={!ready || status === "loading"}
         className={cn(
-          "mt-6 flex min-h-14 w-full items-center justify-center gap-2 rounded-full px-8 text-[0.8rem] font-semibold tracking-[0.12em] uppercase transition-colors",
+          "mt-6 flex min-h-14 w-full items-center justify-center gap-2 rounded-full px-8 text-[0.8rem] font-semibold tracking-[0.12em] uppercase transition-[color,background-color,transform] duration-[180ms] active:scale-[0.98]",
           dark ? "bg-lait text-encre hover:bg-mousse" : "bg-foret text-lait hover:bg-matcha hover:text-encre",
           "disabled:opacity-60",
         )}

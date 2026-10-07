@@ -19,6 +19,8 @@ test("hero is readable and clickable on slow 3G", async ({ browser }) => {
   const textMs = Date.now() - start;
   const cta = page.getByRole("link", { name: "Être prévenu du lancement" }).first();
   await expect(cta).toBeInViewport();
+  /* The 600 ms entrance moves the title by design: measure once it has settled. */
+  await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
   const box = await h1.boundingBox();
   await page.waitForLoadState("load", { timeout: 60_000 });
   const after = await h1.boundingBox();

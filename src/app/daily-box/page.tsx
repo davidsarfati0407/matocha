@@ -3,7 +3,7 @@ import { PageIntro } from "@/components/blocks/PageIntro";
 import { ProofValue } from "@/components/blocks/ProofValue";
 import { FaqList } from "@/components/blocks/FaqList";
 import { ProductCard } from "@/components/blocks/ProductCard";
-import { Photo } from "@/components/media/Photo";
+import { Render } from "@/components/media/Render";
 import { ButtonLink } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Section";
 import { WaitlistForm } from "@/components/ui/WaitlistForm";
@@ -49,7 +49,7 @@ export default async function DailyBoxPage() {
 
       <section aria-labelledby="acheter-title" className="pb-16">
         <Container wide className="grid items-start gap-10 lg:grid-cols-[1fr_1fr] lg:gap-16">
-          <Photo id="matocha-latte" priority sizes="(min-width: 1024px) 45vw, 100vw" />
+          <Render id="matocha-v2-marketing" priority sizes="(min-width: 1024px) 560px, 100vw" mobileSizes="calc(100vw - 40px)" className="w-full max-w-[560px]" />
           <div>
             <h2 id="acheter-title" className="sr-only">
               {product.name}

@@ -52,16 +52,23 @@ export const fr = {
     prelaunchLine: "Le premier lot se prépare. Soyez prévenu du lancement.",
   },
 
-  /* Home, scroll narrative: one idea per screen, a short title and one line at most. */
+  /* Home: short titles, one line each. Facts stay in the catalogue. */
   scenes: {
-    hero: { label: "Matcha Original · Daily Box", line: "Une dose de matcha dans un stick." },
-    gesture: { label: "Ouvrir, verser", title: "Le geste.", line: "Vous déchirez le stick, vous versez. La dose est déjà mesurée." },
-    foam: { label: "Fouetter", title: "La mousse.", line: "Fouettez, moussez ou secouez : la couleur devient uniforme." },
-    temperature: { label: "Préparer", title: "Chaud ou glacé.", line: "Lait chaud, pas bouillant. Ou lait froid et glaçons." },
+    hero: { label: "Matcha Original · Daily Box", line: "Une dose de matcha dans un stick. Vous l'ouvrez, vous la versez, vous la préparez." },
+    prep: {
+      label: "Préparer",
+      title: "Quatre gestes.",
+      steps: [
+        { label: "Étape 1 sur 4", title: "Ouvrir.", text: "Déchirez le stick au niveau de l'encoche." },
+        { label: "Étape 2 sur 4", title: "Verser.", text: "Versez la poudre dans le verre ou la tasse. La dose est déjà mesurée." },
+        { label: "Étape 3 sur 4", title: "Fouetter.", text: "Fouettez, moussez ou secouez : la poudre se répartit, la couleur devient uniforme." },
+        { label: "Étape 4 sur 4", title: "Savourer.", text: "Chaud ou glacé : lait chaud, pas bouillant, ou lait froid et glaçons." },
+      ],
+    },
     ingredient: {
       label: "Dedans",
       title: "Des feuilles, broyées très fin.",
-      line: "Composition et origine s'affichent ici dès qu'elles sont confirmées.",
+      line: "La poudre ne fond pas, elle se fouette. Composition et origine s'affichent dès qu'elles sont confirmées.",
       link: "Notre produit",
     },
     box: { label: "La Daily Box", beats: ["Trente sticks.", "Un par jour.", "2 g chacun, déjà dosés."] },

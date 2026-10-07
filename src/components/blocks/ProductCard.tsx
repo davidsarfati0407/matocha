@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 /** One product, one price, one CTA. */
 export function ProductCard({ product, className }: { product: ReturnType<typeof productView>; className?: string }) {
   return (
-    <article id="acheter" className={cn("scroll-mt-24 rounded-3xl border border-encre/15 bg-lait p-7", className)}>
+    <article id="acheter" className={cn("scroll-mt-24 rounded-3xl border border-encre/15 bg-lait p-7 transition-[transform,box-shadow] duration-[250ms] ease-out hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-24px_rgba(21,61,45,0.45)] motion-reduce:hover:translate-y-0", className)}>
       <div className="flex flex-wrap items-center gap-2">
         <span className="concept-tag">{product.statusLabel}</span>
         {product.devLabel && <span className="concept-tag">{product.devLabel}</span>}

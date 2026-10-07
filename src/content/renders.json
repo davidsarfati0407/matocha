@@ -1,0 +1,349 @@
+{
+  "matocha-v2-hero": {
+    "master": {
+      "width": 1672,
+      "height": 941,
+      "format": "jpeg"
+    },
+    "crops": {
+      "full": {
+        "width": 1672,
+        "height": 941,
+        "avif": [
+          [
+            480,
+            "/renders/v2/matocha-v2-hero-full-480.avif"
+          ],
+          [
+            640,
+            "/renders/v2/matocha-v2-hero-full-640.avif"
+          ],
+          [
+            828,
+            "/renders/v2/matocha-v2-hero-full-828.avif"
+          ],
+          [
+            1080,
+            "/renders/v2/matocha-v2-hero-full-1080.avif"
+          ],
+          [
+            1280,
+            "/renders/v2/matocha-v2-hero-full-1280.avif"
+          ],
+          [
+            1672,
+            "/renders/v2/matocha-v2-hero-full-1672.avif"
+          ]
+        ],
+        "webp": [
+          [
+            480,
+            "/renders/v2/matocha-v2-hero-full-480.webp"
+          ],
+          [
+            640,
+            "/renders/v2/matocha-v2-hero-full-640.webp"
+          ],
+          [
+            828,
+            "/renders/v2/matocha-v2-hero-full-828.webp"
+          ],
+          [
+            1080,
+            "/renders/v2/matocha-v2-hero-full-1080.webp"
+          ],
+          [
+            1280,
+            "/renders/v2/matocha-v2-hero-full-1280.webp"
+          ],
+          [
+            1672,
+            "/renders/v2/matocha-v2-hero-full-1672.webp"
+          ]
+        ],
+        "fallback": "/renders/v2/matocha-v2-hero-full-1080.jpg"
+      },
+      "mobile": {
+        "width": 1050,
+        "height": 941,
+        "avif": [
+          [
+            480,
+            "/renders/v2/matocha-v2-hero-mobile-480.avif"
+          ],
+          [
+            640,
+            "/renders/v2/matocha-v2-hero-mobile-640.avif"
+          ],
+          [
+            828,
+            "/renders/v2/matocha-v2-hero-mobile-828.avif"
+          ],
+          [
+            1050,
+            "/renders/v2/matocha-v2-hero-mobile-1050.avif"
+          ]
+        ],
+        "webp": [
+          [
+            480,
+            "/renders/v2/matocha-v2-hero-mobile-480.webp"
+          ],
+          [
+            640,
+            "/renders/v2/matocha-v2-hero-mobile-640.webp"
+          ],
+          [
+            828,
+            "/renders/v2/matocha-v2-hero-mobile-828.webp"
+          ],
+          [
+            1050,
+            "/renders/v2/matocha-v2-hero-mobile-1050.webp"
+          ]
+        ],
+        "fallback": "/renders/v2/matocha-v2-hero-mobile-1050.jpg"
+      }
+    }
+  },
+  "matocha-v2-marketing": {
+    "master": {
+      "width": 1122,
+      "height": 1402,
+      "format": "jpeg"
+    },
+    "crops": {
+      "full": {
+        "width": 1122,
+        "height": 1402,
+        "avif": [
+          [
+            480,
+            "/renders/v2/matocha-v2-marketing-full-480.avif"
+          ],
+          [
+            640,
+            "/renders/v2/matocha-v2-marketing-full-640.avif"
+          ],
+          [
+            828,
+            "/renders/v2/matocha-v2-marketing-full-828.avif"
+          ],
+          [
+            1080,
+            "/renders/v2/matocha-v2-marketing-full-1080.avif"
+          ],
+          [
+            1122,
+            "/renders/v2/matocha-v2-marketing-full-1122.avif"
+          ]
+        ],
+        "webp": [
+          [
+            480,
+            "/renders/v2/matocha-v2-marketing-full-480.webp"
+          ],
+          [
+            640,
+            "/renders/v2/matocha-v2-marketing-full-640.webp"
+          ],
+          [
+            828,
+            "/renders/v2/matocha-v2-marketing-full-828.webp"
+          ],
+          [
+            1080,
+            "/renders/v2/matocha-v2-marketing-full-1080.webp"
+          ],
+          [
+            1122,
+            "/renders/v2/matocha-v2-marketing-full-1122.webp"
+          ]
+        ],
+        "fallback": "/renders/v2/matocha-v2-marketing-full-1080.jpg"
+      }
+    }
+  },
+  "matocha-v2-poudre": {
+    "master": {
+      "width": 1122,
+      "height": 1402,
+      "format": "jpeg"
+    },
+    "crops": {
+      "full": {
+        "width": 1122,
+        "height": 1402,
+        "avif": [
+          [
+            480,
+            "/renders/v2/matocha-v2-poudre-full-480.avif"
+          ],
+          [
+            640,
+            "/renders/v2/matocha-v2-poudre-full-640.avif"
+          ],
+          [
+            828,
+            "/renders/v2/matocha-v2-poudre-full-828.avif"
+          ],
+          [
+            1080,
+            "/renders/v2/matocha-v2-poudre-full-1080.avif"
+          ],
+          [
+            1122,
+            "/renders/v2/matocha-v2-poudre-full-1122.avif"
+          ]
+        ],
+        "webp": [
+          [
+            480,
+            "/renders/v2/matocha-v2-poudre-full-480.webp"
+          ],
+          [
+            640,
+            "/renders/v2/matocha-v2-poudre-full-640.webp"
+          ],
+          [
+            828,
+            "/renders/v2/matocha-v2-poudre-full-828.webp"
+          ],
+          [
+            1080,
+            "/renders/v2/matocha-v2-poudre-full-1080.webp"
+          ],
+          [
+            1122,
+            "/renders/v2/matocha-v2-poudre-full-1122.webp"
+          ]
+        ],
+        "fallback": "/renders/v2/matocha-v2-poudre-full-1080.jpg"
+      }
+    }
+  },
+  "matocha-v2-latte": {
+    "master": {
+      "width": 1122,
+      "height": 1402,
+      "format": "jpeg"
+    },
+    "crops": {
+      "full": {
+        "width": 1122,
+        "height": 1402,
+        "avif": [
+          [
+            480,
+            "/renders/v2/matocha-v2-latte-full-480.avif"
+          ],
+          [
+            640,
+            "/renders/v2/matocha-v2-latte-full-640.avif"
+          ],
+          [
+            828,
+            "/renders/v2/matocha-v2-latte-full-828.avif"
+          ],
+          [
+            1080,
+            "/renders/v2/matocha-v2-latte-full-1080.avif"
+          ],
+          [
+            1122,
+            "/renders/v2/matocha-v2-latte-full-1122.avif"
+          ]
+        ],
+        "webp": [
+          [
+            480,
+            "/renders/v2/matocha-v2-latte-full-480.webp"
+          ],
+          [
+            640,
+            "/renders/v2/matocha-v2-latte-full-640.webp"
+          ],
+          [
+            828,
+            "/renders/v2/matocha-v2-latte-full-828.webp"
+          ],
+          [
+            1080,
+            "/renders/v2/matocha-v2-latte-full-1080.webp"
+          ],
+          [
+            1122,
+            "/renders/v2/matocha-v2-latte-full-1122.webp"
+          ]
+        ],
+        "fallback": "/renders/v2/matocha-v2-latte-full-1080.jpg"
+      }
+    }
+  },
+  "matocha-v2-swirl": {
+    "master": {
+      "width": 1672,
+      "height": 941,
+      "format": "jpeg"
+    },
+    "crops": {
+      "full": {
+        "width": 1672,
+        "height": 941,
+        "avif": [
+          [
+            480,
+            "/renders/v2/matocha-v2-swirl-full-480.avif"
+          ],
+          [
+            640,
+            "/renders/v2/matocha-v2-swirl-full-640.avif"
+          ],
+          [
+            828,
+            "/renders/v2/matocha-v2-swirl-full-828.avif"
+          ],
+          [
+            1080,
+            "/renders/v2/matocha-v2-swirl-full-1080.avif"
+          ],
+          [
+            1280,
+            "/renders/v2/matocha-v2-swirl-full-1280.avif"
+          ],
+          [
+            1672,
+            "/renders/v2/matocha-v2-swirl-full-1672.avif"
+          ]
+        ],
+        "webp": [
+          [
+            480,
+            "/renders/v2/matocha-v2-swirl-full-480.webp"
+          ],
+          [
+            640,
+            "/renders/v2/matocha-v2-swirl-full-640.webp"
+          ],
+          [
+            828,
+            "/renders/v2/matocha-v2-swirl-full-828.webp"
+          ],
+          [
+            1080,
+            "/renders/v2/matocha-v2-swirl-full-1080.webp"
+          ],
+          [
+            1280,
+            "/renders/v2/matocha-v2-swirl-full-1280.webp"
+          ],
+          [
+            1672,
+            "/renders/v2/matocha-v2-swirl-full-1672.webp"
+          ]
+        ],
+        "fallback": "/renders/v2/matocha-v2-swirl-full-1080.jpg"
+      }
+    }
+  }
+}
