@@ -10,6 +10,8 @@ export const fr = {
   meta: {
     siteName: "Matocha",
     titleDefault: "Matocha — Le matcha, en plus simple",
+    /* Title of the link preview when the site is shared. */
+    shareTitle: "MATOCHA - Matcha. Made simple.",
     descriptionPrelaunch:
       "Une dose de matcha dans un stick : vous l'ouvrez, vous la versez, vous la préparez. Matocha est en préparation ; inscrivez-vous pour être prévenu du lancement.",
     descriptionSale:
@@ -48,6 +50,23 @@ export const fr = {
     ctaPrelaunch: "Être prévenu du lancement",
     ctaSale: "Ajouter au panier",
     prelaunchLine: "Le premier lot se prépare. Soyez prévenu du lancement.",
+  },
+
+  /* Home, scroll narrative: one idea per screen, a short title and one line at most. */
+  scenes: {
+    hero: { label: "Matcha Original · Daily Box", line: "Une dose de matcha dans un stick." },
+    gesture: { label: "Ouvrir, verser", title: "Le geste.", line: "Vous déchirez le stick, vous versez. La dose est déjà mesurée." },
+    foam: { label: "Fouetter", title: "La mousse.", line: "Fouettez, moussez ou secouez : la couleur devient uniforme." },
+    temperature: { label: "Préparer", title: "Chaud ou glacé.", line: "Lait chaud, pas bouillant. Ou lait froid et glaçons." },
+    ingredient: {
+      label: "Dedans",
+      title: "Des feuilles, broyées très fin.",
+      line: "Composition et origine s'affichent ici dès qu'elles sont confirmées.",
+      link: "Notre produit",
+    },
+    box: { label: "La Daily Box", beats: ["Trente sticks.", "Un par jour.", "2 g chacun, déjà dosés."] },
+    everywhere: { label: "Dans la poche", title: "Partout.", line: "Le stick se glisse partout. Il reste à mélanger." },
+    final: { label: "Pré-lancement", labelSale: "Disponible" },
   },
 
   gesture: {

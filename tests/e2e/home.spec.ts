@@ -34,6 +34,23 @@ test.describe("pré-lancement", () => {
     await expect(page.getByRole("textbox", { name: "Adresse e-mail" })).toHaveCount(0);
   });
 
+  test("link previews: Open Graph and Twitter tags with the latte card", async ({ request }) => {
+    const html = await (await request.get("/")).text();
+    expect(html).toContain('<meta property="og:title" content="MATOCHA - Matcha. Made simple."/>');
+    expect(html).toContain('<meta name="twitter:title" content="MATOCHA - Matcha. Made simple."/>');
+    expect(html).toContain('<meta name="twitter:card" content="summary_large_image"/>');
+    expect(html).toMatch(/<meta property="og:description" content="[^"]{40,}"/);
+    const og = html.match(/<meta property="og:image" content="([^"]+)"/)?.[1];
+    const tw = html.match(/<meta name="twitter:image" content="([^"]+)"/)?.[1];
+    expect(og).toBeTruthy();
+    expect(tw).toBeTruthy();
+    for (const url of [og!, tw!]) {
+      const res = await request.get(new URL(url).pathname + new URL(url).search);
+      expect(res.status()).toBe(200);
+      expect(res.headers()["content-type"]).toBe("image/png");
+    }
+  });
+
   test("checkout API refuses in pre-launch", async ({ request }) => {
     const res = await request.post("/api/checkout", {
       headers: { "Idempotency-Key": "e2e-1" },
@@ -55,16 +72,39 @@ test.describe("produit unique, mode réaliste", () => {
       await page.goto(path);
       await expect(page.locator("main svg, footer svg, header svg"), path).toHaveCount(0);
       await expect(page.locator("canvas"), path).toHaveCount(0);
-      const srcs = await page.locator("main img").evaluateAll((imgs) => imgs.map((i) => decodeURIComponent((i as HTMLImageElement).currentSrc)));
-      for (const src of srcs) expect(src, path).toMatch(/\/renders\/(layers\/)?matocha-(sticks|latte|box|jet|verre|stick|boite)\.png/);
+      const srcs = await page.locator("main img").evaluateAll((imgs) => imgs.map((i) => decodeURIComponent(i.getAttribute("src") ?? "")));
+      for (const src of srcs) expect(src, path).toMatch(/\/renders\/matocha-(sticks|latte|box|jet|poudre|swirl|latte-verse|texture)\.(png|jpg)/);
     }
+  });
+
+  test("no visual is repeated anywhere on the site", async ({ page }) => {
+    const seen = new Map<string, string>();
+    for (const path of ["/", "/daily-box", "/preparer", "/notre-produit", "/faq", "/recettes", "/aide", "/journal", "/page-inexistante"]) {
+      await page.goto(path);
+      const srcs = await page.locator("main img").evaluateAll((imgs) =>
+        imgs.map((i) => decodeURIComponent(i.getAttribute("src") ?? "").match(/\/renders\/([\w-]+)\./)?.[1] ?? "?"),
+      );
+      for (const id of srcs) {
+        expect(seen.get(id), `${id} on ${path}, already on ${seen.get(id)}`).toBeUndefined();
+        seen.set(id, path);
+      }
+    }
+    /* The seven home scenes each have their own render. */
+    expect([...seen].filter(([, p]) => p === "/").map(([id]) => id)).toEqual([
+      "matocha-sticks",
+      "matocha-poudre",
+      "matocha-swirl",
+      "matocha-latte-verse",
+      "matocha-texture",
+      "matocha-box",
+      "matocha-jet",
+    ]);
   });
 
   test("every visual carries the concept mention", async ({ page }) => {
     await page.goto("/");
-    /* Hero composition, Daily Box composition, two photos. */
-    const frames = page.locator("main figure, main [role=img]");
-    await expect(frames).toHaveCount(4);
+    const frames = page.locator("main figure");
+    await expect(frames).toHaveCount(7);
     for (const f of await frames.all()) await expect(f.getByText("Visuel de concept")).toHaveCount(1);
   });
 
@@ -83,20 +123,47 @@ test.describe("produit unique, mode réaliste", () => {
     }
   });
 
-  test("motion design: staged entrance and floating stick, all off in reduced motion", async ({ browser }) => {
+  test("motion: staged entrance and ken burns, all off in reduced motion", async ({ browser }) => {
     for (const motion of ["no-preference", "reduce"] as const) {
       const ctx = await browser.newContext({ reducedMotion: motion });
       const page = await ctx.newPage();
       await page.goto("/");
       const names = await page.evaluate(() =>
-        [".word > span", ".arrive", ".float", ".pop", ".cascade"].map((sel) => getComputedStyle(document.querySelector(sel)!).animationName),
+        [".word > span", ".cascade", ".arrive-soft", ".kb"].map((sel) => getComputedStyle(document.querySelector(sel)!).animationName),
       );
       if (motion === "reduce") expect(names.every((n) => n === "none")).toBe(true);
-      else expect(names).toEqual(["matocha-word", "matocha-arrive", "matocha-float", "matocha-pop", "matocha-rise"]);
+      else expect(names).toEqual(["matocha-word", "matocha-rise", "matocha-settle", "matocha-kb"]);
       /* The title is readable text, not split letters for screen readers. */
       await expect(page.getByRole("heading", { level: 1 })).toHaveText("Le matcha, en plus simple.");
       await ctx.close();
     }
+  });
+
+  test("the Daily Box stays in place while its lines scroll by", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/");
+    const box = page.locator("#daily-box figure");
+    await page.locator("#daily-box").evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY));
+    await page.waitForTimeout(200);
+    const before = await box.boundingBox();
+    await page.mouse.wheel(0, 1200);
+    await page.waitForTimeout(400);
+    const after = await box.boundingBox();
+    expect(Math.abs((after?.y ?? 0) - (before?.y ?? 1))).toBeLessThan(2);
+    await expect(page.getByText("Un par jour.")).toBeInViewport();
+  });
+
+  test("parallax: text and render drift at different speeds", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("#geste-title").scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
+    const offsets = await page.evaluate(() =>
+      [...document.querySelector("section[aria-labelledby=geste-title]")!.querySelectorAll<HTMLElement>("[data-depth]")].map((el) =>
+        el.style.getPropertyValue("--py"),
+      ),
+    );
+    expect(offsets).toHaveLength(2);
+    expect(offsets[0]).not.toBe(offsets[1]);
   });
 
   test("sections reveal on scroll, and nothing stays hidden after a fast jump", async ({ page }) => {
@@ -122,11 +189,11 @@ test.describe("produit unique, mode réaliste", () => {
   });
 
   test("FAQ opens with the keyboard; /preparer says when a combination is untested", async ({ page }) => {
-    await page.goto("/");
-    const summary = page.locator("#fin summary").first();
+    await page.goto("/faq");
+    const summary = page.locator("main summary").first();
     await summary.focus();
     await page.keyboard.press("Enter");
-    await expect(page.locator("#fin details").first()).toHaveAttribute("open", "");
+    await expect(page.locator("main details").first()).toHaveAttribute("open", "");
     await page.goto("/preparer");
     await page.getByText("Rien de tout ça").click();
     await expect(page.getByText("La poudre a besoin de mouvement.")).toBeVisible();
@@ -160,5 +227,13 @@ test.describe("mobile", () => {
   test("nothing overflows horizontally", async ({ page }) => {
     await page.goto("/");
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
+  });
+
+  test("the waitlist honeypot is out of reach for people", async ({ page }) => {
+    await page.goto("/");
+    const trap = page.locator("input[name=website]");
+    if ((await trap.count()) === 0) return; /* form closed in this environment */
+    await expect(trap).toHaveAttribute("tabindex", "-1");
+    await expect(trap).not.toBeInViewport();
   });
 });

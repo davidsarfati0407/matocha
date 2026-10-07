@@ -49,7 +49,7 @@ export default async function DailyBoxPage() {
 
       <section aria-labelledby="acheter-title" className="pb-16">
         <Container wide className="grid items-start gap-10 lg:grid-cols-[1fr_1fr] lg:gap-16">
-          <Photo id="matocha-box" priority sizes="(min-width: 1024px) 45vw, 100vw" />
+          <Photo id="matocha-latte" priority sizes="(min-width: 1024px) 45vw, 100vw" />
           <div>
             <h2 id="acheter-title" className="sr-only">
               {product.name}
@@ -61,7 +61,7 @@ export default async function DailyBoxPage() {
       </section>
 
       <section aria-labelledby="geste" className="sec">
-        <Container wide className="grid items-center gap-10 lg:grid-cols-[1fr_1fr] lg:gap-16">
+        <Container wide>
           <div>
             <h2 id="geste" className="text-4xl u-caps">{fr.gesture.title}</h2>
             <ol className="mt-8 space-y-4">
@@ -77,7 +77,6 @@ export default async function DailyBoxPage() {
             </ol>
             <p className="mt-6 text-sm">{fr.gesture.volumesPending}</p>
           </div>
-          <Photo id="matocha-latte" parallax sizes="(min-width: 1024px) 45vw, 100vw" />
         </Container>
       </section>
 
@@ -89,7 +88,6 @@ export default async function DailyBoxPage() {
               Ces informations sont obligatoires avant toute vente à distance. Elles s&apos;affichent « {fr.status.pending} » tant
               qu&apos;elles ne sont pas confirmées par le fabricant et nos documents.
             </p>
-            <Photo id="matocha-sticks" className="mt-8 hidden lg:block" sizes="45vw" ratio="aspect-[4/3]" />
           </div>
           <dl className="self-start divide-y divide-encre/15 border-y border-encre/15">
             {mandatory.map(([label, value]) => (

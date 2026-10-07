@@ -40,14 +40,16 @@ export async function generateMetadata(): Promise<Metadata> {
     description,
     applicationName: "Matocha",
     alternates: { canonical: "/" },
+    /* Images come from opengraph-image.tsx / twitter-image.tsx (the latte render). */
     openGraph: {
       type: "website",
       siteName: "Matocha",
-      title: fr.meta.titleDefault,
+      title: fr.meta.shareTitle,
       description,
       locale: "fr_FR",
+      url: "/",
     },
-    twitter: { card: "summary_large_image", title: fr.meta.titleDefault, description },
+    twitter: { card: "summary_large_image", title: fr.meta.shareTitle, description },
   };
 }
 

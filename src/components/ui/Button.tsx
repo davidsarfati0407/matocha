@@ -31,7 +31,7 @@ type CommonProps = {
 
 function classes({ variant = "solid", size = "lg", full, className }: CommonProps) {
   return cn(
-    "group relative inline-flex items-center justify-center overflow-hidden",
+    "group relative inline-flex items-center justify-center overflow-hidden rounded-full",
     "u-label font-semibold text-center",
     "transition-colors duration-500 ease-[var(--ease-matocha)]",
     "disabled:pointer-events-none disabled:opacity-45",

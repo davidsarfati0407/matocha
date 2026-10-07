@@ -117,6 +117,52 @@
     font-weight: 600;
   }
 
+  /* Scroll narrative typography: small-caps labels, very large airy titles. */
+  .eyebrow {
+    font-size: 0.75rem;
+    line-height: 1.3;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--matcha-profond);
+  }
+
+  .display {
+    font-size: clamp(2.75rem, 6.4vw, 6.25rem);
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+    font-weight: 600;
+    text-wrap: balance;
+  }
+  .display-xl {
+    font-size: clamp(3.25rem, 8.2vw, 8.5rem);
+    line-height: 0.92;
+  }
+
+  .lede {
+    max-width: 34ch;
+    font-size: clamp(1.125rem, 1.5vw, 1.375rem);
+    line-height: 1.5;
+    color: color-mix(in oklab, currentColor 78%, transparent);
+  }
+
+  /* Daily Box beats: frosted card over the sticky box on phones, bare text beside it on desktop. */
+  .beat-card {
+    width: 100%;
+    padding: 1.5rem;
+    background: color-mix(in oklab, var(--lait-avoine) 86%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  @media (min-width: 1024px) {
+    .beat-card {
+      padding: 0;
+      background: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
+
   .u-prose p + p {
     margin-top: 0.85em;
   }
@@ -164,7 +210,7 @@
 /* ---------------------------------------------------------------- motion */
 
 /* ==========================================================================
-   MOTION — product layers cut from the renders (public/renders/layers/).
+   MOTION — scroll narrative on the renders (public/renders/).
    Everything below is transform/opacity only (compositor-friendly) and is
    switched off under prefers-reduced-motion. Entrance animations are pure
    CSS: they play without JavaScript and end on the visible state.
@@ -214,67 +260,44 @@
   }
 }
 
-/* The product arrives with a light bounce. */
-.arrive {
-  animation: matocha-arrive 1.05s var(--ease-bounce) both;
-  animation-delay: var(--d, 0.2s);
+/* The hero render settles in: a soft unveil, no bounce. */
+.arrive-soft {
+  animation: matocha-settle 1.4s var(--ease-out-soft) both;
+  animation-delay: var(--d, 0.15s);
 }
-@keyframes matocha-arrive {
+@keyframes matocha-settle {
   from {
     opacity: 0;
-    transform: translate3d(0, 46px, 0) scale(0.96) rotate(var(--r0, 0deg));
+    clip-path: inset(8% 0 0 0);
   }
   to {
     opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1) rotate(var(--r1, 0deg));
+    clip-path: inset(0 0 0 0);
   }
 }
 
-/* The badge pops in. */
-.pop {
-  animation: matocha-pop 0.6s var(--ease-bounce) both;
-  animation-delay: var(--d, 1s);
+/* Ken Burns, very light: a slow breath on the full-screen renders. */
+.kb {
+  animation: matocha-kb 26s ease-in-out infinite alternate;
+  transform-origin: 55% 45%;
+  will-change: transform;
 }
-@keyframes matocha-pop {
+@keyframes matocha-kb {
   from {
-    opacity: 0;
-    transform: scale(0.6);
-  }
-  to {
-    opacity: 1;
     transform: scale(1);
   }
-}
-
-/* Continuous micro-movement: the stick floats. */
-.float {
-  animation: matocha-float 6.5s ease-in-out infinite;
-  animation-delay: var(--d, 1.4s);
-}
-@keyframes matocha-float {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
-  }
-  50% {
-    transform: translate3d(0, -10px, 0) rotate(1.2deg);
+  to {
+    transform: scale(1.06);
   }
 }
 
-/* The floor shadow breathes with the float. */
-.float-shadow {
-  animation: matocha-float-shadow 6.5s ease-in-out infinite;
-  animation-delay: var(--d, 1.4s);
+/* Cover crop: focal point per breakpoint, so the subject stays in frame. */
+.scene-focus {
+  object-position: var(--f, 50% 50%);
 }
-@keyframes matocha-float-shadow {
-  0%,
-  100% {
-    transform: scaleX(1);
-    opacity: 0.55;
-  }
-  50% {
-    transform: scaleX(0.9);
-    opacity: 0.38;
+@media (min-width: 1024px) {
+  .scene-focus {
+    object-position: var(--f-lg, var(--f, 50% 50%));
   }
 }
 
@@ -332,10 +355,8 @@ html.motion-ok [data-reveal].is-in {
   .spinner,
   .word > span,
   .cascade,
-  .arrive,
-  .pop,
-  .float,
-  .float-shadow {
+  .arrive-soft,
+  .kb {
     animation: none !important;
   }
 

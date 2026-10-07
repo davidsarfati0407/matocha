@@ -43,7 +43,7 @@ export function WaitlistForm({
 
   if (status === "closed") {
     return (
-      <div className={cn("border p-5", dark ? "border-lait/30" : "border-encre/20", className)} role="status">
+      <div className={cn("rounded-3xl border p-6", dark ? "border-lait/25" : "border-encre/15", className)} role="status">
         <p className="text-lg font-semibold">{fr.waitlist.closed}</p>
         <p className="mt-2 text-sm">{fr.waitlist.closedDetail}</p>
       </div>
@@ -56,6 +56,7 @@ export function WaitlistForm({
     const form = new FormData(event.currentTarget);
     const email = String(form.get("email") ?? "").trim();
     const consent = form.get("consent") === "on";
+    const website = String(form.get("website") ?? "");
 
     if (!EMAIL.test(email)) {
       setStatus("error");
@@ -77,12 +78,12 @@ export function WaitlistForm({
       const res = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, interests: ["original"], consent, consentVersion, source }),
+        body: JSON.stringify({ email, interests: ["original"], consent, consentVersion, source, website }),
       });
       const data = (await res.json().catch(() => ({}))) as { code?: string; message?: string };
       if (res.ok) {
         setStatus("done");
-        setMessage(fr.waitlist.success);
+        setMessage(data.message ?? fr.waitlist.success);
       } else if (res.status === 503 || data.code === "not_configured") {
         setStatus("closed");
       } else {
@@ -100,8 +101,14 @@ export function WaitlistForm({
 
   if (status === "done") {
     return (
-      <div className={cn("relative overflow-hidden border p-5", dark ? "border-lait/30" : "border-encre/20", className)} role="status">
-        <p className="text-lg font-semibold">{message}</p>
+      <div className={cn("flex items-start gap-4 rounded-3xl border p-6", dark ? "border-lait/25" : "border-encre/15", className)} role="status">
+        <span
+          aria-hidden="true"
+          className={cn("cascade flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-bold", dark ? "bg-mousse text-encre" : "bg-foret text-lait")}
+        >
+          ✓
+        </span>
+        <p className="pt-1 text-lg font-medium">{message}</p>
       </div>
     );
   }
@@ -109,8 +116,8 @@ export function WaitlistForm({
   const errorId = `${id}-error`;
 
   return (
-    <form onSubmit={onSubmit} method="post" noValidate className={className} aria-describedby={status === "error" ? errorId : undefined}>
-      <label htmlFor={`${id}-email`} className="block font-semibold">
+    <form onSubmit={onSubmit} method="post" noValidate className={cn("relative", className)} aria-describedby={status === "error" ? errorId : undefined}>
+      <label htmlFor={`${id}-email`} className={cn("eyebrow block", dark && "text-mousse")}>
         {fr.waitlist.label}
       </label>
       <input
@@ -124,11 +131,19 @@ export function WaitlistForm({
         aria-invalid={field === "email" || undefined}
         aria-describedby={field === "email" ? errorId : undefined}
         className={cn(
-          "mt-2 h-13 w-full border-b-2 bg-transparent px-1 text-lg outline-none placeholder:opacity-60 focus:border-matcha",
-          dark ? "border-lait/60" : "border-encre/50",
+          "mt-3 h-14 w-full rounded-full border bg-transparent px-6 text-lg outline-none transition-colors placeholder:opacity-55 focus:border-matcha",
+          dark ? "border-lait/40 focus:bg-lait/5" : "border-encre/30 focus:bg-white/40",
           field === "email" && "border-rhubarbe",
         )}
       />
+
+      {/* Honeypot: off-screen and out of the tab order; people leave it empty. */}
+      <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
+        <label>
+          Site web
+          <input type="text" name="website" tabIndex={-1} className="sr-only" autoComplete="off" defaultValue="" />
+        </label>
+      </div>
 
       <label className="mt-5 flex items-start gap-2 text-sm">
         {/* 44 px hit area around a 24 px box. */}
@@ -163,7 +178,7 @@ export function WaitlistForm({
         type="submit"
         disabled={!ready || status === "loading"}
         className={cn(
-          "mt-6 flex min-h-14 w-full items-center justify-center gap-2 px-8 text-sm font-semibold tracking-wide uppercase sm:w-auto",
+          "mt-6 flex min-h-14 w-full items-center justify-center gap-2 rounded-full px-8 text-[0.8rem] font-semibold tracking-[0.12em] uppercase transition-colors",
           dark ? "bg-lait text-encre hover:bg-mousse" : "bg-foret text-lait hover:bg-matcha hover:text-encre",
           "disabled:opacity-60",
         )}

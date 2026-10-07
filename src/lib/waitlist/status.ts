@@ -3,12 +3,26 @@ import { getEmailSender } from "@/lib/email";
 import { getStore } from "@/lib/store";
 
 /**
- * The waitlist is open only when a real store AND a real e-mail sender are
- * configured, so double opt-in can actually happen. Otherwise the form renders
- * "Inscriptions bientôt ouvertes" and never a fake confirmation.
+ * Formspree form id (free plan), e.g. "xyzabcde" from https://formspree.io/f/xyzabcde.
+ * Used only when the full pipeline (Supabase + Resend) is not configured.
+ */
+export function formspreeId(): string | null {
+  const id = process.env.FORMSPREE_FORM_ID?.trim();
+  return id && /^[a-zA-Z0-9]+$/.test(id) ? id : null;
+}
+
+/** Double opt-in: our own store AND e-mail sender. */
+export function hasDoubleOptIn(): boolean {
+  return getStore() !== null && getEmailSender() !== null;
+}
+
+/**
+ * The waitlist is open when addresses can really be kept: either the double
+ * opt-in pipeline, or Formspree as the free fallback. Otherwise the form
+ * renders "Inscriptions bientôt ouvertes" and never a fake confirmation.
  */
 export function isWaitlistOpen(): boolean {
-  return getStore() !== null && getEmailSender() !== null;
+  return hasDoubleOptIn() || formspreeId() !== null;
 }
 
 /** Bump when the consent text changes; stored with each lead. */

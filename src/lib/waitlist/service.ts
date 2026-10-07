@@ -5,7 +5,7 @@ import { nowIso, randomToken, sha256 } from "@/lib/ops/crypto";
 import { emitWebhook } from "@/lib/ops/webhooks";
 import { getStore } from "@/lib/store";
 import type { Row } from "@/lib/store/types";
-import { CONSENT_TEXT, CONSENT_VERSION, isWaitlistOpen } from "./status";
+import { CONSENT_TEXT, CONSENT_VERSION, formspreeId, hasDoubleOptIn, isWaitlistOpen } from "./status";
 
 /** One product: the only interest recorded is the Matcha Original Daily Box. */
 export const INTERESTS = ["original"] as const;
@@ -38,7 +38,11 @@ export const MESSAGES = {
   badRequest: "La demande n'a pas pu être lue. Réessayez.",
   serverError: "L'inscription n'a pas pu être enregistrée. Réessayez dans un instant.",
   pending: "C'est noté. Vous recevrez un e-mail pour confirmer votre inscription.",
+  received: "C'est noté. Nous vous écrirons au lancement, et seulement pour ça.",
 } as const;
+
+/** Hidden field: people never see it, naive bots fill it in. */
+export const HONEYPOT_FIELD = "website";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -58,7 +62,7 @@ export function hashIp(request: Request) {
 }
 
 export type SubscribeResult =
-  | { ok: true; status: "pending"; httpStatus: 200 }
+  | { ok: true; status: "pending" | "received"; httpStatus: 200; message: string }
   | { ok: false; code: "invalid_email" | "consent_required" | "not_configured" | "bad_request" | "server_error"; httpStatus: number; message: string };
 
 async function sendConfirmation(lead: LeadRow, confirmToken: string, unsubscribeToken: string) {
@@ -115,11 +119,32 @@ async function trackFormError() {
   }
 }
 
+const PENDING = { ok: true, status: "pending", httpStatus: 200, message: MESSAGES.pending } as const;
+const RECEIVED = { ok: true, status: "received", httpStatus: 200, message: MESSAGES.received } as const;
+
+/** Free fallback: the lead goes to Formspree, which stores it and notifies the team. */
+async function forwardToFormspree(id: string, lead: { email: string; source: string | null; interests: string[] }) {
+  const res = await fetch(`https://formspree.io/f/${id}`, {
+    method: "POST",
+    headers: { Accept: "application/json", "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: lead.email,
+      interests: lead.interests.join(", "),
+      source: lead.source ?? "",
+      consent: "oui",
+      consent_version: CONSENT_VERSION,
+      consent_text: CONSENT_TEXT,
+      _subject: "Matocha — nouvelle inscription au lancement",
+    }),
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!res.ok) throw new Error(`formspree ${res.status}`);
+}
+
 export async function subscribe(request: Request): Promise<SubscribeResult> {
   if (!isWaitlistOpen()) {
     return { ok: false, code: "not_configured", httpStatus: 503, message: MESSAGES.notConfigured };
   }
-  const store = getStore()!;
 
   let payload: Record<string, unknown>;
   try {
@@ -127,6 +152,12 @@ export async function subscribe(request: Request): Promise<SubscribeResult> {
     if (!payload || typeof payload !== "object") throw new Error();
   } catch {
     return { ok: false, code: "bad_request", httpStatus: 400, message: MESSAGES.badRequest };
+  }
+
+  /* Honeypot filled: answer exactly like a success, keep nothing. */
+  const trap = payload[HONEYPOT_FIELD];
+  if (typeof trap === "string" && trap.trim() !== "") {
+    return hasDoubleOptIn() ? PENDING : RECEIVED;
   }
 
   const email = normaliseEmail(payload.email);
@@ -145,6 +176,18 @@ export async function subscribe(request: Request): Promise<SubscribeResult> {
   const source = typeof payload.source === "string" ? payload.source.slice(0, 60) : null;
   const now = nowIso();
 
+  if (!hasDoubleOptIn()) {
+    try {
+      await forwardToFormspree(formspreeId()!, { email, source, interests });
+      return RECEIVED;
+    } catch (error) {
+      console.error("[waitlist] formspree failed", error);
+      await trackFormError();
+      return { ok: false, code: "server_error", httpStatus: 502, message: MESSAGES.serverError };
+    }
+  }
+
+  const store = getStore()!;
   try {
     const existing = await store.findOne<LeadRow>("leads", { email });
 
@@ -154,14 +197,14 @@ export async function subscribe(request: Request): Promise<SubscribeResult> {
         if (merged.length !== existing.interests.length) {
           await store.update<LeadRow>("leads", existing.id, { interests: merged });
         }
-        return { ok: true, status: "pending", httpStatus: 200 };
+        return PENDING;
       }
       const recentlySent =
         existing.last_email_sent_at &&
         Date.now() - new Date(existing.last_email_sent_at).getTime() < RESEND_COOLDOWN_MS;
       if (recentlySent) {
         await store.update<LeadRow>("leads", existing.id, { interests: merged });
-        return { ok: true, status: "pending", httpStatus: 200 };
+        return PENDING;
       }
       const confirmToken = randomToken();
       const unsubscribeToken = randomToken();
@@ -176,7 +219,7 @@ export async function subscribe(request: Request): Promise<SubscribeResult> {
         last_email_sent_at: now,
       }))!;
       await sendConfirmation(updated, confirmToken, unsubscribeToken);
-      return { ok: true, status: "pending", httpStatus: 200 };
+      return PENDING;
     }
 
     const confirmToken = randomToken();
@@ -199,7 +242,7 @@ export async function subscribe(request: Request): Promise<SubscribeResult> {
       last_email_sent_at: now,
     });
     await sendConfirmation(lead, confirmToken, unsubscribeToken);
-    return { ok: true, status: "pending", httpStatus: 200 };
+    return PENDING;
   } catch (error) {
     console.error("[waitlist] subscribe failed", error);
     return { ok: false, code: "server_error", httpStatus: 500, message: MESSAGES.serverError };

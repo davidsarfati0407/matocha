@@ -8,12 +8,12 @@ import { cn } from "@/lib/utils";
 /** One product, one price, one CTA. */
 export function ProductCard({ product, className }: { product: ReturnType<typeof productView>; className?: string }) {
   return (
-    <article id="acheter" className={cn("scroll-mt-24 border-2 border-foret bg-lait p-6", className)}>
+    <article id="acheter" className={cn("scroll-mt-24 rounded-3xl border border-encre/15 bg-lait p-7", className)}>
       <div className="flex flex-wrap items-center gap-2">
         <span className="concept-tag">{product.statusLabel}</span>
         {product.devLabel && <span className="concept-tag">{product.devLabel}</span>}
       </div>
-      <h3 className="mt-4 text-3xl u-caps">{product.packName}</h3>
+      <h3 className="mt-5 text-3xl font-semibold tracking-tight">{product.packName}</h3>
       <p className="mt-1 text-lg">{product.recipeName}</p>
       <dl className="mt-5 grid gap-3 border-t border-encre/15 pt-4 sm:grid-cols-2">
         <div>

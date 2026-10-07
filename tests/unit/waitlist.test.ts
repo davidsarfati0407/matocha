@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/waitlist/route";
 import { GET as confirm } from "@/app/api/waitlist/confirm/route";
 import { POST as unsubscribe } from "@/app/api/waitlist/unsubscribe/route";
@@ -93,5 +93,57 @@ describe("POST /api/waitlist", () => {
     const out = await unsubscribe(new Request(unsubUrl, { method: "POST" }));
     expect(out.status).toBe(200);
     expect((await getStore()!.list<LeadRow>("leads"))[0].status).toBe("unsubscribed");
+  });
+});
+
+describe("anti-spam and free fallback", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("a filled honeypot gets the same success and nothing is kept or sent", async () => {
+    const res = await submit({ ...valid, website: "https://spam.example" });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ ok: true, status: "pending" });
+    expect(await getStore()!.list("leads")).toHaveLength(0);
+    expect(consoleOutbox()).toHaveLength(0);
+  });
+
+  it("without store or e-mail, forwards the lead to Formspree and says so", async () => {
+    setupEnv({ MATOCHA_STORE: undefined, MATOCHA_EMAIL: undefined, FORMSPREE_FORM_ID: "abc123" });
+    const fetchMock = vi.fn(async () => new Response("{}", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const res = await submit(valid);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ ok: true, status: "received" });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe("https://formspree.io/f/abc123");
+    const body = JSON.parse(String(init.body));
+    expect(body).toMatchObject({ email: "lea@example.fr", consent_version: CONSENT_VERSION, source: "home" });
+    expect(JSON.stringify(body)).not.toContain("203.0.113.7");
+  });
+
+  it("Formspree honeypot hit is not forwarded", async () => {
+    setupEnv({ MATOCHA_STORE: undefined, MATOCHA_EMAIL: undefined, FORMSPREE_FORM_ID: "abc123" });
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const res = await submit({ ...valid, website: "x" });
+    expect(await res.json()).toMatchObject({ ok: true, status: "received" });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("a Formspree failure is an honest error, not a fake success", async () => {
+    setupEnv({ MATOCHA_STORE: undefined, MATOCHA_EMAIL: undefined, FORMSPREE_FORM_ID: "abc123" });
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 500 })));
+    const res = await submit(valid);
+    expect(res.status).toBe(502);
+    expect((await res.json()).code).toBe("server_error");
+  });
+
+  it("validation still applies before forwarding", async () => {
+    setupEnv({ MATOCHA_STORE: undefined, MATOCHA_EMAIL: undefined, FORMSPREE_FORM_ID: "abc123" });
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    expect((await submit({ ...valid, consent: false })).status).toBe(422);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

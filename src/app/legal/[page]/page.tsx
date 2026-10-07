@@ -69,7 +69,12 @@ function Body({ slug, catalog }: { slug: Slug; catalog: Catalog }) {
         </p>
         <p>
           <strong>Finalité.</strong> Vous prévenir du lancement de la Daily Box. Base légale : votre consentement, donné par une case non
-          pré-cochée, puis confirmé par e-mail (double opt-in).
+          pré-cochée, puis confirmé par e-mail (double opt-in) lorsque notre service d&apos;e-mail est en place.
+        </p>
+        <p>
+          <strong>Pendant le pré-lancement.</strong> Tant que notre propre base n&apos;est pas en service, l&apos;inscription (adresse e-mail,
+          version du consentement, date) est transmise à Formspree (Formspree, Inc., États-Unis), qui la conserve pour notre compte. Aucune
+          autre donnée n&apos;y est envoyée, ni votre adresse IP par nos soins.
         </p>
         <p>
           <strong>Vos droits.</strong> Désinscription en un clic depuis chaque e-mail. Droits d&apos;accès, de rectification et d&apos;effacement :

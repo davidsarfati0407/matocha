@@ -22,11 +22,10 @@
     "alt": "Une main tient un stick Matocha de 2 g devant un matcha latte glacé ; deux autres sticks sont posés sur la table.",
     "decorative": false,
     "usedIn": [
-      "home/hero",
-      "/preparer",
-      "/daily-box"
+      "/daily-box",
+      "metadata/og"
     ],
-    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée."
+    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée. Règle : un visuel = un seul emplacement sur le site."
   },
   {
     "id": "matocha-box",
@@ -51,12 +50,9 @@
     "alt": "La Daily Box Matocha, 30 × 2 g, avec trois sticks posés devant elle.",
     "decorative": false,
     "usedIn": [
-      "home/produit",
-      "/daily-box",
-      "home/fin",
-      "metadata/og"
+      "home/daily-box"
     ],
-    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée."
+    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée. Règle : un visuel = un seul emplacement sur le site."
   },
   {
     "id": "matocha-sticks",
@@ -81,13 +77,9 @@
     "alt": "Une quinzaine de sticks Matocha éparpillés sur une nappe blanche, un bol de matcha en arrière-plan.",
     "decorative": false,
     "usedIn": [
-      "home/geste",
-      "home/dedans",
-      "/daily-box",
-      "/notre-produit",
-      "404"
+      "home/hero"
     ],
-    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée."
+    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée. Règle : un visuel = un seul emplacement sur le site."
   },
   {
     "id": "matocha-jet",
@@ -112,93 +104,9 @@
     "alt": "Des sticks Matocha sur une tablette d'avion, près d'un hublot, d'une bouteille d'eau et d'un sac.",
     "decorative": false,
     "usedIn": [
-      "home/journee"
+      "home/lifestyle"
     ],
-    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée."
-  },
-  {
-    "id": "layer-verre",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "concept",
-    "kind": "image",
-    "source": "calque détouré de matocha-latte.png (masque Vision macOS, découpe locale)",
-    "license": {
-      "name": "Renders Matocha fournis par David Sarfati",
-      "url": "",
-      "commercialUse": true,
-      "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
-    },
-    "files": {
-      "desktop": "/renders/layers/matocha-verre.png",
-      "mobile": "/renders/layers/matocha-verre.png",
-      "poster": ""
-    },
-    "width": 465,
-    "height": 840,
-    "alt": "Un matcha latte glacé dans un grand verre.",
-    "decorative": true,
-    "usedIn": [
-      "home/hero",
-      "home/produit"
-    ],
-    "notes": "Calque PNG transparent issu d'un render existant. Seul un raccord de 20 px sur l'arête de la boîte a été reconstitué, à partir de ses propres pixels."
-  },
-  {
-    "id": "layer-stick",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "concept",
-    "kind": "image",
-    "source": "calque détouré de matocha-box.png (masque Vision macOS, découpe locale)",
-    "license": {
-      "name": "Renders Matocha fournis par David Sarfati",
-      "url": "",
-      "commercialUse": true,
-      "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
-    },
-    "files": {
-      "desktop": "/renders/layers/matocha-stick.png",
-      "mobile": "/renders/layers/matocha-stick.png",
-      "poster": ""
-    },
-    "width": 246,
-    "height": 719,
-    "alt": "Un stick Matocha de 2 g.",
-    "decorative": true,
-    "usedIn": [
-      "home/hero",
-      "home/produit"
-    ],
-    "notes": "Calque PNG transparent issu d'un render existant. Seul un raccord de 20 px sur l'arête de la boîte a été reconstitué, à partir de ses propres pixels."
-  },
-  {
-    "id": "layer-boite",
-    "family": "poudre",
-    "recipe": "original",
-    "status": "concept",
-    "kind": "image",
-    "source": "calque détouré de matocha-box.png (masque Vision macOS, découpe locale)",
-    "license": {
-      "name": "Renders Matocha fournis par David Sarfati",
-      "url": "",
-      "commercialUse": true,
-      "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
-    },
-    "files": {
-      "desktop": "/renders/layers/matocha-boite.png",
-      "mobile": "/renders/layers/matocha-boite.png",
-      "poster": ""
-    },
-    "width": 609,
-    "height": 852,
-    "alt": "La Daily Box Matocha, 30 × 2 g.",
-    "decorative": true,
-    "usedIn": [
-      "home/hero",
-      "home/produit"
-    ],
-    "notes": "Calque PNG transparent issu d'un render existant. Seul un raccord de 20 px sur l'arête de la boîte a été reconstitué, à partir de ses propres pixels."
+    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée. Règle : un visuel = un seul emplacement sur le site."
   },
   {
     "id": "hero-pour-poudre",
@@ -220,10 +128,8 @@
     },
     "alt": "",
     "decorative": false,
-    "usedIn": [
-      "home/hero"
-    ],
-    "notes": "Film du geste réel (déchirure, versement, mousseur, gorgée). Voir docs/media/PROMPTS.md#m01-poudre"
+    "notes": "Film du geste réel (déchirure, versement, mousseur, gorgée). Voir docs/media/PROMPTS.md#m01-poudre",
+    "usedIn": []
   },
   {
     "id": "plan-geste",
@@ -245,10 +151,8 @@
     },
     "alt": "",
     "decorative": false,
-    "usedIn": [
-      "home/geste"
-    ],
-    "notes": "Trois plans courts Ouvrir / Verser / Préparer. PROMPTS.md#m02"
+    "notes": "Trois plans courts Ouvrir / Verser / Préparer. PROMPTS.md#m02",
+    "usedIn": []
   },
   {
     "id": "macro-stick",
@@ -270,10 +174,8 @@
     },
     "alt": "",
     "decorative": false,
-    "usedIn": [
-      "home/dedans"
-    ],
-    "notes": "Macro du stick ouvert. PROMPTS.md#macro"
+    "notes": "Macro du stick ouvert. PROMPTS.md#macro",
+    "usedIn": []
   },
   {
     "id": "boisson-chaude",
@@ -295,9 +197,115 @@
     },
     "alt": "",
     "decorative": false,
+    "notes": "Matcha chaud terminé. PROMPTS.md#boissons",
+    "usedIn": []
+  },
+  {
+    "id": "matocha-poudre",
+    "family": "poudre",
+    "recipe": "original",
+    "status": "concept",
+    "kind": "image",
+    "source": "render fourni par David (dossier « Image Matocha », 7 oct. 2026)",
+    "license": {
+      "name": "Renders Matocha fournis par David Sarfati",
+      "url": "",
+      "commercialUse": true,
+      "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
+    },
+    "files": {
+      "desktop": "/renders/matocha-poudre.jpg",
+      "mobile": "/renders/matocha-poudre.jpg",
+      "poster": ""
+    },
+    "width": 1122,
+    "height": 1402,
+    "alt": "La poudre de matcha tombe d'un stick Matocha ouvert dans un bol en céramique.",
+    "decorative": false,
     "usedIn": [
-      "/recettes"
+      "home/geste"
     ],
-    "notes": "Matcha chaud terminé. PROMPTS.md#boissons"
+    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée. Règle : un visuel = un seul emplacement sur le site."
+  },
+  {
+    "id": "matocha-swirl",
+    "family": "poudre",
+    "recipe": "original",
+    "status": "concept",
+    "kind": "image",
+    "source": "render fourni par David (dossier « Image Matocha », 7 oct. 2026)",
+    "license": {
+      "name": "Renders Matocha fournis par David Sarfati",
+      "url": "",
+      "commercialUse": true,
+      "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
+    },
+    "files": {
+      "desktop": "/renders/matocha-swirl.jpg",
+      "mobile": "/renders/matocha-swirl.jpg",
+      "poster": ""
+    },
+    "width": 1672,
+    "height": 941,
+    "alt": "Un fouet en bambou fait mousser un matcha vert vif dans un bol clair.",
+    "decorative": false,
+    "usedIn": [
+      "home/mousse"
+    ],
+    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée. Règle : un visuel = un seul emplacement sur le site."
+  },
+  {
+    "id": "matocha-latte-verse",
+    "family": "poudre",
+    "recipe": "original",
+    "status": "concept",
+    "kind": "image",
+    "source": "render fourni par David (dossier « Image Matocha », 7 oct. 2026)",
+    "license": {
+      "name": "Renders Matocha fournis par David Sarfati",
+      "url": "",
+      "commercialUse": true,
+      "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
+    },
+    "files": {
+      "desktop": "/renders/matocha-latte-verse.jpg",
+      "mobile": "/renders/matocha-latte-verse.jpg",
+      "poster": ""
+    },
+    "width": 1122,
+    "height": 1402,
+    "alt": "Du lait versé sur un matcha glacé dans un grand verre, un stick Matocha posé devant.",
+    "decorative": false,
+    "usedIn": [
+      "home/chaud-glace"
+    ],
+    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée. Règle : un visuel = un seul emplacement sur le site."
+  },
+  {
+    "id": "matocha-texture",
+    "family": "poudre",
+    "recipe": "original",
+    "status": "concept",
+    "kind": "image",
+    "source": "render fourni par David (dossier « Image Matocha », 7 oct. 2026)",
+    "license": {
+      "name": "Renders Matocha fournis par David Sarfati",
+      "url": "",
+      "commercialUse": true,
+      "proofStored": "À documenter : origine et droits d'utilisation des renders (outil de génération, conditions)"
+    },
+    "files": {
+      "desktop": "/renders/matocha-texture.jpg",
+      "mobile": "/renders/matocha-texture.jpg",
+      "poster": ""
+    },
+    "width": 1672,
+    "height": 941,
+    "alt": "Gros plan sur de la poudre de matcha répandue sur une surface claire.",
+    "decorative": false,
+    "usedIn": [
+      "home/ingredient"
+    ],
+    "notes": "Render photoréaliste, statut concept : mention « Visuel de concept » affichée. Règle : un visuel = un seul emplacement sur le site."
   }
 ]

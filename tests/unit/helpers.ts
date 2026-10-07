@@ -18,6 +18,7 @@ export function setupEnv(extra: Record<string, string | undefined> = {}) {
     STRIPE_WEBHOOK_SECRET: undefined,
     SITE_MODE_SALE_UNLOCK: undefined,
     OPS_RATE_LIMIT_PER_MIN: undefined,
+    FORMSPREE_FORM_ID: undefined,
     SITE_URL: "https://matocha.test",
     ...extra,
   };
