@@ -1,0 +1,1414 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>MATOCHA — Iced matcha latte</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Archivo";
+        src: url("assets/fonts/archivo-normal.woff2") format("woff2");
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Instrument Serif";
+        src: url("assets/fonts/instrument-serif-normal.woff2") format("woff2");
+        font-weight: 400;
+        font-style: normal;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Instrument Serif";
+        src: url("assets/fonts/instrument-serif-italic.woff2") format("woff2");
+        font-weight: 400;
+        font-style: italic;
+        font-display: block;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #f3efe5;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: "Archivo", sans-serif;
+        color: #161713;
+        background: #f3efe5;
+      }
+      .layer {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1080px;
+        height: 1920px;
+        pointer-events: none;
+      }
+      .clip {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+      }
+      .cam {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1080px;
+        height: 1920px;
+        transform-origin: 0 0;
+      }
+      .abs {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+      svg {
+        overflow: visible;
+      }
+
+      /* ------------------------------------------------------------ ground */
+      #bg {
+        background: linear-gradient(168deg, #fbf8f1 0%, #f3efe5 48%, #e9e2d3 100%);
+      }
+      #light {
+        background:
+          radial-gradient(58% 34% at 84% 3%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 72%),
+          radial-gradient(70% 30% at 20% 62%, rgba(255, 252, 244, 0.55) 0%, rgba(255, 252, 244, 0) 70%);
+      }
+      .mullion {
+        position: absolute;
+        background: rgba(22, 23, 19, 0.06);
+        filter: blur(16px);
+      }
+      .table {
+        background: linear-gradient(180deg, #e4dccb 0%, #ddd3bf 45%, #d6cbb4 100%);
+      }
+      .horizon {
+        height: 3px;
+        background: rgba(22, 23, 19, 0.1);
+      }
+      .contact {
+        border-radius: 50%;
+        background: radial-gradient(closest-side, rgba(15, 42, 30, 0.42), rgba(15, 42, 30, 0));
+      }
+      .cast {
+        background: linear-gradient(90deg, rgba(15, 42, 30, 0) 0%, rgba(15, 42, 30, 0.12) 60%, rgba(15, 42, 30, 0.2) 100%);
+        filter: blur(20px);
+      }
+
+      /* ------------------------------------------------------------ glass ink */
+      #G {
+        --ink: #161713;
+      }
+      #G .ink {
+        stroke: var(--ink);
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      #G .inkfill {
+        stroke: var(--ink);
+      }
+
+      /* ------------------------------------------------------------ type */
+      #type {
+        z-index: 5;
+      }
+      .tw {
+        position: absolute;
+        left: 80px;
+        top: 196px;
+        font-family: "Archivo", sans-serif;
+        font-weight: 760;
+        font-size: 214px;
+        line-height: 0.9;
+        letter-spacing: -0.055em;
+        white-space: nowrap;
+        opacity: 0;
+      }
+      .tw.ivory {
+        color: #f3efe5;
+      }
+      .ch {
+        display: inline-block;
+        will-change: transform;
+      }
+      .mask {
+        display: block;
+        overflow: hidden;
+        padding: 0 0.06em 0.3em 0;
+        margin-bottom: -0.3em;
+      }
+      .mask > .line {
+        display: block;
+      }
+      .serif-it {
+        font-family: "Instrument Serif", serif;
+        font-style: italic;
+        font-weight: 400;
+        letter-spacing: -0.015em;
+      }
+      #t-hook .l1 {
+        font-size: 128px;
+        line-height: 1;
+      }
+      #t-hook .l2 {
+        font-size: 134px;
+        line-height: 0.95;
+        font-weight: 780;
+        letter-spacing: -0.05em;
+      }
+      #t-tear .half {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+      #t-tear .top {
+        clip-path: polygon(0 0, 100% 0, 100% 52%, 92% 58%, 84% 49%, 76% 57%, 68% 48%, 60% 56%, 52% 47%, 44% 56%, 36% 48%, 28% 57%, 20% 49%, 12% 57%, 4% 50%, 0 55%);
+      }
+      #t-tear .bot {
+        clip-path: polygon(0 55%, 4% 50%, 12% 57%, 20% 49%, 28% 57%, 36% 48%, 44% 56%, 52% 47%, 60% 56%, 68% 48%, 76% 57%, 84% 49%, 92% 58%, 100% 52%, 100% 100%, 0 100%);
+      }
+      #t-tear .ghost {
+        visibility: hidden;
+      }
+      #t-water {
+        position: absolute;
+        left: 84px;
+        top: 410px;
+        font-size: 62px;
+        line-height: 1;
+        opacity: 0;
+        white-space: nowrap;
+      }
+      #t-hero {
+        position: absolute;
+        left: 80px;
+        top: 212px;
+        opacity: 0;
+        white-space: nowrap;
+      }
+      #t-hero .l1 {
+        font-size: 150px;
+        font-weight: 760;
+        letter-spacing: -0.055em;
+        line-height: 0.95;
+      }
+      #t-hero .l2 {
+        font-size: 172px;
+        line-height: 0.95;
+      }
+      #t-cta {
+        position: absolute;
+        left: 80px;
+        top: 214px;
+        width: 920px;
+        opacity: 0;
+      }
+      #cta-mark {
+        display: flex;
+        align-items: center;
+        gap: 26px;
+      }
+      #cta-glass {
+        width: 100px;
+        height: 110px;
+        flex: none;
+      }
+      #cta-word {
+        font-size: 150px;
+        font-weight: 620;
+        letter-spacing: -0.05em;
+        line-height: 0.86;
+        white-space: nowrap;
+      }
+      #cta-tag {
+        margin-top: 30px;
+        font-size: 92px;
+        line-height: 1;
+        white-space: nowrap;
+      }
+      #cta-facts {
+        margin-top: 34px;
+        font-size: 25px;
+        font-weight: 600;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        opacity: 0;
+        white-space: nowrap;
+      }
+      #cta-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 22px;
+        margin-top: 38px;
+        padding: 26px 44px 26px 40px;
+        border-radius: 999px;
+        background: #e07a5f;
+        color: #161713;
+        font-size: 36px;
+        font-weight: 720;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        opacity: 0;
+        transform-origin: 18% 50%;
+        position: relative;
+        overflow: hidden;
+      }
+      #cta-pill .arrow {
+        font-weight: 500;
+        letter-spacing: 0;
+      }
+      #cta-pill .shine {
+        position: absolute;
+        top: -20%;
+        left: 0;
+        width: 120px;
+        height: 140%;
+        background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.55) 50%, rgba(255, 255, 255, 0) 100%);
+        opacity: 0.8;
+      }
+
+      /* ------------------------------------------------------------ chrome */
+      #chrome {
+        z-index: 6;
+        --ci: #161713;
+      }
+      .lbl {
+        position: absolute;
+        font-family: "Archivo", sans-serif;
+        font-weight: 600;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        color: var(--ci);
+        white-space: nowrap;
+        opacity: 0;
+      }
+      .lbl .dim {
+        opacity: 0.6;
+      }
+      .ticker {
+        position: relative;
+        display: inline-block;
+        width: 2.1em;
+        height: 1em;
+        overflow: hidden;
+        vertical-align: top;
+      }
+      .ticker span {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+      }
+      #ch-wave {
+        position: absolute;
+        right: 80px;
+        bottom: 84px;
+        opacity: 0;
+      }
+      #ch-wave path {
+        stroke: var(--ci);
+        fill: none;
+        stroke-linecap: round;
+      }
+
+      /* ------------------------------------------------------------ grain */
+      #grain {
+        z-index: 7;
+        overflow: hidden;
+      }
+      #grain .tex {
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        /* texture from the registry's grain-overlay component, held still like the site's paper grain */
+        background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        opacity: 0.16;
+        mix-blend-mode: multiply;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="30"
+      data-width="1080"
+      data-height="1920"
+    >
+      <!-- shared symbols: the two stick colourways and the chasen -->
+      <svg id="defs" width="0" height="0" style="position: absolute">
+        <defs>
+          <symbol id="stk-green" viewBox="0 0 132 520">
+            <clipPath id="stkg-clip"><rect x="8" y="4" width="116" height="512" rx="7" /></clipPath>
+            <linearGradient id="stkg-sheen" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#0F2A1E" stop-opacity="0.9" />
+              <stop offset="16%" stop-color="#0F2A1E" stop-opacity="0.22" />
+              <stop offset="38%" stop-color="#FFFFFF" stop-opacity="0.13" />
+              <stop offset="60%" stop-color="#FFFFFF" stop-opacity="0.02" />
+              <stop offset="82%" stop-color="#0F2A1E" stop-opacity="0.3" />
+              <stop offset="100%" stop-color="#0F2A1E" stop-opacity="0.92" />
+            </linearGradient>
+            <clipPath id="stkg-pg"><path d="M-19 -18 C-18 0 -15 16 -12 23 C-11 26 -8 27 -5 27 L5 27 C8 27 11 26 12 23 C15 16 18 0 19 -18 Z" /></clipPath>
+            <g clip-path="url(#stkg-clip)">
+              <rect x="8" y="4" width="116" height="512" fill="#173D2B" />
+              <rect x="8" y="4" width="116" height="512" fill="url(#stkg-sheen)" />
+              <rect x="8" y="4" width="116" height="46" fill="#12331F" />
+              <rect x="8" y="470" width="116" height="46" fill="#12331F" />
+              <path d="M14 8 V46 M20 8 V46 M26 8 V46 M32 8 V46 M38 8 V46 M44 8 V46 M50 8 V46 M56 8 V46 M62 8 V46 M68 8 V46 M74 8 V46 M80 8 V46 M86 8 V46 M92 8 V46 M98 8 V46 M104 8 V46 M110 8 V46 M116 8 V46 M14 474 V512 M20 474 V512 M26 474 V512 M32 474 V512 M38 474 V512 M44 474 V512 M50 474 V512 M56 474 V512 M62 474 V512 M68 474 V512 M74 474 V512 M80 474 V512 M86 474 V512 M92 474 V512 M98 474 V512 M104 474 V512 M110 474 V512 M116 474 V512" stroke="#0B2116" stroke-width="1.4" opacity="0.5" />
+              <path d="M12 34 L120 34" stroke="#F3EFE5" stroke-width="1.6" stroke-dasharray="3 3" opacity="0.32" />
+              <g transform="translate(66 140) scale(1.5)">
+                <g clip-path="url(#stkg-pg)"><path d="M-22 2 C-12 -2 -4 4 4 1 C12 -1 17 3 22 1 L22 30 L-22 30 Z" fill="#79A84B" /></g>
+                <path d="M-19 -18 C-18 0 -15 16 -12 23 C-11 26 -8 27 -5 27 L5 27 C8 27 11 26 12 23 C15 16 18 0 19 -18" stroke="#F3EFE5" stroke-width="3" fill="none" stroke-linecap="round" />
+                <ellipse cx="0" cy="-18" rx="19" ry="3.4" stroke="#F3EFE5" stroke-width="3" fill="none" />
+                <path d="M-7 27 L7 27" stroke="#F3EFE5" stroke-width="4.5" stroke-linecap="round" />
+              </g>
+              <text transform="rotate(-90 66 330)" x="66" y="339" text-anchor="middle" fill="#F3EFE5" font-size="27" font-weight="620" letter-spacing="-0.5" font-family="Archivo">MATOCHA</text>
+              <text x="66" y="436" text-anchor="middle" fill="#F3EFE5" font-size="12" letter-spacing="4" opacity="0.72" font-family="Archivo">MATCHA</text>
+              <text x="66" y="462" text-anchor="middle" fill="#F3EFE5" font-size="17" font-weight="600" letter-spacing="2" font-family="Archivo">2G</text>
+            </g>
+          </symbol>
+
+          <symbol id="stk-ivory" viewBox="0 0 132 520">
+            <clipPath id="stki-clip"><rect x="8" y="4" width="116" height="512" rx="7" /></clipPath>
+            <linearGradient id="stki-sheen" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#CFC7B4" stop-opacity="0.9" />
+              <stop offset="16%" stop-color="#CFC7B4" stop-opacity="0.22" />
+              <stop offset="38%" stop-color="#FFFFFF" stop-opacity="0.35" />
+              <stop offset="60%" stop-color="#FFFFFF" stop-opacity="0.05" />
+              <stop offset="82%" stop-color="#CFC7B4" stop-opacity="0.3" />
+              <stop offset="100%" stop-color="#CFC7B4" stop-opacity="0.92" />
+            </linearGradient>
+            <clipPath id="stki-pg"><path d="M-19 -18 C-18 0 -15 16 -12 23 C-11 26 -8 27 -5 27 L5 27 C8 27 11 26 12 23 C15 16 18 0 19 -18 Z" /></clipPath>
+            <g clip-path="url(#stki-clip)">
+              <rect x="8" y="4" width="116" height="512" fill="#F3EFE5" />
+              <rect x="8" y="4" width="116" height="512" fill="url(#stki-sheen)" />
+              <rect x="8" y="4" width="116" height="46" fill="#E7E1D2" />
+              <rect x="8" y="470" width="116" height="46" fill="#E7E1D2" />
+              <path d="M14 8 V46 M20 8 V46 M26 8 V46 M32 8 V46 M38 8 V46 M44 8 V46 M50 8 V46 M56 8 V46 M62 8 V46 M68 8 V46 M74 8 V46 M80 8 V46 M86 8 V46 M92 8 V46 M98 8 V46 M104 8 V46 M110 8 V46 M116 8 V46 M14 474 V512 M20 474 V512 M26 474 V512 M32 474 V512 M38 474 V512 M44 474 V512 M50 474 V512 M56 474 V512 M62 474 V512 M68 474 V512 M74 474 V512 M80 474 V512 M86 474 V512 M92 474 V512 M98 474 V512 M104 474 V512 M110 474 V512 M116 474 V512" stroke="#CFC7B4" stroke-width="1.4" opacity="0.7" />
+              <g transform="translate(66 140) scale(1.5)">
+                <g clip-path="url(#stki-pg)"><path d="M-22 2 C-12 -2 -4 4 4 1 C12 -1 17 3 22 1 L22 30 L-22 30 Z" fill="#79A84B" /></g>
+                <path d="M-19 -18 C-18 0 -15 16 -12 23 C-11 26 -8 27 -5 27 L5 27 C8 27 11 26 12 23 C15 16 18 0 19 -18" stroke="#161713" stroke-width="3" fill="none" stroke-linecap="round" />
+                <ellipse cx="0" cy="-18" rx="19" ry="3.4" stroke="#161713" stroke-width="3" fill="none" />
+                <path d="M-7 27 L7 27" stroke="#161713" stroke-width="4.5" stroke-linecap="round" />
+              </g>
+              <text transform="rotate(-90 66 330)" x="66" y="339" text-anchor="middle" fill="#161713" font-size="27" font-weight="620" letter-spacing="-0.5" font-family="Archivo">MATOCHA</text>
+              <text x="66" y="436" text-anchor="middle" fill="#161713" font-size="12" letter-spacing="4" opacity="0.72" font-family="Archivo">MATCHA</text>
+              <text x="66" y="462" text-anchor="middle" fill="#161713" font-size="17" font-weight="600" letter-spacing="2" font-family="Archivo">2G</text>
+            </g>
+          </symbol>
+        </defs>
+      </svg>
+
+      <!-- ground: wall, window light, window-frame shadows (screen space) -->
+      <div id="bg" class="layer"></div>
+      <div id="mullions" class="layer" data-layout-allow-overflow>
+        <div class="mullion" style="left: -120px; top: 220px; width: 46px; height: 1500px; transform: rotate(24deg)"></div>
+        <div class="mullion" style="left: 210px; top: 120px; width: 46px; height: 1500px; transform: rotate(24deg)"></div>
+        <div class="mullion" style="left: -260px; top: 640px; width: 900px; height: 40px; transform: rotate(-8deg)"></div>
+      </div>
+      <div id="light" class="layer"></div>
+
+      <!-- ============================================== WORLD A — the box -->
+      <section id="worldA" class="clip" data-start="0" data-duration="7.5" data-track-index="1">
+        <div id="camA" class="cam">
+          <div class="abs table" data-layout-allow-overflow style="left: -700px; top: 1330px; width: 2480px; height: 1400px"></div>
+          <div class="abs horizon" data-layout-allow-overflow style="left: -700px; top: 1328px; width: 2480px"></div>
+          <div id="A-cast" class="abs cast" data-layout-allow-overflow style="left: -170px; top: 1400px; width: 760px; height: 96px; transform: skewX(-42deg)"></div>
+          <div id="A-contactwrap" class="abs" style="left: 130px; top: 1424px; width: 860px; height: 76px">
+            <div class="abs contact" style="width: 860px; height: 76px"></div>
+          </div>
+          <div id="A-boxwrap" class="abs" style="left: 160px; top: 590px; width: 760px; height: 925px">
+            <svg id="A-box" width="760" height="925" viewBox="0 0 460 560"></svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== WORLD C — the glass station -->
+      <section id="worldC" class="clip" data-start="7.5" data-duration="22.5" data-track-index="2">
+        <div id="camC" class="cam">
+          <div class="abs table" data-layout-allow-overflow style="left: -2400px; top: 1470px; width: 5200px; height: 1800px"></div>
+          <div class="abs horizon" data-layout-allow-overflow style="left: -2400px; top: 1468px; width: 5200px"></div>
+
+          <!-- the green world (whisk → milk): iris in at 15 s, iris out at 25 s -->
+          <div id="C-green" class="abs" data-layout-allow-overflow style="left: -2500px; top: -2500px; width: 6000px; height: 6000px; opacity: 0">
+            <div class="abs" style="left: 0; top: 0; width: 6000px; height: 6000px; background: #173d2b"></div>
+            <div class="abs" style="left: 2140px; top: 2900px; width: 1800px; height: 1800px; border-radius: 50%; background: radial-gradient(closest-side, rgba(52, 110, 74, 0.75), rgba(36, 89, 61, 0.35) 55%, rgba(23, 61, 43, 0))"></div>
+          </div>
+
+          <!-- hero box (arrives at 25 s) -->
+          <div id="C-boxwrap" class="abs" data-layout-allow-overflow style="left: -368px; top: 662px; width: 765px; height: 931px">
+            <div class="abs cast" style="left: -380px; top: 820px; width: 760px; height: 96px; transform: skewX(-42deg)"></div>
+            <div class="abs contact" style="left: -20px; top: 836px; width: 860px; height: 70px"></div>
+            <svg id="C-box" class="abs" width="765" height="931" viewBox="0 0 460 560"></svg>
+          </div>
+
+          <!-- glass shadows -->
+          <div class="abs cast" style="left: -90px; top: 1548px; width: 520px; height: 70px; transform: skewX(-42deg)"></div>
+          <div class="abs contact" style="left: 250px; top: 1572px; width: 580px; height: 56px"></div>
+
+          <!-- the glass -->
+          <svg id="G" class="abs" style="left: 230px; top: 975.35px" width="620" height="682" viewBox="0 0 200 220">
+            <defs>
+              <linearGradient id="G-mixgrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#79A84B" stop-opacity="0" />
+                <stop offset="0.5" stop-color="#AFCB86" stop-opacity="0.95" />
+                <stop offset="1" stop-color="#F4EFE3" stop-opacity="0" />
+              </linearGradient>
+              <clipPath id="G-whiskclip"><path d="M42 50 L42 -900 L158 -900 L158 50 C157 98 151 148 144 175 C142 185 137 189 128 189 L72 189 C63 189 58 185 56 175 C49 148 43 98 42 50 Z" /></clipPath>
+              <filter id="G-soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="0.85" /></filter>
+              <clipPath id="G-int"><path d="M42 50 C43 98 49 148 56 175 C58 185 63 189 72 189 L128 189 C137 189 142 185 144 175 C151 148 157 98 158 50 Z" /></clipPath>
+              <g id="whisk-art">
+                <rect x="-9" y="-222" width="18" height="152" rx="8" fill="#E7E1D2" style="stroke: var(--ink)" stroke-width="3.4" />
+                <path d="M-9 -162 L9 -162 M-9 -114 L9 -114" style="stroke: var(--ink)" fill="none" stroke-width="2.4" stroke-linecap="round" />
+                <path d="M-5 -210 L-5 -170 M-4 -154 L-4 -122" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" opacity="0.6" />
+                <rect x="-12" y="-75" width="24" height="11" rx="3" fill="#161713" />
+                <path d="M-11 -65 C-40 -52 -38 -8 -9 0 L9 0 C38 -8 40 -52 11 -65 Z" fill="#E7E1D2" style="stroke: var(--ink)" stroke-width="3.4" stroke-linejoin="round" />
+                <path d="M-6 -63 C-21 -47 -21 -15 -6 -2 M0 -64 C-6 -47 -6 -15 0 -1 M6 -63 C21 -47 21 -15 6 -2 M-9 -61 C-32 -45 -30 -13 -11 -3 M9 -61 C32 -45 30 -13 11 -3" style="stroke: var(--ink)" fill="none" stroke-width="1.7" stroke-linecap="round" opacity="0.75" />
+                <ellipse cx="0" cy="-37" rx="6.5" ry="18" fill="#CFC7B4" opacity="0.9" />
+              </g>
+            </defs>
+
+            <path id="G-rimback" d="M36 47 A64 9.5 0 0 1 164 47" transform="rotate(-1 100 47)" class="ink" stroke-width="7" />
+            <g id="G-whiskall" opacity="0" clip-path="url(#G-whiskclip)">
+              <use id="G-wg2" href="#whisk-art" opacity="0.14" />
+              <use id="G-wg1" href="#whisk-art" opacity="0.28" />
+              <use id="G-whisk" href="#whisk-art" />
+            </g>
+
+            <g clip-path="url(#G-int)">
+              <path id="G-mound" fill="#79A84B" d="" />
+              <g id="G-mounddots"></g>
+              <path id="G-green" fill="#79A84B" d="" />
+              <g id="G-specks"></g>
+              <g id="G-bubbles"></g>
+              <path id="G-milk" fill="#F4EFE3" d="" />
+              <path id="G-milkband" fill="url(#G-mixgrad)" d="" />
+              <g id="G-tendrils" filter="url(#G-soft)"></g>
+              <path id="G-column" fill="#F4EFE3" opacity="0.82" d="" />
+              <path id="G-foam" fill="#C9DCA6" d="" />
+              <g id="G-foamdots"></g>
+            </g>
+
+            <g id="G-ice"></g>
+            <path id="G-powderstream" fill="#79A84B" d="" />
+            <g id="G-powder"></g>
+            <g id="G-puffs"></g>
+            <path id="G-water" fill="#BCD4CB" d="" />
+            <path id="G-waterhl" fill="#F7FAF4" opacity="0.85" d="" />
+            <path id="G-milkstream" fill="#F7F3EA" d="" />
+            <path id="G-milkshade" fill="#E4DCCB" opacity="0.7" d="" />
+            <g id="G-drops"></g>
+
+            <path id="G-sheen" d="M51 74 C52 110 56 146 62 168" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" opacity="0.6" fill="none" />
+            <path id="G-sheen2" d="M146 84 C145 104 143 120 141 132" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" opacity="0.35" fill="none" />
+            <path d="M36 47 C37 97 43 149 50 178 C52 190 60 196 72 196 L129 196 C141 196 148 189 150 177 C157 148 162 96 164 47" class="ink" stroke-width="7" />
+            <path id="G-rimfront" d="M36 47 A64 9.5 0 0 0 164 47" transform="rotate(-1 100 47)" class="ink" stroke-width="7" />
+            <path d="M64 196 L136 196" class="ink" stroke-width="11" />
+          </svg>
+
+          <!-- the hero stick (match-cut from world A at 7.5 s) -->
+          <div id="C-stickwrap" class="abs">
+            <svg id="C-stick" class="abs" style="left: -77.5px; top: -37.58px" width="155" height="610.6" viewBox="0 0 132 520">
+              <defs>
+                <clipPath id="C-bodyclip"><path d="M0 34 L8 34 L20 26 L32 36 L44 27 L56 37 L68 28 L80 38 L92 29 L104 37 L116 28 L124 34 L132 34 L132 530 L0 530 Z" /></clipPath>
+                <clipPath id="C-topclip"><path d="M0 -10 L132 -10 L132 35.5 L124 35.5 L116 29.5 L104 38.5 L92 30.5 L80 39.5 L68 29.5 L56 38.5 L44 28.5 L32 37.5 L20 27.5 L8 35.5 L0 35.5 Z" /></clipPath>
+              </defs>
+              <g clip-path="url(#C-bodyclip)"><use href="#stk-green" width="132" height="520" /></g>
+              <g id="C-mouth" opacity="0">
+                <path d="M8 34 L20 26 L32 36 L44 27 L56 37 L68 28 L80 38 L92 29 L104 37 L116 28 L124 34 L124 41 L116 35 L104 44 L92 36 L80 45 L68 35 L56 44 L44 34 L32 43 L20 33 L8 41 Z" fill="#081A10" opacity="0.75" />
+                <circle cx="40" cy="33" r="2.4" fill="#79A84B" />
+                <circle cx="62" cy="34" r="3" fill="#8DB85A" />
+                <circle cx="88" cy="35" r="2.2" fill="#79A84B" />
+              </g>
+              <g id="C-toppiece"><g clip-path="url(#C-topclip)"><use href="#stk-green" width="132" height="520" /></g></g>
+            </svg>
+          </div>
+
+          <!-- world-space fx (tear puff) -->
+          <svg id="C-fx" class="abs" width="1080" height="1920" viewBox="0 0 1080 1920">
+            <defs><filter id="dust" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="7" /></filter></defs>
+            <g id="C-dust" filter="url(#dust)"></g>
+            <g id="C-specks"></g>
+          </svg>
+        </div>
+      </section>
+
+      <!-- ============================================== TYPE (screen space) -->
+      <div id="type" class="layer">
+        <div id="t-hook" class="tw">
+          <span class="mask"><span class="line l1 serif-it">Matcha latte,</span></span>
+          <span class="mask"><span class="line l2" data-split>made simple.</span></span>
+        </div>
+        <div id="t-open" class="tw">Open.</div>
+        <div id="t-tear" class="tw">
+          <span class="ghost">Tear.</span>
+          <span class="half top">Tear.</span>
+          <span class="half bot">Tear.</span>
+        </div>
+        <div id="t-pour" class="tw" data-split>Pour.</div>
+        <div id="t-water" class="serif-it">+ a splash of water</div>
+        <div id="t-whisk" class="tw ivory"><span id="t-whisk-shake" style="display: inline-block" data-split>Whisk.</span></div>
+        <div id="t-ice" class="tw ivory" data-split>Ice.</div>
+        <div id="t-milk" class="tw ivory" data-split>Milk.</div>
+        <div id="t-hero">
+          <span class="mask"><span class="line l1">One stick.</span></span>
+          <span class="mask"><span class="line l2 serif-it">One latte.</span></span>
+        </div>
+        <div id="t-cta">
+          <div id="cta-mark">
+            <svg id="cta-glass" viewBox="0 0 200 220">
+              <clipPath id="cta-gclip"><path d="M42 50 C43 98 49 148 56 175 C58 185 63 189 72 189 L128 189 C137 189 142 185 144 175 C151 148 157 98 158 50 Z" /></clipPath>
+              <g clip-path="url(#cta-gclip)"><path d="M28 109 C48 98 66 114 92 109 C118 101 140 116 172 98 L172 202 L28 202 Z" fill="#79A84B" /></g>
+              <path d="M36 47 C37 97 43 149 50 178 C52 190 60 196 72 196 L129 196 C141 196 148 189 150 177 C157 148 162 96 164 47" stroke="#161713" stroke-width="9" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+              <ellipse cx="100" cy="47" rx="64" ry="9.5" stroke="#161713" stroke-width="9" fill="none" transform="rotate(-1 100 47)" />
+              <path d="M64 196 L136 196" stroke="#161713" stroke-width="13" stroke-linecap="round" />
+            </svg>
+            <div id="cta-word" data-split>MATOCHA</div>
+          </div>
+          <div class="mask"><div id="cta-tag" class="line serif-it">Matcha. Made simple.</div></div>
+          <div id="cta-facts">100% Japanese matcha · 30 × 2g · €39</div>
+          <div id="cta-pill"><span class="shine"></span><span>Pre-order</span><span class="arrow">→</span><span>matocha.com</span></div>
+        </div>
+      </div>
+
+      <!-- ============================================== CHROME -->
+      <div id="chrome" class="layer">
+        <div id="ch-tl" class="lbl" style="left: 80px; top: 92px">Matocha <span class="dim">— Iced latte</span></div>
+        <div id="ch-tr" class="lbl" style="right: 80px; top: 92px">
+          Step <span class="ticker"><span>01</span><span>02</span><span>03</span><span>04</span><span>05</span></span>/ 05
+        </div>
+        <div id="ch-bl" class="lbl" style="left: 80px; bottom: 92px">30 × 2g · 100% Japanese matcha</div>
+        <svg id="ch-wave" width="220" height="27" viewBox="0 0 200 24">
+          <path d="M2 14 C 26 2, 48 22, 74 13 C 100 4, 122 24, 148 13 C 168 5, 184 16, 198 11" stroke-width="3" opacity="0.18" />
+          <path id="ch-wave-fill" d="M2 14 C 26 2, 48 22, 74 13 C 100 4, 122 24, 148 13 C 168 5, 184 16, 198 11" stroke-width="5" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1" />
+        </svg>
+      </div>
+
+      <div id="grain" class="layer"><div class="tex"></div></div>
+
+      <audio id="soundtrack" src="assets/audio/soundtrack.wav" data-start="0" data-duration="30" data-track-index="10" data-volume="1"></audio>
+    </div>
+
+    <script>
+      (function () {
+        const NS = "http://www.w3.org/2000/svg";
+        const $ = (id) => document.getElementById(id);
+        const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+        const lerp = (a, b, p) => a + (b - a) * p;
+        const prand = (n) => {
+          const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+          return x - Math.floor(x);
+        };
+        const EC = {};
+        const E = (n) => EC[n] || (EC[n] = gsap.parseEase(n));
+        const P = (t, a, b, e) => {
+          const p = clamp((t - a) / (b - a), 0, 1);
+          return e ? E(e)(p) : p;
+        };
+        // piecewise keyframes [[t, v, ease], ...] — the ease shapes the segment ending at that key
+        function K(t, keys) {
+          if (t <= keys[0][0]) return keys[0][1];
+          for (let i = 1; i < keys.length; i++) {
+            if (t <= keys[i][0]) return lerp(keys[i - 1][1], keys[i][1], P(t, keys[i - 1][0], keys[i][0], keys[i][2]));
+          }
+          return keys[keys.length - 1][1];
+        }
+        const hex = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+        function mix(a, b, p) {
+          const A = hex(a), B = hex(b);
+          return "rgb(" + A.map((v, i) => Math.round(lerp(v, B[i], p))).join(",") + ")";
+        }
+        const f2 = (v) => (Math.round(v * 100) / 100).toString();
+        function el(tag, attrs, parent) {
+          const e = document.createElementNS(NS, tag);
+          for (const k in attrs) e.setAttribute(k, attrs[k]);
+          if (parent) parent.appendChild(e);
+          return e;
+        }
+
+        // ------------------------------------------------------------------ geometry
+        const BOX_A = { left: 160, top: 590, k: 760 / 460 };
+        const EMBLEM = { x: BOX_A.left + 226 * BOX_A.k, y: BOX_A.top + 330 * BOX_A.k };
+        const STICK_W = 40, STICK_H = (40 * 520) / 132;
+        const HERO_REST_TOP = 70, HERO_UP_TOP = -190;
+        const SCREEN_STICK_TOP = 560, SCREEN_STICK_W = 360;
+        const CAM_A_END_S = SCREEN_STICK_W / (STICK_W * BOX_A.k);
+        const CAM_A_END = {
+          x: BOX_A.left + 226 * BOX_A.k,
+          y: BOX_A.top + HERO_UP_TOP * BOX_A.k + (960 - SCREEN_STICK_TOP) / CAM_A_END_S,
+          s: CAM_A_END_S,
+          r: 0,
+        };
+        const STICK_C_W = 155, STICK_C_K = 155 / 132;
+        const STICK_C_REST = { x: 540, y: 420 + 32 * STICK_C_K, r: 0 }; // pivot = mouth (66, 32)
+        const CAM_C_TEAR_S = SCREEN_STICK_W / STICK_C_W;
+        const CAM_C_TEAR = { x: 540, y: 420 + (960 - SCREEN_STICK_TOP) / CAM_C_TEAR_S, s: CAM_C_TEAR_S, r: 0 };
+        const GL = { left: 230, top: 975.35, k: 3.1 };
+        const POUR = { x: 635, y: 860, r: -140 };
+        const MOUTH = { x: (POUR.x - GL.left) / GL.k, y: (POUR.y - GL.top) / GL.k };
+
+        // ------------------------------------------------------------------ the box
+        const BODY = "M-58 -74 C-56 -18 -47 34 -38 61 C-35 71 -26 78 -13 78 L13 78 C26 78 34 71 37 61 C46 34 55 -18 57 -74";
+        const INTERIOR = "M-50 -68 C-48 -16 -40 32 -32 56 C-29 65 -22 70 -13 70 L13 70 C22 70 29 65 32 56 C40 32 48 -16 50 -68 Z";
+        const STICKS = [];
+        for (let k = -3; k <= 3; k++) {
+          STICKS.push({ row: "b", k, cx: 226 + k * 46 + 23, tone: k % 2 === 0 ? "ivory" : "green", top: 46 + 12 * prand(k + 21), delay: 0.03 + 0.05 * Math.abs(k + 0.5) });
+        }
+        for (let k = -3; k <= 3; k++) {
+          STICKS.push({ row: "f", k, cx: 226 + k * 46, tone: k % 2 === 0 ? "green" : "ivory", top: k === 0 ? HERO_REST_TOP : 74 + 10 * prand(k + 7), delay: 0.05 * Math.abs(k), hero: k === 0 });
+        }
+        const CLOSED_TOP = 162;
+
+        function boxMarkup(p, drawn, heroMissing) {
+          let sticks = "";
+          STICKS.forEach((s, i) => {
+            if (s.hero && heroMissing) return;
+            sticks += `<use id="${p}-s${i}" href="#stk-${s.tone}" x="${s.cx - STICK_W / 2}" y="${drawn ? s.top : CLOSED_TOP}" width="${STICK_W}" height="${f2(STICK_H)}"/>`;
+          });
+          const dash = drawn ? "" : ` pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1" opacity="0"`;
+          return `
+            <defs>
+              <linearGradient id="${p}-face" x1="0" y1="0" x2="1" y2="0.25">
+                <stop offset="0%" stop-color="#1C4A34"/><stop offset="58%" stop-color="#173D2B"/><stop offset="100%" stop-color="#0F2A1E"/>
+              </linearGradient>
+              <linearGradient id="${p}-sheen" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#FFFFFF" stop-opacity="0"/><stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0.2"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+              </linearGradient>
+              <clipPath id="${p}-faceclip"><path d="M62 150 L390 150 L390 528 L62 528 Z"/></clipPath>
+              <clipPath id="${p}-emclip"><path d="${INTERIOR}"/></clipPath>
+              <clipPath id="${p}-stickclip"><path d="M-300 150 L390 150 L436 106 L436 -1200 L-300 -1200 Z"/></clipPath>
+            </defs>
+            <path d="M62 150 L390 150 L436 106 L108 106 Z" fill="#0A1F14"/>
+            <path d="M108 106 L436 106 L436 112 L108 112 Z" fill="#06150D" opacity="0.6"/>
+            <path id="${p}-lid" d="M62 150 L390 150 L436 106 L108 106 Z" fill="#1C4A34" stroke="#0F2A1E" stroke-width="2" stroke-linejoin="round"/>
+            <g id="${p}-lidprint" opacity="0">
+              <text x="34" y="17" font-family="Archivo" font-size="9" font-weight="600" letter-spacing="3" fill="#173D2B" opacity="0.75">MATOCHA</text>
+              <text x="32" y="44" font-family="Instrument Serif" font-style="italic" font-size="25" fill="#173D2B">Matcha. Made simple.</text>
+              <path d="M226 28 C 238 21, 250 34, 264 28 C 278 22, 290 35, 304 28" stroke="#79A84B" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+            </g>
+            <g clip-path="url(#${p}-stickclip)">${sticks}</g>
+            <path d="M390 150 L436 106 L436 484 L390 528 Z" fill="#0F2A1E"/>
+            <path d="M62 150 L390 150 L390 528 L62 528 Z" fill="url(#${p}-face)"/>
+            <path d="M62 150 L390 150" stroke="#2B6247" stroke-width="2" opacity="0.8"/>
+            <g clip-path="url(#${p}-faceclip)">
+              <rect id="${p}-sheen" x="-200" y="80" width="130" height="560" fill="url(#${p}-sheen)" transform="skewX(-16)"/>
+            </g>
+            <g transform="translate(226 330)">
+              <g clip-path="url(#${p}-emclip)"><path id="${p}-emliq" fill="#79A84B" d="${drawn ? emblemWave(14, 0) : ""}"/></g>
+              <path id="${p}-em-body" d="${BODY}" stroke="#F3EFE5" stroke-width="9" fill="none" stroke-linecap="round" stroke-linejoin="round"${dash}/>
+              <path id="${p}-em-rim" d="M-58 -74 A58 9 0 1 0 58 -74 A58 9 0 1 0 -58 -74" stroke="#F3EFE5" stroke-width="9" fill="none"${dash}/>
+              <path id="${p}-em-base" d="M-22 78 L22 78" stroke="#F3EFE5" stroke-width="13" stroke-linecap="round"${dash}/>
+            </g>
+            <g id="${p}-print1"${drawn ? "" : ' opacity="0"'}>
+              <text x="96" y="212" fill="#F3EFE5" font-family="Archivo" font-size="34" letter-spacing="-1" font-weight="620">MATOCHA</text>
+              <text x="96" y="240" fill="#F3EFE5" font-family="Archivo" font-size="12" letter-spacing="4.2" opacity="0.7">MATCHA</text>
+            </g>
+            <g id="${p}-print2"${drawn ? "" : ' opacity="0"'}>
+              <text x="96" y="482" fill="#F3EFE5" font-family="Archivo" font-size="18" letter-spacing="2.4" font-weight="600">30 × 2G</text>
+              <text x="96" y="504" fill="#F3EFE5" font-family="Archivo" font-size="10.5" letter-spacing="2" opacity="0.6">100% JAPANESE MATCHA</text>
+              <text x="356" y="504" text-anchor="end" fill="#F3EFE5" font-family="Archivo" font-size="10.5" letter-spacing="2" opacity="0.6">NET 60G</text>
+            </g>`;
+        }
+        function emblemWave(level, ph) {
+          let d = `M-80 120 L-80 ${f2(level + 3 * Math.sin(ph))}`;
+          for (let x = -80; x <= 90; x += 10) {
+            d += ` L${x} ${f2(level + 3.4 * Math.sin(x * 0.075 + ph) + 1.6 * Math.sin(x * 0.13 - ph * 1.3))}`;
+          }
+          return d + " L90 120 Z";
+        }
+        function lidGeom(phi) {
+          const a = (phi * Math.PI) / 180;
+          const ox = -46 * Math.cos(a);
+          const oy = 44 * Math.cos(a) - 104 * Math.sin(a);
+          return {
+            d: `M108 106 L436 106 L${f2(436 + ox)} ${f2(106 + oy)} L${f2(108 + ox)} ${f2(106 + oy)} Z`,
+            ox, oy,
+            inner: oy < 0,
+            m: `matrix(1 0 ${f2(-ox / 104)} ${f2(-oy / 104)} ${f2(108 + ox)} ${f2(106 + oy)})`,
+          };
+        }
+        $("A-box").innerHTML = boxMarkup("A", false, false);
+        $("C-box").innerHTML = boxMarkup("C", true, true);
+        (function setHeroLid() {
+          const g = lidGeom(107);
+          $("C-lid").setAttribute("d", g.d);
+          $("C-lid").setAttribute("fill", "#E5DECF");
+          $("C-lidprint").setAttribute("transform", g.m);
+          $("C-lidprint").setAttribute("opacity", "1");
+        })();
+
+        // ------------------------------------------------------------------ split text
+        document.querySelectorAll("[data-split]").forEach((node) => {
+          const txt = node.textContent;
+          node.textContent = "";
+          for (const c of txt) {
+            const s = document.createElement("span");
+            s.className = "ch";
+            s.textContent = c === " " ? " " : c;
+            node.appendChild(s);
+          }
+        });
+
+        // ------------------------------------------------------------------ procedural pools
+        const G = {
+          green: $("G-green"), mound: $("G-mound"), milk: $("G-milk"), band: $("G-milkband"), column: $("G-column"),
+          foam: $("G-foam"), water: $("G-water"), waterhl: $("G-waterhl"), milkstream: $("G-milkstream"), milkshade: $("G-milkshade"),
+          pstream: $("G-powderstream"), whiskall: $("G-whiskall"), whisk: $("G-whisk"), wg1: $("G-wg1"), wg2: $("G-wg2"),
+        };
+        const moundDots = [];
+        for (let i = 0; i < 9; i++) moundDots.push(el("circle", { r: f2(0.9 + prand(i + 400) * 0.9), fill: i % 2 ? "#5E8A35" : "#9CC46A" }, $("G-mounddots")));
+        const specks = [];
+        for (let i = 0; i < 9; i++) specks.push(el("ellipse", { rx: f2(1.6 + prand(i + 30) * 1.6), ry: f2(1.1 + prand(i + 31) * 1.0), fill: "#46642A", opacity: 0 }, $("G-specks")));
+        const bubbles = [];
+        for (let i = 0; i < 20; i++) bubbles.push(el("circle", { r: f2(1 + prand(i + 50) * 1.7), fill: "#E9F1DC", opacity: 0 }, $("G-bubbles")));
+        const foamDots = [];
+        for (let i = 0; i < 16; i++) foamDots.push(el("circle", { r: f2(0.8 + prand(i + 70) * 1.3), fill: "#F3EFE5", opacity: 0 }, $("G-foamdots")));
+        // marbling: green ribbons sink into the milk, milk ribbons rise into the green
+        const RIBBONS = [
+          { x: 56, L: 30, t0: 21.8, w: 4.2, dir: 1, curl: 1.0, c: "#86AE58" },
+          { x: 70, L: 18, t0: 22.4, w: 2.2, dir: 1, curl: -0.6, c: "#9DBF73" },
+          { x: 79, L: 44, t0: 22.05, w: 5.0, dir: 1, curl: -1.2, c: "#79A84B" },
+          { x: 95, L: 26, t0: 22.35, w: 3.4, dir: 1, curl: 0.8, c: "#94B968" },
+          { x: 106, L: 16, t0: 22.7, w: 2.0, dir: 1, curl: 1.4, c: "#A4C47C" },
+          { x: 116, L: 50, t0: 21.7, w: 5.4, dir: 1, curl: -0.9, c: "#7FA752" },
+          { x: 136, L: 34, t0: 22.2, w: 4.0, dir: 1, curl: 1.3, c: "#8DB25E" },
+          { x: 151, L: 20, t0: 22.6, w: 3.0, dir: 1, curl: -1.0, c: "#94B968" },
+          { x: 64, L: 22, t0: 22.25, w: 4.4, dir: -1, curl: 1.1, c: "#F4EFE3" },
+          { x: 101, L: 28, t0: 21.95, w: 5.0, dir: -1, curl: -1.0, c: "#F4EFE3" },
+          { x: 128, L: 18, t0: 22.5, w: 3.6, dir: -1, curl: 0.9, c: "#F4EFE3" },
+          { x: 146, L: 14, t0: 22.8, w: 2.6, dir: -1, curl: -0.7, c: "#F4EFE3" },
+        ];
+        const ribbons = RIBBONS.map((d) => el("path", { fill: d.c, opacity: 0, d: "" }, $("G-tendrils")));
+        const powder = [];
+        for (let i = 0; i < 52; i++) {
+          const c = ["#79A84B", "#8DB85A", "#6A9640", "#A4C978"][i % 4];
+          powder.push({
+            el: el("circle", { r: f2(0.9 + prand(i + 90) * 1.1), fill: c, opacity: 0 }, $("G-powder")),
+            te: 9.92 + (1.44 * (i + prand(i + 91))) / 52,
+            vs: 0.82 + prand(i + 92) * 0.36,
+            vp: (prand(i + 93) - 0.5) * 26,
+          });
+        }
+        const puffs = [];
+        for (let i = 0; i < 5; i++) puffs.push(el("circle", { r: 1, fill: "#A9C77F", opacity: 0 }, $("G-puffs")));
+        const ICE = [
+          { T: 20.0, dx: 75, dy: 6, rot: -11, w: 34, h: 32, rx: 6 },
+          { T: 20.3125, dx: 121, dy: 14, rot: 9, w: 30, h: 29, rx: 6 },
+          { T: 20.625, dx: 98, dy: 26, rot: -4, w: 27, h: 26, rx: 5 },
+        ];
+        const iceEls = ICE.map(() => null);
+        [2, 0, 1].forEach((i) => {
+          const c = ICE[i];
+          const g = el("g", { opacity: 0 }, $("G-ice"));
+          el("rect", { x: -c.w / 2, y: -c.h / 2, width: c.w, height: c.h, rx: c.rx, fill: "#F3EFE5", "fill-opacity": "0.9", class: "inkfill", "stroke-width": "4" }, g);
+          el("path", { d: `M${-c.w / 2 + 6} ${-c.h / 2 + 7} L${-c.w / 2 + 6} ${-c.h / 2 + 15}`, stroke: "#FFFFFF", "stroke-width": "3", "stroke-linecap": "round", opacity: "0.9" }, g);
+          iceEls[i] = g;
+        });
+        const drops = [];
+        for (let i = 0; i < 30; i++) drops.push(el("circle", { r: f2(1.6 + prand(i + 120) * 1.8), fill: i % 4 === 3 ? "#C9DCA6" : "#79A84B", opacity: 0 }, $("G-drops")));
+        const tearPuff = [];
+        for (let i = 0; i < 14; i++) tearPuff.push({ el: el("circle", { r: 8, fill: ["#8DB85A", "#79A84B", "#A9C77F"][i % 3], opacity: 0 }, $("C-dust")), soft: true });
+        for (let i = 0; i < 22; i++) tearPuff.push({ el: el("circle", { r: 2, fill: i % 2 ? "#6A9640" : "#8DB85A", opacity: 0 }, $("C-specks")), soft: false });
+
+        // ------------------------------------------------------------------ liquid helpers (glass viewBox units)
+        const waveY = (x, S, a, ph) => S + a * (0.62 * Math.sin(x * 0.0654 + ph) + 0.38 * Math.sin(x * 0.103 - ph * 1.37 + 1.1));
+        function bodyPath(S, a, ph, bottom) {
+          let d = `M24 ${bottom} L24 ${f2(waveY(24, S, a, ph))}`;
+          for (let x = 30; x <= 176; x += 6) d += ` L${x} ${f2(waveY(x, S, a, ph))}`;
+          return d + ` L176 ${bottom} Z`;
+        }
+        function bandPath(top, a1, ph1, bot, a2, ph2) {
+          let d = `M24 ${f2(waveY(24, top, a1, ph1))}`;
+          for (let x = 30; x <= 176; x += 6) d += ` L${x} ${f2(waveY(x, top, a1, ph1))}`;
+          for (let x = 176; x >= 24; x -= 6) d += ` L${x} ${f2(waveY(x, bot, a2, ph2))}`;
+          return d + " Z";
+        }
+        function streamPath(xc, yTop, yBot, w, t, wob) {
+          if (yBot - yTop < 0.5) return "";
+          const n = Math.max(14, Math.min(140, Math.ceil((yBot - yTop) / 5)));
+          let L = "", R = "";
+          for (let i = 0; i <= n; i++) {
+            const y = yTop + ((yBot - yTop) * i) / n;
+            const x = xc + wob * Math.sin(y * 0.045 - t * 13) + wob * 0.5 * Math.sin(y * 0.11 + t * 7);
+            const ww = w * (0.86 + 0.14 * Math.sin(y * 0.07 + t * 9));
+            L += `${i ? " L" : "M"}${f2(x - ww / 2)} ${f2(y)}`;
+            R = ` L${f2(x + ww / 2)} ${f2(y)}` + R;
+          }
+          return L + R + " Z";
+        }
+
+        // ------------------------------------------------------------------ cameras
+        const camAKeys = [
+          [0, { x: EMBLEM.x, y: EMBLEM.y, s: 3.45, r: -7 }],
+          [0.95, { x: EMBLEM.x, y: EMBLEM.y, s: 3.9, r: -5 }, "sine.out"],
+          [2.5, { x: 540, y: 1000, s: 1.07, r: 0 }, "power3.inOut"],
+          [6.3, { x: 540, y: 1004, s: 1.1, r: 0 }, "sine.inOut"],
+          [7.5, CAM_A_END, "power3.inOut"],
+        ];
+        const camCKeys = [
+          [7.5, CAM_C_TEAR],
+          [8.45, CAM_C_TEAR],
+          [9.7, { x: 540, y: 960, s: 1.0, r: 0 }, "power3.inOut"],
+          [12.5, { x: 540, y: 985, s: 1.035, r: 0 }, "sine.inOut"],
+          [14.45, { x: 540, y: 1000, s: 1.05, r: 0 }, "sine.inOut"],
+          [15.35, { x: 540, y: 1180, s: 1.18, r: 0 }, "power2.inOut"],
+          [20.0, { x: 540, y: 1186, s: 1.22, r: 0 }, "sine.inOut"],
+          [21.2, { x: 540, y: 1190, s: 1.23, r: 0 }],
+          [24.6, { x: 540, y: 1300, s: 1.38, r: 0 }, "sine.inOut"],
+          [25.0, { x: 540, y: 1300, s: 1.385, r: 0 }],
+          [26.55, { x: 315, y: 688, s: 0.8, r: 0 }, "power3.inOut"],
+          [30.0, { x: 318, y: 698, s: 0.825, r: 0 }, "sine.inOut"],
+        ];
+        function camAt(t, keys) {
+          if (t <= keys[0][0]) return Object.assign({}, keys[0][1]);
+          for (let i = 1; i < keys.length; i++) {
+            if (t <= keys[i][0]) {
+              const a = keys[i - 1][1], b = keys[i][1];
+              const p = P(t, keys[i - 1][0], keys[i][0], keys[i][2]);
+              return { x: lerp(a.x, b.x, p), y: lerp(a.y, b.y, p), s: Math.exp(lerp(Math.log(a.s), Math.log(b.s), p)), r: lerp(a.r, b.r, p) };
+            }
+          }
+          return Object.assign({}, keys[keys.length - 1][1]);
+        }
+        const camCss = (c) => `translate(540px,960px) rotate(${f2(c.r)}deg) scale(${c.s.toFixed(5)}) translate(${f2(-c.x)}px,${f2(-c.y)}px)`;
+        // a whisper of motion blur that follows camera speed (zero at rest, so cuts stay clean)
+        function camBlur(t, keys) {
+          const dt = 1 / 60;
+          const a = camAt(t - dt, keys), b = camAt(t + dt, keys);
+          const vz = Math.abs(Math.log(b.s) - Math.log(a.s)) / (2 * dt);
+          const vxy = (Math.hypot(b.x - a.x, b.y - a.y) * b.s) / (2 * dt);
+          const px = Math.min(3.2, vz * 1.5 + vxy / 1200);
+          return px > 0.35 ? `blur(${f2(px)}px)` : "none";
+        }
+
+        // ------------------------------------------------------------------ render(t): every procedural layer, pure function of t
+        const camA = $("camA"), camC = $("camC");
+        const A = { lid: $("A-lid"), print: $("A-lidprint"), liq: $("A-emliq"), sheen: $("A-sheen"), boxwrap: $("A-boxwrap"), contact: $("A-contactwrap") };
+        const Csheen = $("C-sheen");
+        const stickWrap = $("C-stickwrap"), topPiece = $("C-toppiece"), mouth = $("C-mouth");
+        const greenLayer = $("C-green"), boxC = $("C-boxwrap"), glassEl = $("G");
+        const CHROME = [
+          { el: $("ch-tl"), x: 290, y: 104 },
+          { el: $("ch-tr"), x: 880, y: 104 },
+          { el: $("ch-bl"), x: 400, y: 1816 },
+          { el: $("ch-wave"), x: 890, y: 1822 },
+        ];
+        const waveFill = $("ch-wave-fill");
+        const whiskShake = $("t-whisk-shake");
+        const T_WHISK0 = 15.546875, WF = 3.2;
+
+        function greenLevel(t) {
+          // fill fraction before milk: water 0 → 0.30, ice adds 0.02 per cube
+          let f = 0.36 * P(t, 12.95, 14.55, "sine.out");
+          ICE.forEach((c) => (f += 0.02 * P(t, c.T, c.T + 0.25, "power2.out")));
+          return f;
+        }
+        function milkTop(t) {
+          return lerp(194, 126, P(t, 21.62, 24.25, "sine.inOut"));
+        }
+        function surfaceAt(t) {
+          const Sg = 194 - greenLevel(t) * 132;
+          const ym = milkTop(t);
+          return ym < 193.9 ? Math.min(Sg, ym - 55.4) : Sg;
+        }
+        function amplitudeAt(t) {
+          let a = K(t, [[12.9, 2.2], [13.2, 3.8, "sine.out"], [14.4, 3.2], [14.9, 2.4, "sine.inOut"], [15.6, 2.4], [15.95, 6.4, "power2.out"], [18.6, 6.4], [19.7, 2.2, "sine.out"], [21.5, 2.2], [22.0, 3.0, "sine.out"], [24.0, 3.0], [24.8, 1.9, "sine.inOut"]]);
+          ICE.forEach((c) => {
+            if (t > c.T) a += 3.4 * Math.exp(-(t - c.T) * 4.5);
+          });
+          return a;
+        }
+        const phaseAt = (t) => 1.5 * t + 24 * P(t, 15.6, 18.75) + 3 * P(t, 12.95, 14.5);
+        function whiskX(t) {
+          const A0 = 16 * P(t, 15.6, 15.85, "sine.out") * (1 - P(t, 18.5, 18.78, "sine.in"));
+          return { x: 100 + A0 * Math.sin(2 * Math.PI * WF * (t - T_WHISK0)), a: A0 };
+        }
+        function whiskTransform(t) {
+          const w = whiskX(t);
+          let y = 186;
+          if (t < 15.62) y = lerp(-640, 186, P(t, 15.12, 15.62, "expo.out"));
+          if (t > 18.78) y = lerp(186, -720, P(t, 18.78, 19.18, "power3.in"));
+          y += 1.6 * Math.sin(2 * Math.PI * 2 * WF * (t - T_WHISK0)) * (w.a / 16);
+          const rot = (-w.a / 16) * 4 * Math.cos(2 * Math.PI * WF * (t - T_WHISK0));
+          return `translate(${f2(w.x)} ${f2(y)}) rotate(${f2(rot)} 0 -200)`;
+        }
+
+        function render(t) {
+          // ---------------- world A
+          if (t < 7.6) {
+            camA.style.transform = camCss(camAt(t, camAKeys));
+            camA.style.filter = camBlur(t, camAKeys);
+            const lvl = K(t, [[0.55, 92], [1.35, 14, "power2.out"]]);
+            A.liq.setAttribute("d", emblemWave(lvl, t * 2.2));
+            const fl = P(t, 2.4, 2.9, "sine.out") * (1 - P(t, 4.6, 5.0, "sine.inOut"));
+            const fy = -7 * Math.sin((2 * Math.PI * (t - 2.5)) / 2.5) * fl;
+            A.boxwrap.style.transform = `translate(0px, ${f2(fy)}px)`;
+            A.contact.style.transform = `scale(${f2(1 + fy * 0.006)}, 1)`;
+            A.contact.style.opacity = f2(1 + fy * 0.03);
+            A.sheen.setAttribute("x", f2(lerp(-220, 560, P(t, 3.0, 4.1, "power2.inOut"))));
+            // lid hinge
+            const phi = K(t, [[5.05, 0], [5.52, 124, "power3.out"], [5.8, 103, "sine.inOut"], [6.05, 110, "sine.inOut"], [6.3, 107, "sine.inOut"]]);
+            const g = lidGeom(phi);
+            A.lid.setAttribute("d", g.d);
+            A.lid.setAttribute("fill", g.inner ? mix("#CFC7B4", "#E5DECF", P(phi, 20, 90)) : mix("#1C4A34", "#2A5E44", P(phi, 0, 22)));
+            A.print.setAttribute("transform", g.m);
+            A.print.setAttribute("opacity", g.inner ? f2(P(phi, 30, 80)) : "0");
+            // sticks spring up, hero lifts out
+            STICKS.forEach((s, i) => {
+              const u = $("A-s" + i);
+              let y = lerp(CLOSED_TOP, s.top, P(t, 5.4 + s.delay, 5.4 + s.delay + 0.55, "back.out(2.1)"));
+              if (s.hero) y = lerp(y, HERO_UP_TOP, P(t, 6.22, 7.5, "power2.inOut"));
+              u.setAttribute("y", f2(y));
+            });
+          }
+
+          // ---------------- world C
+          if (t >= 7.45) {
+            const cam = camAt(t, camCKeys);
+            if (t > 8.125 && t < 8.6) {
+              const k = t - 8.125;
+              cam.x += 5 * Math.exp(-k / 0.07) * Math.sin(2 * Math.PI * 27 * k);
+              cam.y += 4 * Math.exp(-k / 0.07) * Math.cos(2 * Math.PI * 23 * k);
+            }
+            camC.style.transform = camCss(cam);
+            camC.style.filter = t > 7.5 ? camBlur(t, camCKeys) : "none";
+
+            // the stick: lean, rip, swing over the glass, pour, tap, exit
+            let px = STICK_C_REST.x, py = STICK_C_REST.y;
+            let r = K(t, [[7.5, 0], [8.06, 2.2, "sine.inOut"], [8.16, -3.2, "power2.out"], [8.5, 0, "sine.inOut"]]);
+            const sw = P(t, 8.55, 9.75, "power3.inOut");
+            px = lerp(px, POUR.x, sw);
+            py = lerp(py, POUR.y, sw);
+            r = lerp(r, POUR.r, sw);
+            if (t > 9.75 && t < 11.35) r += 1.3 * Math.sin(2 * Math.PI * 9 * (t - 9.75)) * P(t, 9.75, 9.95) * (1 - P(t, 11.15, 11.35));
+            [11.4, 11.58].forEach((tt) => {
+              if (t > tt) r += 3.5 * Math.exp(-(t - tt) / 0.045) * (t - tt < 0.02 ? (t - tt) / 0.02 : 1);
+            });
+            const ex = P(t, 11.75, 12.3, "power3.in");
+            px += 520 * ex;
+            py -= 980 * ex;
+            r += 40 * ex;
+            stickWrap.style.transform = `translate(${f2(px)}px, ${f2(py)}px) rotate(${f2(r)}deg)`;
+            stickWrap.style.opacity = t > 12.35 ? "0" : "1";
+            // top piece peels around its left end, then flies off
+            const pe = P(t, 8.125, 8.26, "power2.out");
+            const fly = P(t, 8.26, 8.8, "power2.in");
+            topPiece.setAttribute("transform", `translate(${f2(-60 * fly - 4 * pe)} ${f2(-14 * pe - 520 * fly)}) rotate(${f2(-24 * pe - 70 * fly)} 8 32)`);
+            topPiece.setAttribute("opacity", t > 8.8 ? "0" : "1");
+            mouth.setAttribute("opacity", f2(P(t, 8.13, 8.2)));
+            // tear puff (world space, at the mouth)
+            tearPuff.forEach((pp, i) => {
+              const c = pp.el;
+              const life = pp.soft ? 1.1 : 0.75;
+              const k = t - 8.13 - (pp.soft ? 0 : prand(i + 163) * 0.06);
+              if (k <= 0 || k > life) return c.setAttribute("opacity", "0");
+              const ang = -Math.PI / 2 + (prand(i + 160) - 0.5) * (pp.soft ? 1.6 : 2.4);
+              const sp = pp.soft ? 140 + prand(i + 161) * 220 : 260 + prand(i + 161) * 420;
+              const tau = pp.soft ? 0.32 : 0.18;
+              const drag = tau * (1 - Math.exp(-k / tau));
+              const x = STICK_C_REST.x + Math.cos(ang) * sp * drag + (prand(i + 162) - 0.5) * (pp.soft ? 50 : 30);
+              const y = STICK_C_REST.y - 8 + Math.sin(ang) * sp * drag + (pp.soft ? 40 : 520) * k * k;
+              c.setAttribute("cx", f2(x));
+              c.setAttribute("cy", f2(y));
+              if (pp.soft) {
+                c.setAttribute("r", f2((10 + prand(i + 150) * 14) * (1 + k * 2.2)));
+                c.setAttribute("opacity", f2(0.55 * Math.pow(1 - k / life, 1.4)));
+              } else {
+                c.setAttribute("r", f2(1.6 + prand(i + 151) * 2.6));
+                c.setAttribute("opacity", f2(0.95 * (1 - k / life)));
+              }
+            });
+
+            // ---------------- the glass interior
+            const S = surfaceAt(t);
+            const amp = amplitudeAt(t);
+            const ph = phaseAt(t);
+            const liquidOn = t > 12.9;
+
+            // powder mound
+            const mh = 15 * P(t, 10.5, 11.95, "power1.out");
+            if (mh > 0.2) {
+              const w = 20 + mh * 1.3;
+              let d = `M${f2(101 - w - 4)} 192`;
+              for (let i = 0; i <= 16; i++) {
+                const u = -1 + (2 * i) / 16;
+                const y = 189.5 - mh * Math.pow(Math.max(0, 1 - u * u), 0.85) + 0.8 * Math.sin(i * 2.1);
+                d += ` L${f2(101 + u * w)} ${f2(y)}`;
+              }
+              G.mound.setAttribute("d", d + ` L${f2(101 + w + 4)} 192 Z`);
+              moundDots.forEach((c, i) => {
+                const u = (prand(i + 410) - 0.5) * 1.5;
+                c.setAttribute("cx", f2(101 + u * w));
+                c.setAttribute("cy", f2(189.5 - mh * Math.pow(Math.max(0, 1 - u * u), 0.85) * prand(i + 411) - 0.5));
+                c.setAttribute("opacity", "0.8");
+              });
+            } else {
+              G.mound.setAttribute("d", "");
+              moundDots.forEach((c) => c.setAttribute("opacity", "0"));
+            }
+
+            // liquid body + colour (diluted → murky → whisked vivid)
+            if (liquidOn) {
+              const col = t < 15.8 ? mix("#93AA6E", "#64803F", P(t, 12.95, 13.9)) : mix("#64803F", "#79A84B", P(t, 15.8, 17.6, "sine.inOut"));
+              G.green.setAttribute("fill", col);
+              G.green.setAttribute("d", bodyPath(S, amp, ph, 214));
+            } else G.green.setAttribute("d", "");
+
+            // clumps of unmixed powder
+            specks.forEach((c, i) => {
+              const o = P(t, 13.15, 13.6) * (1 - P(t, 15.9, 16.8));
+              if (o <= 0) return c.setAttribute("opacity", "0");
+              const x = 58 + prand(i + 300) * 84 + 4 * Math.sin(t * 1.3 + i);
+              c.setAttribute("cx", f2(x));
+              c.setAttribute("cy", f2(waveY(x, S, amp, ph) + 3 + prand(i + 301) * 12));
+              c.setAttribute("opacity", f2(o * 0.9));
+            });
+
+            // bubbles (water, whisk, milk)
+            bubbles.forEach((c, i) => {
+              const win = [[12.95, 14.9], [15.65, 19.3], [21.6, 24.4]];
+              let on = false, y = 0, x = 0;
+              for (const [a, b] of win) {
+                if (t < a || t > b) continue;
+                const per = 0.9 + prand(i + 60) * 0.8;
+                const q = ((t - a) / per + prand(i + 61)) % 1;
+                y = 186 - q * (186 - S);
+                x = 56 + prand(i + 62 + Math.floor((t - a) / per) * 7) * 88 + 2.5 * Math.sin(t * 6 + i);
+                on = q > 0.04 && y > S + 2.5;
+              }
+              c.setAttribute("opacity", on ? "0.75" : "0");
+              if (on) {
+                c.setAttribute("cx", f2(x));
+                c.setAttribute("cy", f2(y));
+              }
+            });
+
+            // milk: rises from the bottom, pushes the green up, marbles at the seam
+            const ym = milkTop(t);
+            if (ym < 193.5) {
+              const ma = 2.4 + 1.2 * P(t, 21.7, 22.2) * (1 - P(t, 23.9, 24.6));
+              const mph = ph * 0.6 + 1.7;
+              G.milk.setAttribute("d", bodyPath(ym, ma, mph, 214));
+              G.band.setAttribute("d", bandPath(ym - 9, ma * 1.3, mph + 0.6, ym + 7, ma, mph));
+            } else {
+              G.milk.setAttribute("d", "");
+              G.band.setAttribute("d", "");
+            }
+            RIBBONS.forEach((d, i) => {
+              const g = P(t, d.t0, d.t0 + 1.6, "sine.out");
+              if (g <= 0 || ym > 193) return ribbons[i].setAttribute("opacity", "0");
+              const len = d.L * g * (1 - 0.25 * P(t, 24.4, 28, "sine.inOut"));
+              const base = ym + 1.2 * Math.sin(d.x * 0.07 + ph * 0.6) - d.dir * 2;
+              let L = "", R = "";
+              for (let k = 0; k <= 12; k++) {
+                const u = k / 12;
+                const sway = d.curl * (5 * Math.sin(u * 2.6 + t * 0.9 + i) * u + 7 * u * u);
+                const hw = (d.w * (0.6 + 0.4 * g) * (1 - 0.8 * u)) / 2;
+                const x = d.x + sway, y = base + d.dir * len * u;
+                L += `${k ? " L" : "M"}${f2(x - hw)} ${f2(y)}`;
+                R = ` L${f2(x + hw)} ${f2(y)}` + R;
+              }
+              ribbons[i].setAttribute("d", L + R + " Z");
+              ribbons[i].setAttribute("opacity", f2((d.dir > 0 ? 0.72 : 0.88) * g));
+            });
+
+            // foam from the whisk
+            const fo = 7.5 * P(t, 15.95, 18.5, "sine.out");
+            if (fo > 0.1 && liquidOn) {
+              G.foam.setAttribute("d", bandPath(S - fo, amp * 0.85, ph + 0.15, S + 1.6, amp, ph));
+              foamDots.forEach((c, i) => {
+                const x = 50 + prand(i + 80) * 100;
+                const y = waveY(x, S, amp, ph) - fo * (0.2 + prand(i + 81) * 0.6);
+                c.setAttribute("cx", f2(x + 1.5 * Math.sin(t * 2 + i)));
+                c.setAttribute("cy", f2(y));
+                c.setAttribute("opacity", f2(0.85 * (fo / 7.5)));
+              });
+            } else {
+              G.foam.setAttribute("d", "");
+              foamDots.forEach((c) => c.setAttribute("opacity", "0"));
+            }
+
+            // powder stream: mean ballistic path + seeded particles
+            const g0 = 840, VX = -45, VY = 53.6;
+            const yLand = 189 - mh - 2;
+            const tauLand = (-VY + Math.sqrt(VY * VY + 2 * g0 * (yLand - MOUTH.y))) / g0;
+            const tHead = Math.min(t - 9.92, tauLand), tTail = Math.max(0, t - 11.36);
+            if (tHead > tTail && t > 9.92) {
+              let L = "", R = "";
+              const n = 16;
+              for (let i = 0; i <= n; i++) {
+                const tau = tTail + ((tHead - tTail) * i) / n;
+                const x = MOUTH.x + VX * tau;
+                const y = MOUTH.y + VY * tau + 0.5 * g0 * tau * tau;
+                const w = (5.2 - 2.6 * (tau / tauLand)) / 2;
+                L += `${i ? " L" : "M"}${f2(x - w)} ${f2(y)}`;
+                R = ` L${f2(x + w)} ${f2(y)}` + R;
+              }
+              G.pstream.setAttribute("d", L + R + " Z");
+            } else G.pstream.setAttribute("d", "");
+            powder.forEach((p) => {
+              const tau = t - p.te;
+              const vx = VX * p.vs + p.vp * 0.77, vy = VY * p.vs + p.vp * 0.64;
+              const y = MOUTH.y + vy * tau + 0.5 * g0 * tau * tau;
+              if (tau <= 0 || y > yLand + 1) return p.el.setAttribute("opacity", "0");
+              p.el.setAttribute("cx", f2(MOUTH.x + vx * tau));
+              p.el.setAttribute("cy", f2(y));
+              p.el.setAttribute("opacity", "0.95");
+            });
+            puffs.forEach((c, i) => {
+              const per = 0.36;
+              const k = t - 10.55 - i * (per / 5);
+              if (k < 0 || t > 12.1) return c.setAttribute("opacity", "0");
+              const q = (k % per) / per;
+              c.setAttribute("cx", f2(101 + (prand(i + 170 + Math.floor(k / per)) - 0.5) * 16));
+              c.setAttribute("cy", f2(yLand - 2 - q * 6));
+              c.setAttribute("r", f2(3 + q * 11));
+              c.setAttribute("opacity", f2(0.38 * (1 - q)));
+            });
+
+            // water stream
+            const gS = 5000, YT = -420;
+            const hW = YT + 0.5 * gS * Math.pow(Math.max(0, t - 12.45), 2);
+            const tW = t > 14.15 ? YT + 0.5 * gS * Math.pow(t - 14.15, 2) : YT;
+            const sBotW = Math.min(hW, liquidOn ? S : 189);
+            if (t > 12.45 && tW < sBotW) {
+              G.water.setAttribute("d", streamPath(124, tW, sBotW, 7.6, t, 1.1));
+              G.waterhl.setAttribute("d", streamPath(122.6, tW, sBotW, 2.2, t, 1.1));
+            } else {
+              G.water.setAttribute("d", "");
+              G.waterhl.setAttribute("d", "");
+            }
+
+            // milk stream + the column it drives through the green
+            const hM = YT + 0.5 * gS * Math.pow(Math.max(0, t - 21.1), 2);
+            const tM = t > 23.75 ? YT + 0.5 * gS * Math.pow(t - 23.75, 2) : YT;
+            const sBotM = Math.min(hM, S);
+            if (t > 21.1 && tM < sBotM) {
+              G.milkstream.setAttribute("d", streamPath(122, tM, sBotM, 9.5, t, 1.4));
+              G.milkshade.setAttribute("d", streamPath(125.5, tM, sBotM, 2.4, t, 1.4));
+            } else {
+              G.milkstream.setAttribute("d", "");
+              G.milkshade.setAttribute("d", "");
+            }
+            const colOn = P(t, 21.6, 21.75) * (1 - P(t, 23.95, 24.45));
+            if (colOn > 0 && ym < 193.5) {
+              G.column.setAttribute("d", streamPath(122, S + 1, ym + 2, 10 + 6 * (1 - colOn), t * 0.7, 2.2));
+              G.column.setAttribute("opacity", f2(0.8 * colOn));
+            } else G.column.setAttribute("d", "");
+
+            // ice: drop, splash, bob, ride the rising surface
+            ICE.forEach((c, i) => {
+              const g = iceEls[i];
+              const t0 = c.T - 0.38;
+              if (t < t0) return g.setAttribute("opacity", "0");
+              const x = c.dx;
+              const restY = waveY(x, S, amp * 0.5, ph) + c.dy;
+              let y, rot = c.rot;
+              if (t < c.T) {
+                const q = (t - t0) / 0.38;
+                y = restY - 330 * (1 - q * q);
+                rot = c.rot - 30 * (1 - q);
+              } else {
+                const k = t - c.T;
+                y = restY + 7 * Math.exp(-k * 6) * Math.sin(k * 15) + 1.2 * Math.sin(t * 1.6 + i * 2);
+                rot = c.rot + 6 * Math.exp(-k * 5) * Math.sin(k * 12) + 1.5 * Math.sin(t * 1.2 + i);
+              }
+              g.setAttribute("transform", `translate(${f2(x)} ${f2(y)}) rotate(${f2(rot)})`);
+              g.setAttribute("opacity", "1");
+            });
+            drops.forEach((d, j) => {
+              const ci = Math.floor(j / 7);
+              let k, x0, y0, vx, vy;
+              if (ci < 3) {
+                const c = ICE[ci];
+                k = t - c.T;
+                x0 = c.dx;
+                y0 = S - 2;
+                const ang = -Math.PI / 2 + (prand(j + 200) - 0.5) * 2.1;
+                const sp = 70 + prand(j + 201) * 110;
+                vx = Math.cos(ang) * sp;
+                vy = Math.sin(ang) * sp;
+              } else {
+                const per = 0.22;
+                const kk = t - 21.62 - (j - 21) * 0.025;
+                if (kk < 0 || t > 23.9) return d.setAttribute("opacity", "0");
+                k = kk % per;
+                x0 = 122;
+                y0 = S - 1;
+                const seed = j * 13 + Math.floor(kk / per);
+                const ang = -Math.PI / 2 + (prand(seed + 220) - 0.5) * 2.4;
+                const sp = 40 + prand(seed + 221) * 60;
+                vx = Math.cos(ang) * sp;
+                vy = Math.sin(ang) * sp;
+              }
+              if (k <= 0 || k > 0.6) return d.setAttribute("opacity", "0");
+              const yy = y0 + vy * k + 0.5 * 840 * k * k;
+              if (yy > y0 + 1) return d.setAttribute("opacity", "0");
+              d.setAttribute("cx", f2(x0 + vx * k));
+              d.setAttribute("cy", f2(yy));
+              d.setAttribute("fill", ci < 3 ? (j % 4 === 3 ? "#C9DCA6" : "#79A84B") : "#F4EFE3");
+              d.setAttribute("opacity", "1");
+            });
+
+            // whisk + its ghost trail (reads as motion blur)
+            if (t > 15.1 && t < 19.2) {
+              G.whiskall.setAttribute("opacity", "1");
+              G.whisk.setAttribute("transform", whiskTransform(t));
+              G.wg1.setAttribute("transform", whiskTransform(t - 0.028));
+              G.wg2.setAttribute("transform", whiskTransform(t - 0.056));
+              const blur = whiskX(t).a / 16;
+              G.wg1.setAttribute("opacity", f2(0.3 * blur));
+              G.wg2.setAttribute("opacity", f2(0.16 * blur));
+            } else G.whiskall.setAttribute("opacity", "0");
+
+            // the green world: iris in at 15 s, iris out (hole grows) at 25 s
+            let inkP = 0;
+            if (t >= 14.98 && t < 25.75) {
+              greenLayer.style.opacity = "1";
+              const rIn = 1650 * P(t, 14.98, 15.62, "power3.inOut");
+              greenLayer.style.clipPath = `circle(${f2(rIn)}px at 3040px 3980px)`;
+              const rOut = 3300 * P(t, 25.0, 25.72, "power2.in");
+              const m = rOut > 0 ? `radial-gradient(circle at 3040px 3980px, rgba(0,0,0,0) ${f2(rOut)}px, #000 ${f2(rOut + 2)}px)` : "none";
+              greenLayer.style.maskImage = m;
+              greenLayer.style.webkitMaskImage = m;
+              inkP = P(rIn, 190, 440) * (1 - P(rOut, 190, 440));
+              // chrome labels flip colour as the iris edge passes each of them
+              const icx = (540 - cam.x) * cam.s + 540, icy = (1480 - cam.y) * cam.s + 960;
+              CHROME.forEach((L) => {
+                const d = Math.hypot(L.x - icx, L.y - icy);
+                const g = P(rIn * cam.s - d, -70, 70) * (1 - P(rOut * cam.s - d, -70, 70));
+                L.el.style.setProperty("--ci", mix("#161713", "#F3EFE5", g));
+              });
+            } else {
+              greenLayer.style.opacity = "0";
+              CHROME.forEach((L) => L.el.style.setProperty("--ci", "#161713"));
+            }
+            glassEl.style.setProperty("--ink", mix("#161713", "#F3EFE5", inkP));
+
+            // hero box slides in beside the latte
+            const bx = lerp(-940, 0, P(t, 25.1, 26.6, "power3.out"));
+            boxC.style.transform = `translate(${f2(bx)}px, 0px)`;
+            boxC.style.visibility = t < 25.05 ? "hidden" : "visible";
+            Csheen.setAttribute("x", f2(lerp(-220, 560, P(t, 28.3, 29.3, "power2.inOut"))));
+          }
+
+          // ---------------- screen-space bits
+          whiskShake.style.transform = `translate(${f2(4 * Math.sin(2 * Math.PI * WF * (t - T_WHISK0)) * P(t, 15.6, 15.9) * (1 - P(t, 18.5, 18.8)))}px, 0px)`;
+          waveFill.style.strokeDashoffset = f2(1 - P(t, 2.6, 27.4));
+          $("mullions").style.transform = `translate(${f2(18 * Math.sin(t * 0.22))}px, ${f2(6 * Math.sin(t * 0.17))}px)`;
+        }
+
+        // ------------------------------------------------------------------ the timeline
+        const tl = gsap.timeline({ paused: true });
+        const clock = { t: 0 };
+        tl.to(clock, { t: 30, duration: 30, ease: "none", onUpdate: () => render(clock.t) }, 0);
+
+        // emblem draws itself, then the print lands while the camera pulls back
+        tl.set("#A-em-body", { opacity: 1 }, 0.04);
+        tl.set("#A-em-rim", { opacity: 1 }, 0.3);
+        tl.set("#A-em-base", { opacity: 1 }, 0.66);
+        tl.fromTo("#A-print1", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, 1.25);
+        tl.fromTo("#A-print2", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, 1.4);
+        tl.fromTo("#A-em-body", { strokeDashoffset: 0.985 }, { strokeDashoffset: 0, duration: 0.72, ease: "power2.out" }, 0.04);
+        tl.fromTo("#A-em-rim", { strokeDashoffset: 0.985 }, { strokeDashoffset: 0, duration: 0.5, ease: "power2.inOut" }, 0.3);
+        tl.fromTo("#A-em-base", { strokeDashoffset: 0.97 }, { strokeDashoffset: 0, duration: 0.2, ease: "power3.out" }, 0.66);
+
+        // hook
+        tl.set("#t-hook", { opacity: 1 }, 2.3);
+        tl.fromTo("#t-hook .l1", { yPercent: 110 }, { yPercent: 0, duration: 0.75, ease: "expo.out" }, 2.32);
+        tl.fromTo("#t-hook .l2 .ch", { yPercent: 115, rotation: 6 }, { yPercent: 0, rotation: 0, duration: 0.6, ease: "power4.out", stagger: 0.026 }, 2.46);
+        tl.to("#t-hook", { y: -46, opacity: 0, filter: "blur(10px)", duration: 0.3, ease: "power2.in" }, 4.72);
+
+        // chrome
+        tl.fromTo(["#ch-tl", "#ch-bl"], { opacity: 0, y: 10 }, { opacity: 0.82, y: 0, duration: 0.5, ease: "power2.out", stagger: 0.1 }, 2.6);
+        tl.fromTo("#ch-tr", { opacity: 0, y: 10 }, { opacity: 0.82, y: 0, duration: 0.4, ease: "power2.out" }, 4.92);
+        tl.to("#ch-bl", { opacity: 0, duration: 0.25, ease: "power1.in" }, 6.75);
+        tl.to("#ch-bl", { opacity: 0.82, duration: 0.4, ease: "power1.out" }, 9.65);
+        tl.fromTo("#ch-wave", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "sine.out" }, 2.75);
+        const tick = document.querySelectorAll(".ticker span");
+        [5.0, 7.5, 10.0, 15.0, 20.0].forEach((T, i) => {
+          tl.fromTo(tick[i], { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.34, ease: "power3.out" }, T);
+          if (i > 0) tl.to(tick[i - 1], { yPercent: -100, opacity: 0, duration: 0.26, ease: "power2.in" }, T - 0.02);
+        });
+        tl.to(["#ch-tl", "#ch-tr", "#ch-bl", "#ch-wave"], { opacity: 0, duration: 0.35, ease: "power1.in" }, 27.2);
+
+        // Open.
+        tl.fromTo("#t-open", { opacity: 0, scale: 1.32, filter: "blur(14px)", transformOrigin: "0% 60%" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.48, ease: "expo.out" }, 4.98);
+        tl.to("#t-open", { y: -70, opacity: 0, duration: 0.24, ease: "power2.in" }, 7.28);
+
+        // Tear.
+        tl.set("#t-tear", { opacity: 1 }, 7.48);
+        tl.fromTo("#t-tear .top", { x: -80, rotation: -5, opacity: 0 }, { x: 0, rotation: 0, opacity: 1, duration: 0.4, ease: "back.out(1.7)" }, 7.48);
+        tl.fromTo("#t-tear .bot", { x: 80, rotation: 4, opacity: 0 }, { x: 0, rotation: 0, opacity: 1, duration: 0.4, ease: "back.out(1.7)" }, 7.5);
+        tl.to("#t-tear .top", { x: -14, y: -16, rotation: -4, duration: 0.09, ease: "power2.out" }, 8.125);
+        tl.to("#t-tear .top", { x: 0, y: 0, rotation: 0, duration: 0.42, ease: "elastic.out(1, 0.45)" }, 8.215);
+        tl.to("#t-tear", { y: -60, opacity: 0, duration: 0.24, ease: "power2.in" }, 9.78);
+
+        // Pour. (+ a splash of water)
+        tl.set("#t-pour", { opacity: 1 }, 9.95);
+        tl.fromTo("#t-pour .ch", { yPercent: -150, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.55, ease: "bounce.out", stagger: 0.07 }, 9.95);
+        tl.fromTo("#t-water", { opacity: 0, x: -36 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, 12.5);
+        tl.to(["#t-pour", "#t-water"], { opacity: 0, filter: "blur(12px)", duration: 0.3, ease: "power1.in" }, 14.85);
+
+        // Whisk.
+        tl.set("#t-whisk", { opacity: 1 }, 15.3);
+        tl.fromTo("#t-whisk .ch", { x: (i) => (i % 2 ? 46 : -46), skewX: (i) => (i % 2 ? -14 : 14), opacity: 0 }, { x: 0, skewX: 0, opacity: 1, duration: 0.5, ease: "expo.out", stagger: 0.04 }, 15.3);
+        tl.to("#t-whisk", { y: -60, opacity: 0, duration: 0.24, ease: "power2.in" }, 19.72);
+
+        // Ice. → Milk.
+        tl.set("#t-ice", { opacity: 1 }, 19.86);
+        const iceCh = document.querySelectorAll("#t-ice .ch");
+        [19.86, 20.16, 20.48, 20.6].forEach((T, i) => {
+          tl.fromTo(iceCh[i], { yPercent: -170, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.4, ease: "bounce.out" }, T);
+        });
+        tl.to("#t-ice", { y: -60, opacity: 0, duration: 0.22, ease: "power2.in" }, 21.1);
+        tl.set("#t-milk", { opacity: 1 }, 21.25);
+        tl.fromTo("#t-milk .ch", { opacity: 0, y: 34, filter: "blur(16px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8, ease: "sine.out", stagger: 0.06 }, 21.25);
+        tl.to("#t-milk", { opacity: 0, y: -40, filter: "blur(10px)", duration: 0.3, ease: "power2.in" }, 24.85);
+
+
+        // One stick. One latte.
+        tl.set("#t-hero", { opacity: 1 }, 25.5);
+        tl.fromTo("#t-hero .l1", { yPercent: 112 }, { yPercent: 0, duration: 0.7, ease: "expo.out" }, 25.52);
+        tl.fromTo("#t-hero .l2", { yPercent: 112 }, { yPercent: 0, duration: 0.75, ease: "expo.out" }, 25.7);
+        tl.to("#t-hero", { y: -56, opacity: 0, duration: 0.26, ease: "power2.in" }, 27.28);
+
+        // CTA
+        tl.set("#t-cta", { opacity: 1 }, 27.5);
+        tl.fromTo("#cta-glass", { scale: 0, rotation: -12, transformOrigin: "50% 80%" }, { scale: 1, rotation: 0, duration: 0.6, ease: "back.out(2.2)" }, 27.5);
+        tl.fromTo("#cta-word .ch", { yPercent: 120, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.55, ease: "power4.out", stagger: 0.032 }, 27.56);
+        tl.fromTo("#cta-tag", { yPercent: 110 }, { yPercent: 0, duration: 0.7, ease: "expo.out" }, 27.82);
+        tl.fromTo("#cta-facts", { opacity: 0, y: 14 }, { opacity: 0.85, y: 0, duration: 0.45, ease: "power2.out" }, 28.0);
+        tl.fromTo("#cta-pill", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: "back.out(2.4)" }, 28.1);
+        tl.fromTo("#cta-pill .shine", { x: -160 }, { x: 760, duration: 0.9, ease: "power2.inOut" }, 28.7);
+
+        render(0);
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

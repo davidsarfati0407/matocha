@@ -1,0 +1,6 @@
+# regenerable — python3 tools/make_audio.py && python3 tools/mix_audio.py
+assets/audio/*.raw.wav
+# review artefacts — npx hyperframes snapshot
+snapshots/
+renders/.hf-segments/
+.hyperframes/

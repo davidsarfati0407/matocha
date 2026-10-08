@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Third-party agent skills (npx skills add) — not app code.
     ".claude/**",
+    // HyperFrames video projects (vendored GSAP, composition scripts) — not app code.
+    "videos/**",
   ]),
 ]);
 
