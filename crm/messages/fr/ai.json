@@ -1,0 +1,50 @@
+{
+  "page": {
+    "title": "Assistant",
+    "deniedWhat": "l'assistant",
+    "subtitle": "Questions en langage naturel sur vos données · lecture seule, avec vos droits",
+    "connected": "Connecté · {model}",
+    "notConfigured": "Non configuré",
+    "howTitle": "Comment ça marche",
+    "how1": "Le modèle n'accède qu'à 7 outils de lecture (recherche, KPI, factures ouvertes, commandes, présence, congés, stock bas).",
+    "how2": "Chaque outil interroge la base avec votre session : la RLS s'applique, l'assistant ne voit pas les salaires si vous ne les voyez pas.",
+    "how3": "Il ne modifie rien : il propose le lien de la page où agir en un clic.",
+    "how4": "Dans la messagerie, il rédige des brouillons de réponse à relire avant envoi."
+  },
+  "panel": {
+    "label": "Assistant IA",
+    "title": "Assistant",
+    "close": "Fermer l'assistant"
+  },
+  "chat": {
+    "suggestions": {
+      "urgent": "Qu'est-ce qui est urgent aujourd'hui ?",
+      "overdue": "Quelles factures sont échues ?",
+      "orders": "Où en sont les commandes pro en préparation ?",
+      "remote": "Qui est en télétravail ?"
+    },
+    "notConfigured": "Assistant non configuré",
+    "notConfiguredHint": "Ajoutez <code>ANTHROPIC_API_KEY</code> dans <code>crm/.env.local</code> puis relancez <code>pnpm dev</code>. Rien n'est simulé ici : sans clé, pas de réponse.",
+    "intro": "Posez une question sur vos données. L'assistant lit la base avec <b>vos</b> droits et ne modifie rien.",
+    "sources": "Sources : {tools}",
+    "searching": "Recherche dans vos données…",
+    "inputLabel": "Question à l'assistant",
+    "placeholder": "Votre question…",
+    "send": "Envoyer"
+  },
+  "errors": {
+    "notConfigured": "Assistant non configuré : ajoutez ANTHROPIC_API_KEY dans .env.local.",
+    "forbidden": "Votre rôle ne permet pas d'utiliser l'assistant.",
+    "emptyQuestion": "Question vide.",
+    "authError": "Clé API refusée par Anthropic.",
+    "rateLimit": "Trop de requêtes : réessayez dans un instant.",
+    "apiError": "Erreur de l'API ({status}).",
+    "networkError": "Erreur de l'API (réseau).",
+    "unavailable": "Assistant indisponible."
+  },
+  "assistant": {
+    "refusal": "La demande n'a pas pu être traitée (refus de sécurité du modèle).",
+    "empty": "(réponse vide)",
+    "tooManySteps": "Je n'ai pas pu conclure en un nombre raisonnable d'étapes : reformulez la question."
+  }
+}

@@ -1,14 +1,18 @@
-import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/ui/kit";
 import { getCtx } from "@/lib/backoffice/context";
 import { createClient } from "@/lib/supabase/server";
 import { EmployeesTable } from "./table";
 
-export const metadata: Metadata = { title: "Collaborateurs" };
+export async function generateMetadata() {
+  const t = await getTranslations("hr");
+  return { title: t("employees.title") };
+}
 
 /** Annuaire : visible par tous ; le détail RH (soldes, contrats) seulement avec le droit RH. */
 export default async function EmployeesPage() {
   const ctx = await getCtx();
+  const t = await getTranslations("hr");
   const supabase = await createClient();
   const [emps, pres] = await Promise.all([
     supabase.from("employees").select("id, first_name, last_name, job_title, email, phone, contract_type, work_rate, hired_on, leave_balance_days, departments(name), manager:manager_id(first_name, last_name)").is("left_on", null).order("last_name"),
@@ -22,7 +26,7 @@ export default async function EmployeesPage() {
   });
   return (
     <>
-      <PageHeader title="Collaborateurs" subtitle={`${rows.length} personnes · statut de présence en direct (même source que la map)`} />
+      <PageHeader title={t("employees.title")} subtitle={t("employees.subtitle", { count: rows.length })} />
       <EmployeesTable rows={rows} hr={hr} />
     </>
   );

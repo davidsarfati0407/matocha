@@ -1,5 +1,6 @@
 "use client";
 /** Tableau de bord personnalisable : widgets à glisser-déposer, masquables ; ordre enregistré par utilisateur. */
+import { useTranslations } from "next-intl";
 import { useEffect, useState, type ReactNode } from "react";
 import { Icon } from "@/components/map/hud/ui";
 import { listViews, saveView, deleteView } from "@/app/(backoffice)/_actions/views";
@@ -13,6 +14,7 @@ export interface Widget {
 }
 
 export function WidgetBoard({ widgets, storageKey }: { widgets: Widget[]; storageKey: string }) {
+  const t = useTranslations("dashboard.board");
   const [order, setOrder] = useState<string[]>(widgets.map((w) => w.id));
   const [hidden, setHidden] = useState<string[]>([]);
   const [editing, setEditing] = useState(false);
@@ -47,13 +49,13 @@ export function WidgetBoard({ widgets, storageKey }: { widgets: Widget[]; storag
           onClick={async () => {
             if (editing) {
               await persist(order, hidden);
-              toast({ title: "Disposition enregistrée", tone: "ok" });
+              toast({ title: t("saved"), tone: "ok" });
             }
             setEditing(!editing);
           }}
           className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium ring-1 ring-black/10 hover:bg-black/[0.03]"
         >
-          <Icon name={editing ? "check" : "edit"} size={13} /> {editing ? "Terminer" : "Personnaliser"}
+          <Icon name={editing ? "check" : "edit"} size={13} /> {editing ? t("done") : t("customize")}
         </button>
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -76,7 +78,7 @@ export function WidgetBoard({ widgets, storageKey }: { widgets: Widget[]; storag
               <div className="flex items-center justify-between px-2 py-1 text-xs">
                 <span className="font-medium">⠿ {w.title}</span>
                 <button onClick={() => setHidden(hidden.includes(w.id) ? hidden.filter((x) => x !== w.id) : [...hidden, w.id])} className="text-accent">
-                  {hidden.includes(w.id) ? "Afficher" : "Masquer"}
+                  {hidden.includes(w.id) ? t("show") : t("hide")}
                 </button>
               </div>
             )}

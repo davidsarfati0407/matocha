@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Logo } from "@/components/ui/Logo";
 import { sectorConfig } from "@/config/sector.config";
@@ -7,7 +6,10 @@ import { formatMoney, formatNumber, formatPercent, formatTime } from "@/lib/form
 import { createClient } from "@/lib/supabase/server";
 import { LocaleSwitch, RevealSalary } from "./client";
 
-export const metadata: Metadata = { title: "Page technique" };
+export async function generateMetadata() {
+  const t = await getTranslations("tech");
+  return { title: t("metaTitle") };
+}
 
 type Kpi = { value: number | null; delta: number | null; target?: number | null };
 
@@ -164,7 +166,7 @@ export default async function TechPage() {
                     {items.map((w) => (
                       <p key={w.number} className="truncate pl-3 text-xs text-muted">
                         <span className="font-mono">{w.number}</span> · {(w.clients as unknown as { name: string } | null)?.name ?? "—"}
-                        {w.status === "attente" && <span className="ml-1 text-warn">● attente</span>}
+                        {w.status === "attente" && <span className="ml-1 text-warn">● {t("waiting")}</span>}
                       </p>
                     ))}
                   </li>
@@ -266,7 +268,7 @@ export default async function TechPage() {
             ))}
           </ul>
           <p className="mt-4 text-xs text-muted">
-            {t("config")} : {sectorConfig.lieux[0].zones.length} espaces · {sectorConfig.postes.length} postes · {stages.length} étapes. {t("mapComing")}
+            {t("configSummary", { zones: sectorConfig.lieux[0].zones.length, posts: sectorConfig.postes.length, stages: stages.length })} {t("mapComing")}
           </p>
         </div>
       </section>

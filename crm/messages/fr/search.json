@@ -1,0 +1,14 @@
+{
+  "group": {
+    "employees": "Collaborateurs",
+    "clients": "Comptes",
+    "actions": "Actions",
+    "workOrders": "Commandes pro",
+    "quotes": "Devis",
+    "invoices": "Factures",
+    "stock": "Stock",
+    "assets": "Équipements"
+  },
+  "newQuoteFor": "Nouveau devis pour {name}",
+  "guidedQuote": "Devis guidé"
+}

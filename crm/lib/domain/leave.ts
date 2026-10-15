@@ -40,10 +40,15 @@ export function businessDays(from: string, to: string): number {
   return n;
 }
 
+/** Message de contrôle : code traduit par l'interface (clé « domain.leave.<code> ») et ses paramètres. */
+export interface Notice {
+  code: "endBeforeStart" | "balance" | "blackout" | "presence";
+  values?: Record<string, string | number>;
+}
 export interface LeaveCheck {
   ok: boolean;
-  warnings: string[];
-  errors: string[];
+  warnings: Notice[];
+  errors: Notice[];
 }
 
 /**
@@ -61,18 +66,17 @@ export function checkLeave(o: {
   teamAbsences: { from: string; to: string }[]; // congés validés des collègues
   minPresence: number;
 }): LeaveCheck {
-  const errors: string[] = [];
-  const warnings: string[] = [];
-  if (o.to < o.from) errors.push("La date de fin précède la date de début.");
-  if ((o.type === "conges" || o.type === "rtt") && o.days > o.balance) errors.push(`Solde insuffisant (${o.balance} j disponibles).`);
+  const errors: Notice[] = [];
+  const warnings: Notice[] = [];
+  if (o.to < o.from) errors.push({ code: "endBeforeStart" });
+  if ((o.type === "conges" || o.type === "rtt") && o.days > o.balance) errors.push({ code: "balance", values: { days: o.balance } });
   for (let d = new Date(`${o.from}T12:00:00Z`); iso(d) <= o.to; d = plus(d, 1)) {
     const md = iso(d).slice(5);
     const b = o.blackouts.find((x) => md >= x.from && md <= x.to);
-    if (b && !warnings.some((w) => w.includes(b.label))) warnings.push(`Période de blocage : ${b.label}.`);
+    if (b && !warnings.some((w) => w.values?.label === b.label)) warnings.push({ code: "blackout", values: { label: b.label } });
     const absent = 1 + o.teamAbsences.filter((a) => iso(d) >= a.from && iso(d) <= a.to).length;
     if (o.teamSize > 0 && (o.teamSize - absent) / o.teamSize < o.minPresence) {
-      const msg = `Présence de l'équipe sous ${Math.round(o.minPresence * 100)} % le ${iso(d).split("-").reverse().join("/")}.`;
-      if (!warnings.includes(msg)) warnings.push(msg);
+      warnings.push({ code: "presence", values: { pct: Math.round(o.minPresence * 100), date: iso(d) } });
     }
   }
   return { ok: errors.length === 0, warnings, errors };

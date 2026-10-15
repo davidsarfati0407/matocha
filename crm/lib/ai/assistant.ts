@@ -6,6 +6,7 @@ import "server-only";
  * Sans clé API, l'application l'indique honnêtement (« non configuré »).
  */
 import Anthropic from "@anthropic-ai/sdk";
+import { getTranslations } from "next-intl/server";
 import { searchAll } from "@/app/(backoffice)/_actions/shell";
 import { sectorConfig } from "@/config/sector.config";
 import { getCtx } from "@/lib/backoffice/context";
@@ -68,17 +69,20 @@ export interface ChatTurn {
   text: string;
 }
 
-/** Une question → réponse, avec boucle d'outils (au plus 6 tours). */
-export async function askAssistant(history: ChatTurn[]): Promise<{ text: string; tools: string[] }> {
+/** Une question → réponse, avec boucle d'outils (au plus 6 tours), dans la langue d'interface (locale). */
+export async function askAssistant(history: ChatTurn[], locale: string): Promise<{ text: string; tools: string[] }> {
   const ctx = await getCtx();
+  const t = await getTranslations({ locale, namespace: "ai.assistant" });
+  const answerIn = locale === "en" ? "en anglais (English) — the user interface is in English" : "en français";
   const client = new Anthropic();
   const system = `Tu es l'assistant interne de ${sectorConfig.entreprise.nomCourt} (${sectorConfig.entreprise.activite}).
-Tu parles à ${ctx.fullName}, rôle « ${ctx.role.label} ». Réponds en français, brièvement, avec des chiffres exacts tirés des outils.
+Tu parles à ${ctx.fullName}, rôle « ${ctx.role.label} ». Réponds ${answerIn}, brièvement, avec des chiffres exacts tirés des outils.
 Utilise les outils pour toute question sur les données : n'invente jamais un chiffre, un nom ou un statut.
 Quand tu cites un élément, ajoute son lien relatif en markdown, ex. [F-2026-0409](/finance/invoices/…).
 Si un outil répond « Accès refusé », dis que le rôle de l'utilisateur ne permet pas de voir cette information.
 Tu ne peux rien modifier : propose l'action et le lien de la page où la faire en un clic.
-Les données sont fictives (démonstration). Date du jour : ${new Date().toLocaleDateString("fr-FR", { timeZone: sectorConfig.entreprise.fuseau })}.`;
+Les données sont fictives (démonstration). Date du jour : ${new Date().toLocaleDateString("fr-FR", { timeZone: sectorConfig.entreprise.fuseau })}.
+Langue de réponse : réponds toujours ${answerIn}, quelle que soit la langue des données ou des outils.`;
   const messages: Anthropic.Beta.BetaMessageParam[] = history.map((h) => ({ role: h.role, content: h.text }));
   const used: string[] = [];
   for (let i = 0; i < 6; i++) {
@@ -92,14 +96,14 @@ Les données sont fictives (démonstration). Date du jour : ${new Date().toLocal
       fallbacks: "default",
       messages,
     });
-    if (res.stop_reason === "refusal") return { text: "La demande n'a pas pu être traitée (refus de sécurité du modèle).", tools: used };
+    if (res.stop_reason === "refusal") return { text: t("refusal"), tools: used };
     if (res.stop_reason === "pause_turn") {
       messages.push({ role: "assistant", content: res.content });
       continue;
     }
     const calls = res.content.filter((b): b is Anthropic.Beta.BetaToolUseBlock => b.type === "tool_use");
     if (res.stop_reason !== "tool_use" || calls.length === 0) {
-      return { text: res.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("\n").trim() || "(réponse vide)", tools: used };
+      return { text: res.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("\n").trim() || t("empty"), tools: used };
     }
     messages.push({ role: "assistant", content: res.content });
     const results: Anthropic.Beta.BetaToolResultBlockParam[] = await Promise.all(
@@ -114,7 +118,7 @@ Les données sont fictives (démonstration). Date du jour : ${new Date().toLocal
     );
     messages.push({ role: "user", content: results });
   }
-  return { text: "Je n'ai pas pu conclure en un nombre raisonnable d'étapes : reformulez la question.", tools: used };
+  return { text: t("tooManySteps"), tools: used };
 }
 
 /** Brouillon de réponse à un fil de messages (à relire avant envoi). */

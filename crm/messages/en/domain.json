@@ -1,0 +1,16 @@
+{
+  "domain": {
+    "anomaly": {
+      "doubleIn": "duplicate clock-in",
+      "pauseWithoutIn": "break without clock-in",
+      "outWithoutIn": "clock-out without clock-in",
+      "missingOut": "missing clock-out"
+    },
+    "leave": {
+      "endBeforeStart": "The end date is before the start date.",
+      "balance": "Insufficient balance ({days} days available).",
+      "blackout": "Blackout period: {label}.",
+      "presence": "Team presence below {pct}% on {date, date, short}."
+    }
+  }
+}

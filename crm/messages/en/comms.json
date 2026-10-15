@@ -1,0 +1,50 @@
+{
+  "actions": {
+    "threadNotFound": "Thread not found",
+    "emptyMessage": "Empty message",
+    "replySent": "Reply sent to {to} ({via})",
+    "replySaved": "Reply saved (internal thread)",
+    "threadClosed": "Thread closed"
+  },
+  "inbox": {
+    "title": "Inbox",
+    "deniedWhat": "the inbox",
+    "subtitle": "Customer e-mails and internal messages · Gmail / Outlook connectors in simulated mode",
+    "status": {
+      "awaiting_reply": "To answer",
+      "open": "Open",
+      "answered": "Answered",
+      "closed": "Closed"
+    },
+    "internal": "Internal",
+    "accountLink": "Account record →",
+    "aiDraftReviewed": "reviewed AI draft",
+    "empty": "No messages",
+    "draft": "Suggest a draft",
+    "draftAi": "Written by AI · review it",
+    "draftTemplate": "Template (AI not configured)",
+    "reply": "Reply",
+    "replyPlaceholder": "Your reply…",
+    "send": "Send",
+    "close": "Close"
+  },
+  "documents": {
+    "title": "Documents",
+    "subtitle": "Quotes and invoices generated on demand, files attached to records",
+    "storageHint": "Uploaded file storage: <b>simulated mode</b> locally (Supabase Storage to be connected in phase 4). Quotes and invoices are always regenerated from the data: never an outdated copy.",
+    "quoteFile": "Quote {number}.pdf",
+    "invoiceFile": "Invoice {number}.pdf",
+    "kindQuote": "quote",
+    "kindInvoice": "invoice",
+    "colDocument": "Document",
+    "colType": "Type",
+    "colOwner": "Attached to",
+    "colDate": "Date",
+    "colSource": "Source",
+    "uploaded": "Uploaded",
+    "generated": "Generated",
+    "uploadedBadge": "uploaded · simulated",
+    "generatedBadge": "generated",
+    "exportName": "documents"
+  }
+}

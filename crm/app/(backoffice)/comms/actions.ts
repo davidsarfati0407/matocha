@@ -1,5 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { outbound, textToHtml } from "@/lib/integrations/outbound";
 import { aiConfigured, draftReply } from "@/lib/ai/assistant";
 import { getCtx } from "@/lib/backoffice/context";
@@ -8,9 +9,10 @@ import { createClient } from "@/lib/supabase/server";
 
 /** Brouillon : IA si configurée, sinon modèle de réponse (indiqué comme tel). */
 export async function makeDraft(threadId: string): Promise<ActionResult<{ text: string; source: "ia" | "modele" }>> {
+  const tr = await getTranslations("comms.actions");
   const supabase = await createClient();
   const { data: t } = await supabase.from("threads").select("subject, clients(name), messages(direction, from_name, body, language, sent_at)").eq("id", threadId).single();
-  if (!t) return { ok: false, error: "Fil introuvable" };
+  if (!t) return { ok: false, error: tr("threadNotFound") };
   const msgs = [...(t.messages as { direction: string; from_name: string; body: string; language: string | null; sent_at: string | null }[])].sort((a, b) => (a.sent_at ?? "").localeCompare(b.sent_at ?? ""));
   const lastIn = [...msgs].reverse().find((m) => m.direction === "in");
   const lang = lastIn?.language ?? "fr";
@@ -29,7 +31,8 @@ export async function makeDraft(threadId: string): Promise<ActionResult<{ text: 
 }
 
 export async function sendReply(threadId: string, body: string, aiDraft: boolean): Promise<ActionResult> {
-  if (!body.trim()) return { ok: false, error: "Message vide" };
+  const tr = await getTranslations("comms.actions");
+  if (!body.trim()) return { ok: false, error: tr("emptyMessage") };
   const supabase = await createClient();
   const { fullName } = await getCtx();
   const now = new Date().toISOString();
@@ -42,13 +45,14 @@ export async function sendReply(threadId: string, body: string, aiDraft: boolean
   if (error) return fail(error);
   await supabase.from("threads").update({ status: "answered", last_message_at: now }).eq("id", threadId);
   revalidatePath("/comms/inbox");
-  return { ok: true, message: sent ? `Réponse envoyée à ${to} (${sent.via})` : "Réponse enregistrée (fil interne)" };
+  return { ok: true, message: sent ? tr("replySent", { to: to ?? "", via: sent.via }) : tr("replySaved") };
 }
 
 export async function closeThread(threadId: string): Promise<ActionResult> {
+  const tr = await getTranslations("comms.actions");
   const supabase = await createClient();
   const { error } = await supabase.from("threads").update({ status: "closed" }).eq("id", threadId);
   if (error) return fail(error);
   revalidatePath("/comms/inbox");
-  return { ok: true, message: "Fil clôturé" };
+  return { ok: true, message: tr("threadClosed") };
 }

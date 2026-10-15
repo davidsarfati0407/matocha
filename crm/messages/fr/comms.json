@@ -1,0 +1,50 @@
+{
+  "actions": {
+    "threadNotFound": "Fil introuvable",
+    "emptyMessage": "Message vide",
+    "replySent": "Réponse envoyée à {to} ({via})",
+    "replySaved": "Réponse enregistrée (fil interne)",
+    "threadClosed": "Fil clôturé"
+  },
+  "inbox": {
+    "title": "Messagerie",
+    "deniedWhat": "la messagerie",
+    "subtitle": "E-mails clients et messages internes · connecteurs Gmail / Outlook en mode simulé",
+    "status": {
+      "awaiting_reply": "À répondre",
+      "open": "Ouvert",
+      "answered": "Répondu",
+      "closed": "Clôturé"
+    },
+    "internal": "Interne",
+    "accountLink": "Fiche compte →",
+    "aiDraftReviewed": "brouillon IA relu",
+    "empty": "Aucun message",
+    "draft": "Proposer un brouillon",
+    "draftAi": "Rédigé par l'IA · à relire",
+    "draftTemplate": "Modèle (IA non configurée)",
+    "reply": "Réponse",
+    "replyPlaceholder": "Votre réponse…",
+    "send": "Envoyer",
+    "close": "Clôturer"
+  },
+  "documents": {
+    "title": "Documents",
+    "subtitle": "Devis et factures générés à la demande, pièces rattachées aux fiches",
+    "storageHint": "Stockage des fichiers déposés : <b>mode simulé</b> en local (Supabase Storage à brancher en phase 4). Les devis et factures sont toujours régénérés depuis les données : jamais de copie périmée.",
+    "quoteFile": "Devis {number}.pdf",
+    "invoiceFile": "Facture {number}.pdf",
+    "kindQuote": "devis",
+    "kindInvoice": "facture",
+    "colDocument": "Document",
+    "colType": "Type",
+    "colOwner": "Rattaché à",
+    "colDate": "Date",
+    "colSource": "Source",
+    "uploaded": "Déposé",
+    "generated": "Généré",
+    "uploadedBadge": "déposé · simulé",
+    "generatedBadge": "généré",
+    "exportName": "documents"
+  }
+}

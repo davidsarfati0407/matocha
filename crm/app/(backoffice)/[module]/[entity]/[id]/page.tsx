@@ -1,12 +1,15 @@
-import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
 import { sectorConfig } from "@/config/sector.config";
 import { entityFromRoute, mapHref } from "@/lib/map/links";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = { title: "Back-office" };
+export async function generateMetadata() {
+  const t = await getTranslations("dashboard.entity");
+  return { title: t("metaTitle") };
+}
 
 /**
  * Point d'arrivée des liens « Ouvrir dans le back-office » de la map.
@@ -27,6 +30,7 @@ const HIDDEN = new Set(["org_id", "created_by", "appearance", "telemetry", "spec
 
 export default async function BackOfficeEntityPage({ params }: { params: Promise<{ module: string; entity: string; id: string }> }) {
   const { module, entity, id } = await params;
+  const t = await getTranslations("dashboard.entity");
   const type = entityFromRoute(module, entity);
   if (!type) notFound();
   const site = sectorConfig.lieux[0].id;
@@ -36,7 +40,7 @@ export default async function BackOfficeEntityPage({ params }: { params: Promise
   if (type === "stock_rack") {
     const { data } = await supabase.from("stock_items").select("reference, name, quantity, min_quantity, location").like("location", `${id}%`).order("location");
     row = { rayonnage: id, references: (data ?? []).map((d) => `${d.location} · ${d.name} (${d.quantity}/${d.min_quantity})`).join("\n") };
-    title = `Rayonnage ${id}`;
+    title = t("rack", { id });
   } else if (type === "zones") {
     const { data } = await supabase.from("zones").select("key, code, name, type, capacity, description").eq("key", id).maybeSingle();
     row = data;
@@ -59,14 +63,14 @@ export default async function BackOfficeEntityPage({ params }: { params: Promise
           <h1 className="truncate text-xl font-semibold tracking-tight">{title}</h1>
         </div>
         <Link href={mapHref(site, focusType, focusId)} className="rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white">
-          Voir sur la map
+          {t("viewOnMap")}
         </Link>
       </header>
       <section className="card p-5">
         <p className="mb-4 rounded-xl bg-warn/12 px-3 py-2 text-sm text-[#8a5d08]">
-          Module en cours de construction (phase 3). Données brutes lues avec vos droits :
+          {t("building")}
         </p>
-        {!row && <p className="text-sm text-muted">Aucune donnée visible avec votre rôle.</p>}
+        {!row && <p className="text-sm text-muted">{t("noData")}</p>}
         {row && (
           <dl className="grid grid-cols-[minmax(140px,auto)_1fr] gap-x-6 gap-y-1.5 text-sm">
             {Object.entries(row)

@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
 import { ActivityFeed } from "@/components/backoffice/ActivityFeed";
 import { MiniMap } from "@/components/backoffice/MiniMap";
 import { WidgetBoard } from "@/components/backoffice/WidgetBoard";
@@ -15,9 +15,13 @@ import { budgetAlertLevel } from "@/lib/domain/money";
 import { nowMs } from "@/lib/clock";
 import { ChartLabels } from "./labels";
 
-export const metadata: Metadata = { title: "Aujourd'hui" };
+export async function generateMetadata() {
+  const t = await getTranslations("dashboard");
+  return { title: t("metaTitle") };
+}
 
 export default async function Dashboard() {
+  const [t, locale] = await Promise.all([getTranslations("dashboard"), getLocale()]);
   const ctx = await getCtx();
   const supabase = await createClient();
   const site = sectorConfig.lieux[0].id;
@@ -51,35 +55,35 @@ export default async function Dashboard() {
     .filter((w) => w.level >= 50 || w.status === "attente" || (w.due_at && Date.parse(w.due_at) < now));
 
   const todos = [
-    { key: "quotes_to_send", label: "Devis à envoyer", href: "/crm/quotes?status=draft", icon: "file", module: "commercial" },
-    { key: "dunning_due", label: "Relances dues", href: "/finance/dunning", icon: "bell", module: "finance" },
-    { key: "invoices_overdue", label: "Factures échues", href: "/finance/invoices?status=overdue", icon: "receipt", module: "finance" },
-    { key: "leaves_pending", label: "Congés à valider", href: "/hr/leaves?status=pending", icon: "sun", module: "rh" },
-    { key: "wo_alerts", label: "Alertes commandes pro", href: "/ops/work-orders?alert=1", icon: "box", module: "operations" },
-    { key: "stock_low", label: "Stock bas", href: "/resources/stock?tab=low", icon: "layers", module: "ressources" },
-    { key: "expenses_pending", label: "Notes de frais à valider", href: "/finance/expenses?status=submitted", icon: "receipt", module: "finance" },
-    { key: "to_answer", label: "Messages à répondre", href: "/comms/inbox", icon: "mail", module: "communication" },
-  ].filter((t) => ctx.can(t.module as never));
-  const hello = new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: sectorConfig.entreprise.fuseau });
+    { key: "quotes_to_send", href: "/crm/quotes?status=draft", icon: "file", module: "commercial" },
+    { key: "dunning_due", href: "/finance/dunning", icon: "bell", module: "finance" },
+    { key: "invoices_overdue", href: "/finance/invoices?status=overdue", icon: "receipt", module: "finance" },
+    { key: "leaves_pending", href: "/hr/leaves?status=pending", icon: "sun", module: "rh" },
+    { key: "wo_alerts", href: "/ops/work-orders?alert=1", icon: "box", module: "operations" },
+    { key: "stock_low", href: "/resources/stock?tab=low", icon: "layers", module: "ressources" },
+    { key: "expenses_pending", href: "/finance/expenses?status=submitted", icon: "receipt", module: "finance" },
+    { key: "to_answer", href: "/comms/inbox", icon: "mail", module: "communication" },
+  ].filter((td) => ctx.can(td.module as never));
+  const hello = new Date().toLocaleDateString(locale === "en" ? "en-GB" : "fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: sectorConfig.entreprise.fuseau });
 
   const widgets = [
     {
       id: "todo",
-      title: "À faire aujourd'hui",
+      title: t("todo.title"),
       span: 3 as const,
       node: (
-        <Card title="À faire aujourd'hui" action={<span className="text-xs text-muted">Un clic ouvre la liste filtrée, avec le contenu pré-rempli</span>}>
+        <Card title={t("todo.title")} action={<span className="text-xs text-muted">{t("todo.hint")}</span>}>
           <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-            {todos.map((t) => {
-              const n = c[t.key] ?? 0;
+            {todos.map((td) => {
+              const n = c[td.key] ?? 0;
               return (
-                <Link key={t.key} href={t.href} className={`flex items-center gap-3 rounded-xl p-3 ring-1 transition hover:-translate-y-0.5 ${n ? "bg-accent/[0.06] ring-accent/25" : "ring-black/5"}`}>
+                <Link key={td.key} href={td.href} className={`flex items-center gap-3 rounded-xl p-3 ring-1 transition hover:-translate-y-0.5 ${n ? "bg-accent/[0.06] ring-accent/25" : "ring-black/5"}`}>
                   <span className={`grid size-9 place-items-center rounded-xl ${n ? "bg-accent text-white" : "bg-ground text-muted"}`}>
-                    <Icon name={t.icon} size={16} />
+                    <Icon name={td.icon} size={16} />
                   </span>
                   <span className="min-w-0">
                     <span className="block text-xl font-semibold leading-none">{n}</span>
-                    <span className="block truncate text-xs text-muted">{t.label}</span>
+                    <span className="block truncate text-xs text-muted">{t(`todo.${td.key}`)}</span>
                   </span>
                 </Link>
               );
@@ -90,7 +94,7 @@ export default async function Dashboard() {
     },
     {
       id: "kpis",
-      title: "Indicateurs",
+      title: t("kpis.title"),
       span: 3 as const,
       node: (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -100,46 +104,46 @@ export default async function Dashboard() {
             const d = v.delta == null ? null : Number(v.delta);
             return <Stat key={k.id} label={k.libelle} value={value} sub={`${d == null ? "" : `${d >= 0 ? "↑" : "↓"} ${k.unite === "nombre" ? formatNumber(Math.abs(d)) : formatPercent(Math.abs(d))} · `}${k.sousTitre}`} icon={["box", "clock", "chart"][i]} href={k.lien} />;
           })}
-          <Stat label="CA HT sur 30 jours" value={formatMoney(rev30, "fr", 0)} sub="en ligne + commandes pro" icon="chart" href="/finance/treasury" />
+          <Stat label={t("kpis.revenue30")} value={formatMoney(rev30, "fr", 0)} sub={t("kpis.revenue30Sub")} icon="chart" href="/finance/treasury" />
         </div>
       ),
     },
     {
       id: "revenue",
-      title: "Chiffre d'affaires",
+      title: t("revenue.widget"),
       span: 2 as const,
       node: (
-        <Card title="Chiffre d'affaires HT · 30 jours">
+        <Card title={t("revenue.title")}>
           <ChartLabels kind="revenue" data={rev} />
         </Card>
       ),
     },
     {
       id: "minimap",
-      title: "Mini-map",
+      title: t("minimap.widget"),
       node: (
-        <Card title="Qui est où" action={<Link href={`/map/${site}`} className="text-xs font-medium text-accent">Ouvrir la map →</Link>}>
-          {plan.data ? <MiniMap layout={plan.data.layout as FloorPlanLayout} site={site} counts={counts} /> : <Empty title="Plan non publié" />}
-          <p className="mt-2 text-xs text-muted">{(presence.data ?? []).filter((p) => ["au_poste", "reunion", "pause"].includes(p.status)).length} personnes sur site · cliquez un espace</p>
+        <Card title={t("minimap.title")} action={<Link href={`/map/${site}`} className="text-xs font-medium text-accent">{t("minimap.open")}</Link>}>
+          {plan.data ? <MiniMap layout={plan.data.layout as FloorPlanLayout} site={site} counts={counts} /> : <Empty title={t("minimap.noPlan")} />}
+          <p className="mt-2 text-xs text-muted">{t("minimap.onSite", { count: (presence.data ?? []).filter((p) => ["au_poste", "reunion", "pause"].includes(p.status)).length })}</p>
         </Card>
       ),
     },
     {
       id: "orders",
-      title: "Commandes en ligne",
+      title: t("orders.widget"),
       node: (
-        <Card title="Commandes en ligne par jour">
+        <Card title={t("orders.title")}>
           <ChartLabels kind="orders" data={rev} />
         </Card>
       ),
     },
     {
       id: "agenda",
-      title: "Mon agenda",
+      title: t("agenda.title"),
       node: (
-        <Card title="Mon agenda" action={<Link href="/crm/calendar" className="text-xs font-medium text-accent">Calendrier →</Link>}>
+        <Card title={t("agenda.title")} action={<Link href="/crm/calendar" className="text-xs font-medium text-accent">{t("agenda.link")}</Link>}>
           {(calendar.data ?? []).length === 0 ? (
-            <Empty icon="calendar" title="Rien de prévu" hint="Votre agenda du jour est libre." />
+            <Empty icon="calendar" title={t("agenda.empty")} hint={t("agenda.emptyHint")} />
           ) : (
             <ul className="space-y-2 text-sm">
               {(calendar.data ?? []).map((e) => (
@@ -157,11 +161,11 @@ export default async function Dashboard() {
     },
     {
       id: "alerts",
-      title: "Alertes budget et délais",
+      title: t("alerts.widget"),
       node: (
-        <Card title="Alertes budget & délais">
+        <Card title={t("alerts.title")}>
           {alerts.length === 0 ? (
-            <Empty icon="check" title="Aucune alerte" />
+            <Empty icon="check" title={t("alerts.empty")} />
           ) : (
             <ul className="space-y-2 text-sm">
               {alerts.slice(0, 6).map((w) => (
@@ -170,7 +174,7 @@ export default async function Dashboard() {
                     <span className="truncate">
                       <span className="font-mono text-xs">{w.number}</span> · {w.clients?.name ?? w.title}
                     </span>
-                    {w.level >= 50 ? <Badge tone={w.level >= 100 ? "danger" : w.level >= 80 ? "warn" : "info"}>Budget {w.level} %</Badge> : w.status === "attente" ? <Badge tone="warn">En attente</Badge> : <Badge tone="danger">En retard</Badge>}
+                    {w.level >= 50 ? <Badge tone={w.level >= 100 ? "danger" : w.level >= 80 ? "warn" : "info"}>{t("alerts.budget", { level: w.level })}</Badge> : w.status === "attente" ? <Badge tone="warn">{t("alerts.waiting")}</Badge> : <Badge tone="danger">{t("alerts.late")}</Badge>}
                   </Link>
                 </li>
               ))}
@@ -181,10 +185,10 @@ export default async function Dashboard() {
     },
     {
       id: "activity",
-      title: "Fil d'activité",
+      title: t("activity.widget"),
       span: 2 as const,
       node: (
-        <Card title="Fil d'activité en direct">
+        <Card title={t("activity.title")}>
           <ActivityFeed initial={(activity.data ?? []) as ActivityEvent[]} orgId={ctx.orgId} names={names} />
         </Card>
       ),
@@ -193,7 +197,7 @@ export default async function Dashboard() {
 
   return (
     <>
-      <PageHeader kicker={hello} title={`Bonjour ${ctx.fullName.split(" ")[0]}`} subtitle={`${ctx.role.label} · ${ctx.orgName}`} />
+      <PageHeader kicker={hello} title={t("hello", { name: ctx.fullName.split(" ")[0] })} subtitle={`${ctx.role.label} · ${ctx.orgName}`} />
       <WidgetBoard widgets={widgets} storageKey={`dashboard:${ctx.role.key}`} />
     </>
   );

@@ -1,0 +1,33 @@
+{
+  "parcels": "{count, plural, one {# parcel} other {# parcels}}",
+  "event": {
+    "badge_in": "Arrival",
+    "badge_out": "Departure",
+    "badge_pause_start": "Break",
+    "badge_pause_end": "Back from break",
+    "work_order_stage": "Stage change",
+    "work_order_created": "Pro order created",
+    "quote_accepted": "Quote accepted",
+    "quote_sent": "Quote sent",
+    "lot_quarantaine": "Lot received (quarantine)",
+    "lot_libere": "Lot released",
+    "invoice_paid": "Invoice paid",
+    "invoice_sent": "Invoice sent",
+    "leave_approved": "Leave approved",
+    "leave_pending": "Leave request",
+    "expedition_pickup": "Carrier pickup",
+    "notification_ambient": "Notification",
+    "shop_order_payee": "Online order",
+    "stock_low": "Low stock",
+    "stock_entree": "Stock in",
+    "stock_sortie": "Stock out",
+    "invoice_overdue": "Invoice overdue",
+    "room_insert": "Room booked",
+    "room_update": "Booking changed",
+    "room_delete": "Room released",
+    "booking_created": "Equipment booking",
+    "asset_assigned": "Equipment assigned",
+    "quote_draft": "Quote created",
+    "leave_rejected": "Leave rejected"
+  }
+}

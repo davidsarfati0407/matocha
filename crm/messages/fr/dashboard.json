@@ -1,0 +1,72 @@
+{
+  "metaTitle": "Aujourd'hui",
+  "hello": "Bonjour {name}",
+  "todo": {
+    "title": "À faire aujourd'hui",
+    "hint": "Un clic ouvre la liste filtrée, avec le contenu pré-rempli",
+    "quotes_to_send": "Devis à envoyer",
+    "dunning_due": "Relances dues",
+    "invoices_overdue": "Factures échues",
+    "leaves_pending": "Congés à valider",
+    "wo_alerts": "Alertes commandes pro",
+    "stock_low": "Stock bas",
+    "expenses_pending": "Notes de frais à valider",
+    "to_answer": "Messages à répondre"
+  },
+  "kpis": {
+    "title": "Indicateurs",
+    "revenue30": "CA HT sur 30 jours",
+    "revenue30Sub": "en ligne + commandes pro"
+  },
+  "revenue": {
+    "widget": "Chiffre d'affaires",
+    "title": "Chiffre d'affaires HT · 30 jours",
+    "series": "CA HT"
+  },
+  "minimap": {
+    "widget": "Mini-map",
+    "title": "Qui est où",
+    "open": "Ouvrir la map →",
+    "noPlan": "Plan non publié",
+    "onSite": "{count} personnes sur site · cliquez un espace",
+    "aria": "Plan des locaux avec présence par espace",
+    "zone": "{name} : {count} personne(s)"
+  },
+  "orders": {
+    "widget": "Commandes en ligne",
+    "title": "Commandes en ligne par jour",
+    "series": "Commandes"
+  },
+  "agenda": {
+    "title": "Mon agenda",
+    "link": "Calendrier →",
+    "empty": "Rien de prévu",
+    "emptyHint": "Votre agenda du jour est libre."
+  },
+  "alerts": {
+    "widget": "Alertes budget et délais",
+    "title": "Alertes budget & délais",
+    "empty": "Aucune alerte",
+    "budget": "Budget {level} %",
+    "waiting": "En attente",
+    "late": "En retard"
+  },
+  "activity": {
+    "widget": "Fil d'activité",
+    "title": "Fil d'activité en direct"
+  },
+  "board": {
+    "saved": "Disposition enregistrée",
+    "done": "Terminer",
+    "customize": "Personnaliser",
+    "show": "Afficher",
+    "hide": "Masquer"
+  },
+  "entity": {
+    "metaTitle": "Back-office",
+    "rack": "Rayonnage {id}",
+    "viewOnMap": "Voir sur la map",
+    "building": "Module en cours de construction (phase 3). Données brutes lues avec vos droits :",
+    "noData": "Aucune donnée visible avec votre rôle."
+  }
+}

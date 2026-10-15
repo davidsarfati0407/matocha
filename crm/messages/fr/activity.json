@@ -1,0 +1,33 @@
+{
+  "parcels": "{count} colis",
+  "event": {
+    "badge_in": "Arrivée",
+    "badge_out": "Départ",
+    "badge_pause_start": "Pause",
+    "badge_pause_end": "Retour de pause",
+    "work_order_stage": "Changement d'étape",
+    "work_order_created": "Commande pro créée",
+    "quote_accepted": "Devis accepté",
+    "quote_sent": "Devis envoyé",
+    "lot_quarantaine": "Lot reçu (quarantaine)",
+    "lot_libere": "Lot libéré",
+    "invoice_paid": "Facture payée",
+    "invoice_sent": "Facture envoyée",
+    "leave_approved": "Congé validé",
+    "leave_pending": "Demande de congé",
+    "expedition_pickup": "Enlèvement transporteur",
+    "notification_ambient": "Notification",
+    "shop_order_payee": "Commande en ligne",
+    "stock_low": "Stock bas",
+    "stock_entree": "Entrée de stock",
+    "stock_sortie": "Sortie de stock",
+    "invoice_overdue": "Facture échue",
+    "room_insert": "Salle réservée",
+    "room_update": "Réservation modifiée",
+    "room_delete": "Salle libérée",
+    "booking_created": "Réservation d'équipement",
+    "asset_assigned": "Matériel affecté",
+    "quote_draft": "Devis créé",
+    "leave_rejected": "Congé refusé"
+  }
+}

@@ -1,15 +1,19 @@
-import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Card, Denied, PageHeader } from "@/components/ui/kit";
 import { requirePerm } from "@/lib/backoffice/context";
 import { formatDate, formatTime } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { ExportPicker } from "./client";
 
-export const metadata: Metadata = { title: "RGPD" };
+export async function generateMetadata() {
+  const t = await getTranslations("settings.privacy");
+  return { title: t("metaTitle") };
+}
 
 export default async function PrivacyPage() {
+  const t = await getTranslations("settings.privacy");
   const { allowed } = await requirePerm("organisation");
-  if (!allowed) return <Denied what="la conformité RGPD" />;
+  if (!allowed) return <Denied what={t("deniedWhat")} />;
   const supabase = await createClient();
   const [emps, reveals, profiles] = await Promise.all([
     supabase.from("employees").select("id, first_name, last_name").order("last_name"),
@@ -19,13 +23,14 @@ export default async function PrivacyPage() {
   const who = new Map((profiles.data ?? []).map((p) => [p.user_id, p.full_name]));
   return (
     <>
-      <PageHeader title="Données personnelles (RGPD)" subtitle="Droit d'accès, registre, accès aux données sensibles" />
+      <PageHeader title={t("title")} subtitle={t("subtitle")} />
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card title="Droit d'accès et portabilité">
-          <p className="mb-3 text-sm text-muted">Export JSON de toutes les données d'un collaborateur (fiche, badges, congés, heures, notes de frais, entretiens, formations). Le salaire n'est inclus que si votre rôle y a accès (RLS).</p>
+        <Card title={t("access")}>
+          <p className="mb-3 text-sm text-muted">{t("accessHint")}</p>
           <ExportPicker people={(emps.data ?? []).map((e) => ({ id: e.id, name: `${e.first_name} ${e.last_name}` }))} />
         </Card>
-        <Card title="Registre des traitements (extrait)">
+        <Card title={t("registry")}>
+          {/* Contenu du registre : données de l'entreprise (non traduites) */}
           <ul className="space-y-2 text-sm">
             <li><b>Badgeuse</b> · présence et temps de travail · conservation 1 an · base : obligation légale</li>
             <li><b>Paie</b> · salaires, accès RH et direction seulement, consultation journalisée · 5 ans</li>
@@ -35,9 +40,9 @@ export default async function PrivacyPage() {
           </ul>
           <p className="mt-3 text-xs text-muted">Hébergement cible : Supabase région UE (Francfort ou Zurich). Données de cette démo : fictives.</p>
         </Card>
-        <Card title="Consultations de salaires" className="lg:col-span-2">
-          {(reveals.data ?? []).length === 0 ? <p className="text-sm text-muted">Aucune consultation depuis la dernière réinitialisation.</p> : (
-            <ul className="text-sm">{(reveals.data ?? []).map((r) => <li key={r.id} className="py-1"><span className="text-muted">{formatDate(r.at)} {formatTime(r.at)}</span> · {who.get(r.actor ?? "") ?? "?"} a consulté un salaire</li>)}</ul>
+        <Card title={t("reveals")} className="lg:col-span-2">
+          {(reveals.data ?? []).length === 0 ? <p className="text-sm text-muted">{t("noReveals")}</p> : (
+            <ul className="text-sm">{(reveals.data ?? []).map((r) => <li key={r.id} className="py-1"><span className="text-muted">{formatDate(r.at)} {formatTime(r.at)}</span> · {t("revealed", { who: who.get(r.actor ?? "") ?? "?" })}</li>)}</ul>
           )}
         </Card>
       </div>

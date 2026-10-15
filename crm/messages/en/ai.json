@@ -1,0 +1,50 @@
+{
+  "page": {
+    "title": "Assistant",
+    "deniedWhat": "the assistant",
+    "subtitle": "Natural-language questions about your data · read-only, with your permissions",
+    "connected": "Connected · {model}",
+    "notConfigured": "Not configured",
+    "howTitle": "How it works",
+    "how1": "The model only has access to 7 read tools (search, KPIs, open invoices, orders, presence, leave, low stock).",
+    "how2": "Each tool queries the database with your session: RLS applies, so the assistant cannot see salaries if you cannot.",
+    "how3": "It changes nothing: it suggests a link to the page where you can act in one click.",
+    "how4": "In the inbox, it writes reply drafts for you to review before sending."
+  },
+  "panel": {
+    "label": "AI assistant",
+    "title": "Assistant",
+    "close": "Close the assistant"
+  },
+  "chat": {
+    "suggestions": {
+      "urgent": "What is urgent today?",
+      "overdue": "Which invoices are overdue?",
+      "orders": "What is the status of the pro orders being prepared?",
+      "remote": "Who is working remotely?"
+    },
+    "notConfigured": "Assistant not configured",
+    "notConfiguredHint": "Add <code>ANTHROPIC_API_KEY</code> to <code>crm/.env.local</code> then restart <code>pnpm dev</code>. Nothing is simulated here: no key, no answer.",
+    "intro": "Ask a question about your data. The assistant reads the database with <b>your</b> permissions and changes nothing.",
+    "sources": "Sources: {tools}",
+    "searching": "Searching your data…",
+    "inputLabel": "Question for the assistant",
+    "placeholder": "Your question…",
+    "send": "Send"
+  },
+  "errors": {
+    "notConfigured": "Assistant not configured: add ANTHROPIC_API_KEY to .env.local.",
+    "forbidden": "Your role does not allow using the assistant.",
+    "emptyQuestion": "Empty question.",
+    "authError": "API key rejected by Anthropic.",
+    "rateLimit": "Too many requests: try again in a moment.",
+    "apiError": "API error ({status}).",
+    "networkError": "API error (network).",
+    "unavailable": "Assistant unavailable."
+  },
+  "assistant": {
+    "refusal": "The request could not be processed (model safety refusal).",
+    "empty": "(empty answer)",
+    "tooManySteps": "I could not reach an answer in a reasonable number of steps: please rephrase the question."
+  }
+}

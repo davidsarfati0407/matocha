@@ -1,13 +1,18 @@
-import type { Metadata } from "next";
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/ui/kit";
 import { TotpManager } from "./client";
 
-export const metadata: Metadata = { title: "Sécurité du compte" };
+export async function generateMetadata() {
+  const t = await getTranslations("settings.security");
+  return { title: t("metaTitle") };
+}
 
 export default function SecurityPage() {
+  const t = useTranslations("settings.security");
   return (
     <>
-      <PageHeader title="Sécurité du compte" subtitle="Double authentification par application (TOTP : Google Authenticator, Microsoft Authenticator, 1Password…)" />
+      <PageHeader title={t("title")} subtitle={t("subtitle")} />
       <TotpManager />
     </>
   );

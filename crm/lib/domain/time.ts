@@ -10,8 +10,10 @@ export interface Day {
   workedMin: number;
   pauseMin: number;
   open: boolean;
-  anomalies: string[];
+  anomalies: Anomaly[];
 }
+/** Codes d'anomalie (traduits par l'interface : clé « domain.anomaly.<code> »). */
+export type Anomaly = "doubleIn" | "pauseWithoutIn" | "outWithoutIn" | "missingOut";
 
 /** Calcule une journée à partir de ses badges (triés ou non). `now` ferme une période ouverte du jour en cours. */
 export function computeDay(badges: Badge[], now?: number): Day {
@@ -20,15 +22,15 @@ export function computeDay(badges: Badge[], now?: number): Day {
   let pause = 0;
   let workStart: number | null = null;
   let pauseStart: number | null = null;
-  const anomalies: string[] = [];
+  const anomalies: Anomaly[] = [];
   for (const b of ev) {
     const t = Date.parse(b.at);
     if (b.kind === "in") {
-      if (workStart !== null) anomalies.push("entrée en double");
+      if (workStart !== null) anomalies.push("doubleIn");
       workStart = t;
     } else if (b.kind === "pause_start") {
       if (workStart !== null) worked += t - workStart;
-      else anomalies.push("pause sans entrée");
+      else anomalies.push("pauseWithoutIn");
       workStart = null;
       pauseStart = t;
     } else if (b.kind === "pause_end") {
@@ -37,7 +39,7 @@ export function computeDay(badges: Badge[], now?: number): Day {
       workStart = t;
     } else if (b.kind === "out") {
       if (workStart !== null) worked += t - workStart;
-      else if (pauseStart === null) anomalies.push("sortie sans entrée");
+      else if (pauseStart === null) anomalies.push("outWithoutIn");
       if (pauseStart !== null) pause += t - pauseStart;
       workStart = null;
       pauseStart = null;
@@ -47,7 +49,7 @@ export function computeDay(badges: Badge[], now?: number): Day {
   if (open && now !== undefined) {
     if (workStart !== null) worked += Math.max(0, now - workStart);
     if (pauseStart !== null) pause += Math.max(0, now - pauseStart);
-  } else if (open) anomalies.push("pas de badge de sortie");
+  } else if (open) anomalies.push("missingOut");
   return {
     firstIn: ev.find((b) => b.kind === "in")?.at ?? null,
     lastOut: [...ev].reverse().find((b) => b.kind === "out")?.at ?? null,

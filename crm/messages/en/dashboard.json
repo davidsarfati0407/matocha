@@ -1,0 +1,72 @@
+{
+  "metaTitle": "Today",
+  "hello": "Hello {name}",
+  "todo": {
+    "title": "To do today",
+    "hint": "One click opens the filtered list, with the content pre-filled",
+    "quotes_to_send": "Quotes to send",
+    "dunning_due": "Reminders due",
+    "invoices_overdue": "Overdue invoices",
+    "leaves_pending": "Leave to approve",
+    "wo_alerts": "Pro order alerts",
+    "stock_low": "Low stock",
+    "expenses_pending": "Expense reports to approve",
+    "to_answer": "Messages to answer"
+  },
+  "kpis": {
+    "title": "Indicators",
+    "revenue30": "Revenue excl. VAT over 30 days",
+    "revenue30Sub": "online + pro orders"
+  },
+  "revenue": {
+    "widget": "Revenue",
+    "title": "Revenue excl. VAT · 30 days",
+    "series": "Revenue excl. VAT"
+  },
+  "minimap": {
+    "widget": "Mini-map",
+    "title": "Who is where",
+    "open": "Open the map →",
+    "noPlan": "Plan not published",
+    "onSite": "{count, plural, one {# person} other {# people}} on site · click an area",
+    "aria": "Floor plan with presence per area",
+    "zone": "{name}: {count, plural, one {# person} other {# people}}"
+  },
+  "orders": {
+    "widget": "Online orders",
+    "title": "Online orders per day",
+    "series": "Orders"
+  },
+  "agenda": {
+    "title": "My calendar",
+    "link": "Calendar →",
+    "empty": "Nothing planned",
+    "emptyHint": "Your calendar is clear today."
+  },
+  "alerts": {
+    "widget": "Budget and deadline alerts",
+    "title": "Budget & deadline alerts",
+    "empty": "No alerts",
+    "budget": "Budget {level} %",
+    "waiting": "On hold",
+    "late": "Late"
+  },
+  "activity": {
+    "widget": "Activity feed",
+    "title": "Live activity feed"
+  },
+  "board": {
+    "saved": "Layout saved",
+    "done": "Done",
+    "customize": "Customise",
+    "show": "Show",
+    "hide": "Hide"
+  },
+  "entity": {
+    "metaTitle": "Back office",
+    "rack": "Rack {id}",
+    "viewOnMap": "View on the map",
+    "building": "Module under construction (phase 3). Raw data read with your permissions:",
+    "noData": "No data visible with your role."
+  }
+}

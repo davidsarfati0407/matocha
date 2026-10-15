@@ -1,0 +1,14 @@
+{
+  "group": {
+    "employees": "Employees",
+    "clients": "Accounts",
+    "actions": "Actions",
+    "workOrders": "Pro orders",
+    "quotes": "Quotes",
+    "invoices": "Invoices",
+    "stock": "Stock",
+    "assets": "Equipment"
+  },
+  "newQuoteFor": "New quote for {name}",
+  "guidedQuote": "Guided quote"
+}

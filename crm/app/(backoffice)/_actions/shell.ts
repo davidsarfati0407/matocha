@@ -1,5 +1,6 @@
 "use server";
 /** Recherche globale (palette ⌘K) et notifications, avec les droits de l'utilisateur. */
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 
 export interface SearchHit {
@@ -12,7 +13,7 @@ export interface SearchHit {
 export async function searchAll(q: string): Promise<SearchHit[]> {
   const term = q.trim();
   if (term.length < 2) return [];
-  const supabase = await createClient();
+  const [t, supabase] = await Promise.all([getTranslations("search"), createClient()]);
   const like = `%${term.replace(/[%_]/g, "")}%`;
   const [emps, clients, wos, quotes, invoices, stock, assets] = await Promise.all([
     supabase.from("employees").select("id, first_name, last_name, job_title").or(`first_name.ilike.${like},last_name.ilike.${like},job_title.ilike.${like}`).limit(6),
@@ -25,16 +26,16 @@ export async function searchAll(q: string): Promise<SearchHit[]> {
   ]);
   const name = (x: unknown) => (x as { name?: string } | null)?.name ?? "";
   return [
-    ...(emps.data ?? []).map((e) => ({ group: "Collaborateurs", label: `${e.first_name} ${e.last_name}`, sub: e.job_title, href: `/hr/employees/${e.id}` })),
+    ...(emps.data ?? []).map((e) => ({ group: t("group.employees"), label: `${e.first_name} ${e.last_name}`, sub: e.job_title, href: `/hr/employees/${e.id}` })),
     ...(clients.data ?? []).flatMap((c) => [
-      { group: "Comptes", label: c.name, sub: [c.segment, c.city].filter(Boolean).join(" · "), href: `/crm/clients/${c.id}` },
-      { group: "Actions", label: `Nouveau devis pour ${c.name}`, sub: "Devis guidé", href: `/crm/quotes/new?client=${c.id}` },
+      { group: t("group.clients"), label: c.name, sub: [c.segment, c.city].filter(Boolean).join(" · "), href: `/crm/clients/${c.id}` },
+      { group: t("group.actions"), label: t("newQuoteFor", { name: c.name }), sub: t("guidedQuote"), href: `/crm/quotes/new?client=${c.id}` },
     ]),
-    ...(wos.data ?? []).map((w) => ({ group: "Commandes pro", label: `${w.number} · ${name(w.clients)}`, sub: w.title, href: `/ops/work-orders/${w.id}` })),
-    ...(quotes.data ?? []).map((x) => ({ group: "Devis", label: `${x.number} · ${name(x.clients)}`, sub: x.status, href: `/crm/quotes/${x.id}` })),
-    ...(invoices.data ?? []).map((x) => ({ group: "Factures", label: `${x.number} · ${name(x.clients)}`, sub: x.status, href: `/finance/invoices/${x.id}` })),
-    ...(stock.data ?? []).map((s) => ({ group: "Stock", label: s.name, sub: `${s.reference} · ${s.location}`, href: `/resources/stock/${s.id}` })),
-    ...(assets.data ?? []).map((a) => ({ group: "Équipements", label: a.name, sub: a.type, href: `/resources/assets/${a.id}` })),
+    ...(wos.data ?? []).map((w) => ({ group: t("group.workOrders"), label: `${w.number} · ${name(w.clients)}`, sub: w.title, href: `/ops/work-orders/${w.id}` })),
+    ...(quotes.data ?? []).map((x) => ({ group: t("group.quotes"), label: `${x.number} · ${name(x.clients)}`, sub: x.status, href: `/crm/quotes/${x.id}` })),
+    ...(invoices.data ?? []).map((x) => ({ group: t("group.invoices"), label: `${x.number} · ${name(x.clients)}`, sub: x.status, href: `/finance/invoices/${x.id}` })),
+    ...(stock.data ?? []).map((s) => ({ group: t("group.stock"), label: s.name, sub: `${s.reference} · ${s.location}`, href: `/resources/stock/${s.id}` })),
+    ...(assets.data ?? []).map((a) => ({ group: t("group.assets"), label: a.name, sub: a.type, href: `/resources/assets/${a.id}` })),
   ];
 }
 

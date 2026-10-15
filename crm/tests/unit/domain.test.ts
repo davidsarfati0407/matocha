@@ -67,7 +67,7 @@ describe("badges → feuille de temps", () => {
     expect(d.workedMin).toBe(120);
     expect(d.open).toBe(true);
   });
-  it("signale l'oubli de badge de sortie", () => expect(computeDay(day.slice(0, 1)).anomalies).toContain("pas de badge de sortie"));
+  it("signale l'oubli de badge de sortie", () => expect(computeDay(day.slice(0, 1)).anomalies).toContain("missingOut"));
   it("heures supplémentaires au-delà de 35 h (80 % → 28 h)", () => {
     expect(weeklyOvertime(38 * 60)).toBe(3);
     expect(weeklyOvertime(30 * 60, 0.8)).toBe(2);
@@ -89,9 +89,9 @@ describe("congés", () => {
   it("refuse au-delà du solde, avertit sur blocage et présence minimale", () => {
     const r = checkLeave({ type: "conges", from: "2026-12-14", to: "2026-12-18", days: 5, balance: 3, blackouts: [{ from: "12-01", to: "12-24", label: "Pic des fêtes" }], teamSize: 4, teamAbsences: [{ from: "2026-12-15", to: "2026-12-16" }], minPresence: 0.6 });
     expect(r.ok).toBe(false);
-    expect(r.errors[0]).toMatch(/Solde insuffisant/);
-    expect(r.warnings.some((w) => w.includes("Pic des fêtes"))).toBe(true);
-    expect(r.warnings.some((w) => w.includes("Présence"))).toBe(true);
+    expect(r.errors[0]).toEqual({ code: "balance", values: { days: expect.any(Number) } });
+    expect(r.warnings.some((w) => w.code === "blackout" && String(w.values?.label).includes("Pic des fêtes"))).toBe(true);
+    expect(r.warnings.some((w) => w.code === "presence")).toBe(true);
   });
 });
 

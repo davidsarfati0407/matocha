@@ -6,9 +6,10 @@ import { revealSalary, setLocale } from "./actions";
 
 export function LocaleSwitch({ locales }: { locales: string[] }) {
   const current = useLocale();
+  const tc = useTranslations("common");
   const [pending, start] = useTransition();
   return (
-    <div role="group" aria-label="Langue" className="flex rounded-full bg-black/5 p-0.5 text-xs font-medium">
+    <div role="group" aria-label={tc("language")} className="flex rounded-full bg-black/5 p-0.5 text-xs font-medium">
       {locales.map((l) => (
         <button
           key={l}

@@ -1,11 +1,13 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useOptimistic, useTransition } from "react";
 import { report } from "@/lib/ui/toast";
 import { togglePermission } from "../actions";
 
 /** Lettre cliquable de la matrice : accorde / retire un droit, mise à jour optimiste. */
 export function PermCell({ roleId, role, module, action, letter, on }: { roleId: string; role: string; module: string; action: string; letter: string; on: boolean }) {
+  const t = useTranslations("settings.roles");
   const router = useRouter();
   const [pending, start] = useTransition();
   const [value, set] = useOptimistic(on);
@@ -14,7 +16,7 @@ export function PermCell({ roleId, role, module, action, letter, on }: { roleId:
       type="button"
       aria-pressed={value}
       aria-label={`${role} · ${module} · ${action}`}
-      title={`${value ? "Retirer" : "Accorder"} « ${action} » sur ${module} à ${role}`}
+      title={t(value ? "revoke" : "grant", { action, module, role })}
       disabled={pending}
       onClick={() =>
         start(async () => {
