@@ -2,7 +2,8 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./env";
 
-const PUBLIC_PATHS = ["/login", "/auth"];
+// Webhooks des fournisseurs et worker planifié : authentifiés par leur propre secret, pas par la session
+const PUBLIC_PATHS = ["/login", "/auth", "/api/integrations/microsoft/notify", "/api/integrations/google/notify", "/api/integrations/worker"];
 
 /** Rafraîchit la session à chaque requête et protège les pages privées. */
 export async function updateSession(request: NextRequest) {

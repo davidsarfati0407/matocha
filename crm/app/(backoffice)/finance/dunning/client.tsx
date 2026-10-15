@@ -23,7 +23,7 @@ export function DunningCard({ id, number, client, email, rest, late, level, sent
       </p>
       <Textarea aria-label="Texte de relance" value={body} onChange={(e) => setBody(e.target.value)} className="min-h-40 text-[13px]" />
       {canSend && (
-        <Button variant="accent" icon="send" className="mt-3" disabled={pending} onClick={() => start(async () => { if (report(await sendDunning(id, level))) router.refresh(); })}>
+        <Button variant="accent" icon="send" className="mt-3" disabled={pending} onClick={() => start(async () => { if (report(await sendDunning(id, level, body))) router.refresh(); })}>
           Envoyer la relance {level}
         </Button>
       )}

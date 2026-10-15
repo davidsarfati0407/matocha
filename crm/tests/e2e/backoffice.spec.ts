@@ -134,3 +134,20 @@ test("assistant IA : honnête sans clé (aucune réponse simulée), et droits fi
   await expect(page.getByRole("heading", { name: "Notes de frais" })).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test("intégrations : un envoi passe par la file (connecteur simulé, affiché comme tel), test de connexion", async ({ page }) => {
+  const errors = watchErrors(page);
+  await login(page, "Direction", "/comms/inbox");
+  await page.getByRole("link", { name: /Yoga Shala Marais/ }).click();
+  await page.getByRole("button", { name: "Proposer un brouillon" }).click();
+  await expect(page.getByText(/Modèle \(IA non configurée\)|Rédigé par l'IA/)).toBeVisible();
+  await page.getByRole("button", { name: "Envoyer" }).click();
+  await expect(page.getByText(/Réponse envoyée à .* \(mode simulé\)/)).toBeVisible();
+  await page.goto("/settings/integrations");
+  await expect(page.getByText("Envoi d'e-mail").first()).toBeVisible();
+  await expect(page.getByText("Microsoft 365").first()).toBeVisible();
+  await expect(page.getByText(/Non configuré|Mode simulé/).first()).toBeVisible();
+  await page.getByRole("button", { name: "Tester la connexion" }).click();
+  await expect(page.getByText(/Test réussi \(mode simulé/)).toBeVisible();
+  expect(errors).toEqual([]);
+});

@@ -1,5 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
+import { outbound, textToHtml } from "@/lib/integrations/outbound";
 import { aiConfigured, draftReply } from "@/lib/ai/assistant";
 import { getCtx } from "@/lib/backoffice/context";
 import { fail, type ActionResult } from "@/lib/backoffice/result";
@@ -32,11 +33,16 @@ export async function sendReply(threadId: string, body: string, aiDraft: boolean
   const supabase = await createClient();
   const { fullName } = await getCtx();
   const now = new Date().toISOString();
+  const { data: t } = await supabase.from("threads").select("subject, channel, clients(email)").eq("id", threadId).single();
+  const to = (t?.clients as unknown as { email: string | null } | null)?.email;
+  // Envoi réel via le compte connecté (Outlook / Gmail) ou connecteur simulé
+  const sent = t?.channel === "email" && to ? await outbound("mail.send", { to: [to], subject: `Re: ${t.subject}`, html: textToHtml(body) }) : null;
+  if (sent && !sent.ok) return { ok: false, error: sent.error };
   const { error } = await supabase.from("messages").insert({ thread_id: threadId, direction: "out", from_name: fullName, body, sent_at: now, is_ai_draft: aiDraft });
   if (error) return fail(error);
   await supabase.from("threads").update({ status: "answered", last_message_at: now }).eq("id", threadId);
   revalidatePath("/comms/inbox");
-  return { ok: true, message: "Réponse envoyée (e-mail simulé)" };
+  return { ok: true, message: sent ? `Réponse envoyée à ${to} (${sent.via})` : "Réponse enregistrée (fil interne)" };
 }
 
 export async function closeThread(threadId: string): Promise<ActionResult> {

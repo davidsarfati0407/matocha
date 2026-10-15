@@ -36,7 +36,7 @@ export function NewEvent({ clients, rooms, day }: { clients: { id: string; name:
           action={(fd) =>
             start(async () => {
               const d = String(fd.get("day"));
-              const r = await createEvent({ title: String(fd.get("title")), type: fd.get("type") as "client", starts_at: iso(d, String(fd.get("from"))), ends_at: iso(d, String(fd.get("to"))), client_id: String(fd.get("client")) || null, resource_id: String(fd.get("room")) || null });
+              const r = await createEvent({ title: String(fd.get("title")), type: fd.get("type") as "client", starts_at: iso(d, String(fd.get("from"))), ends_at: iso(d, String(fd.get("to"))), client_id: String(fd.get("client")) || null, resource_id: String(fd.get("room")) || null, online_meeting: fd.get("online") === "on" });
               if (report(r)) {
                 setOpen(false);
                 router.refresh();
@@ -87,6 +87,9 @@ export function NewEvent({ clients, rooms, day }: { clients: { id: string; name:
               <Input name="to" type="time" defaultValue="11:00" required />
             </Field>
           </div>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="online" className="accent-[var(--accent)]" /> Réunion en ligne (Teams ou Meet selon le compte connecté)
+          </label>
           <Button variant="accent" disabled={pending}>
             Ajouter
           </Button>

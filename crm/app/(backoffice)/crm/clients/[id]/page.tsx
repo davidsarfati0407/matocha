@@ -10,7 +10,7 @@ import { stageLabel } from "@/lib/domain/stages";
 import { formatDate, formatMoney, formatTime } from "@/lib/format";
 import { mapHref } from "@/lib/map/links";
 import { createClient } from "@/lib/supabase/server";
-import { LogInteraction } from "./client";
+import { FolderButton, LogInteraction } from "./client";
 
 export const metadata: Metadata = { title: "Compte" };
 
@@ -31,6 +31,7 @@ export default async function ClientPage({ params, searchParams }: { params: Pro
     supabase.from("threads").select("id, channel, subject, status, last_message_at, messages(direction, from_name, body, sent_at)").eq("client_id", id).order("last_message_at", { ascending: false }).limit(20),
     supabase.from("calendar_events").select("id, title, starts_at, ends_at").eq("client_id", id).order("starts_at", { ascending: false }).limit(10),
   ]);
+  const { data: folder } = await supabase.from("documents").select("external_url").eq("entity_type", "clients").eq("entity_id", id).eq("kind", "dossier").limit(1).maybeSingle();
   const now = nowMs();
   const ca = (invoices.data ?? []).filter((i) => i.status !== "cancelled").reduce((s, i) => s + Number(i.total_ttc), 0);
   const due = (invoices.data ?? []).reduce((s, i) => s + Math.max(0, Number(i.total_ttc) - Number(i.paid_amount)), 0);
@@ -101,7 +102,7 @@ export default async function ClientPage({ params, searchParams }: { params: Pro
               </ul>
             )}
           </Card>
-          <Card title="Coordonnées">
+          <Card title="Coordonnées" action={<FolderButton clientId={id} url={folder?.external_url ?? null} />}>
             <Dl items={[["E-mail", c.email], ["Téléphone", c.phone], ["Adresse", [c.address, c.city].filter(Boolean).join(", ") || null], ["Canal préféré", c.preferred_channel], ["Langue", c.language?.toUpperCase()], ["Satisfaction", c.satisfaction ? "★".repeat(c.satisfaction) + "☆".repeat(5 - c.satisfaction) : null]]} />
             {c.internal_note && <p className="mt-3 rounded-xl bg-ground p-3 text-sm">{c.internal_note}</p>}
           </Card>

@@ -1,6 +1,8 @@
 "use server";
 /** Actions financières : factures, paiements, rapprochement bancaire, relances, notes de frais. */
 import { revalidatePath } from "next/cache";
+import { outbound, textToHtml } from "@/lib/integrations/outbound";
+import { invoicePdf } from "@/lib/pdf/documents";
 import { z } from "zod";
 import { getCtx } from "@/lib/backoffice/context";
 import { fail, type ActionResult } from "@/lib/backoffice/result";
@@ -12,10 +14,17 @@ const today = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/P
 
 export async function sendInvoice(id: string): Promise<ActionResult> {
   const supabase = await createClient();
+  const { data: inv } = await supabase.from("invoices").select("number, total_ttc, due_on, clients(email)").eq("id", id).single();
+  const to = (inv?.clients as unknown as { email: string | null } | null)?.email;
+  if (!to) return { ok: false, error: "Le client n'a pas d'adresse e-mail." };
+  const { orgName } = await getCtx();
+  const doc = await invoicePdf(id);
+  const sent = await outbound("mail.send", { to: [to], subject: `Facture ${inv!.number} — ${orgName}`, html: textToHtml(`Bonjour,\n\nVeuillez trouver notre facture ${inv!.number} de ${Number(inv!.total_ttc).toLocaleString("fr-FR", { style: "currency", currency: "EUR" })} TTC, échéance le ${inv!.due_on.split("-").reverse().join("/")}.\nLa facture est jointe (PDF Factur-X : XML de facture électronique embarqué).\n\nBien cordialement,\n${orgName}`), attachments: doc ? [{ name: `${doc.number}.pdf`, contentType: "application/pdf", base64: doc.pdf.toString("base64") }] : [] });
+  if (!sent.ok) return { ok: false, error: sent.error };
   const { error } = await supabase.from("invoices").update({ status: "sent" }).eq("id", id).eq("status", "draft");
   if (error) return fail(error);
   revalidatePath("/finance", "layout");
-  return { ok: true, message: "Facture envoyée avec PDF et XML Factur-X (e-mail simulé)" };
+  return { ok: true, message: `Facture envoyée à ${to} (${sent.via})` };
 }
 
 const paySchema = z.object({ invoice_id: z.string().uuid(), amount: z.number().positive(), received_on: z.string(), method: z.enum(["virement", "carte", "cheque", "especes", "prelevement"]).default("virement"), reference: z.string().optional() });
@@ -88,14 +97,19 @@ export async function sampleCamt(): Promise<string> {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.054.001.08"><BkToCstmrDbtCdtNtfctn><Ntfctn><Ntry><Amt Ccy="EUR">0</Amt><CdtDbtInd>CRDT</CdtDbtInd><BookgDt><Dt>${today()}</Dt></BookgDt><NtryDtls>${txs.join("")}</NtryDtls></Ntry></Ntfctn></BkToCstmrDbtCdtNtfctn></Document>`;
 }
 
-export async function sendDunning(invoiceId: string, level: number): Promise<ActionResult> {
+export async function sendDunning(invoiceId: string, level: number, body?: string): Promise<ActionResult> {
   const supabase = await createClient();
   const now = new Date().toISOString();
+  const { data: inv } = await supabase.from("invoices").select("number, clients(email)").eq("id", invoiceId).single();
+  const to = (inv?.clients as unknown as { email: string | null } | null)?.email;
+  if (!to) return { ok: false, error: "Le client n'a pas d'adresse e-mail." };
+  const sent = await outbound("mail.send", { to: [to], subject: `${level === 3 ? "Mise en demeure" : "Relance"} — facture ${inv!.number}`, html: textToHtml(body ?? "") });
+  if (!sent.ok) return { ok: false, error: sent.error };
   const { data: existing } = await supabase.from("dunning_steps").select("id").eq("invoice_id", invoiceId).eq("level", level).maybeSingle();
   const { error } = existing ? await supabase.from("dunning_steps").update({ sent_at: now }).eq("id", existing.id) : await supabase.from("dunning_steps").insert({ invoice_id: invoiceId, level, due_at: now, sent_at: now });
   if (error) return fail(error);
   revalidatePath("/finance/dunning");
-  return { ok: true, message: `Relance niveau ${level} envoyée (e-mail simulé)` };
+  return { ok: true, message: `Relance niveau ${level} envoyée à ${to} (${sent.via})` };
 }
 
 export async function decideExpenses(ids: string[], status: "approved" | "rejected" | "reimbursed"): Promise<ActionResult> {

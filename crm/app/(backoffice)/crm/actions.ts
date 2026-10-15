@@ -1,6 +1,8 @@
 "use server";
 /** Actions commerciales : comptes, pipeline, devis. Totaux calculés par le domaine, écritures atomiques en SQL. */
 import { revalidatePath } from "next/cache";
+import { outbound, textToHtml } from "@/lib/integrations/outbound";
+import { quotePdf } from "@/lib/pdf/documents";
 import { z } from "zod";
 import { getCtx } from "@/lib/backoffice/context";
 import { fail, type ActionResult } from "@/lib/backoffice/result";
@@ -23,11 +25,18 @@ export async function saveQuote(input: z.input<typeof quoteSchema>): Promise<Act
 
 export async function sendQuote(id: string): Promise<ActionResult> {
   const supabase = await createClient();
+  const { data: q0 } = await supabase.from("quotes").select("number, total_ttc, valid_until, clients(name, email)").eq("id", id).single();
+  const cl = q0?.clients as unknown as { name: string; email: string | null } | null;
+  if (!cl?.email) return { ok: false, error: "Le compte n'a pas d'adresse e-mail." };
+  const { fullName, orgName } = await getCtx();
+  const doc = await quotePdf(id);
+  const sent = await outbound("mail.send", { to: [cl.email], subject: `Devis ${q0!.number} — ${orgName}`, html: textToHtml(`Bonjour,\n\nVeuillez trouver ci-joint notre devis ${q0!.number} d'un montant de ${Number(q0!.total_ttc).toLocaleString("fr-FR", { style: "currency", currency: "EUR" })} TTC, valable jusqu'au ${q0!.valid_until?.split("-").reverse().join("/")}.\n\nBien cordialement,\n${fullName}`), attachments: doc ? [{ name: `${doc.number}.pdf`, contentType: "application/pdf", base64: doc.pdf.toString("base64") }] : [] });
+  if (!sent.ok) return { ok: false, error: sent.error };
   const { data: q, error } = await supabase.from("quotes").update({ status: "sent", sent_at: new Date().toISOString() }).eq("id", id).in("status", ["draft", "sent", "opened"]).select("client_id").single();
   if (error) return fail(error);
   await supabase.from("clients").update({ last_contact_at: new Date().toISOString() }).eq("id", q.client_id);
   revalidatePath(`/crm/quotes/${id}`);
-  return { ok: true, message: "Devis envoyé avec son PDF (envoi e-mail simulé)" };
+  return { ok: true, message: `Devis envoyé à ${cl.email} (${sent.via})` };
 }
 
 export async function acceptQuote(id: string): Promise<ActionResult<{ workOrderId: string }>> {
@@ -103,7 +112,7 @@ export async function logInteraction(clientId: string, channel: "email" | "inter
   return { ok: true, message: channel === "email" ? "E-mail enregistré (envoi simulé)" : "Note ajoutée à l'historique" };
 }
 
-const eventSchema = z.object({ title: z.string().min(1), type: z.enum(["reunion", "client", "focus", "deplacement", "tournage", "livraison", "autre"]), starts_at: z.string(), ends_at: z.string(), client_id: z.string().uuid().nullable().optional(), resource_id: z.string().uuid().nullable().optional() });
+const eventSchema = z.object({ online_meeting: z.boolean().optional(), title: z.string().min(1), type: z.enum(["reunion", "client", "focus", "deplacement", "tournage", "livraison", "autre"]), starts_at: z.string(), ends_at: z.string(), client_id: z.string().uuid().nullable().optional(), resource_id: z.string().uuid().nullable().optional() });
 export async function createEvent(input: z.input<typeof eventSchema>): Promise<ActionResult> {
   const p = eventSchema.safeParse(input);
   if (!p.success || p.data.ends_at <= p.data.starts_at) return { ok: false, error: "Créneau invalide" };
@@ -113,8 +122,22 @@ export async function createEvent(input: z.input<typeof eventSchema>): Promise<A
     const { data: clash } = await supabase.from("calendar_events").select("title").eq("resource_id", p.data.resource_id).lt("starts_at", p.data.ends_at).gt("ends_at", p.data.starts_at).limit(1);
     if (clash?.length) return { ok: false, error: `Salle déjà prise : « ${clash[0].title} »` };
   }
-  const { error } = await supabase.from("calendar_events").insert({ ...p.data, owner_id: employeeId, external_source: "local" });
+  const { data: ev, error } = await supabase.from("calendar_events").insert({ ...p.data, owner_id: employeeId, external_source: "local" }).select("id").single();
   if (error) return fail(error);
+  // Poussé vers l'agenda connecté (Outlook / Google), avec réunion Teams / Meet si demandée
+  const pushed = await outbound("calendar.push", { event_id: ev.id });
   revalidatePath("/crm/calendar");
-  return { ok: true, message: "Rendez-vous ajouté (synchronisation agenda en mode simulé)" };
+  const join = pushed.ok ? (pushed.result as { joinUrl?: string } | null)?.joinUrl : undefined;
+  return { ok: true, message: pushed.ok ? `Rendez-vous ajouté et synchronisé (${pushed.via})${join ? " · lien de réunion créé" : ""}` : `Rendez-vous ajouté ; synchronisation en attente (${pushed.error})` };
+}
+
+/** Dossier partagé du compte (OneDrive / Drive selon le compte connecté, sinon simulé). */
+export async function createClientFolder(clientId: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { data: c } = await supabase.from("clients").select("name").eq("id", clientId).single();
+  if (!c) return { ok: false, error: "Compte introuvable" };
+  const { orgName } = await getCtx();
+  const r = await outbound("files.folder", { entity_type: "clients", entity_id: clientId, path: [orgName, "Clients", c.name] });
+  revalidatePath(`/crm/clients/${clientId}`);
+  return r.ok ? { ok: true, message: `Dossier partagé créé (${r.via})` } : { ok: false, error: r.error };
 }

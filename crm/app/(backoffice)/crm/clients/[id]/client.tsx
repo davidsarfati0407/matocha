@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { Field, Input, Select, Textarea } from "@/components/ui/Form";
 import { Button, Card } from "@/components/ui/kit";
 import { report } from "@/lib/ui/toast";
-import { logInteraction } from "../../actions";
+import { createClientFolder, logInteraction } from "../../actions";
 
 export function LogInteraction({ clientId, name }: { clientId: string; name: string }) {
   const router = useRouter();
@@ -37,5 +37,16 @@ export function LogInteraction({ clientId, name }: { clientId: string; name: str
         </Button>
       </form>
     </Card>
+  );
+}
+
+export function FolderButton({ clientId, url }: { clientId: string; url: string | null }) {
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  if (url) return <a className="text-xs font-medium text-accent" href={url} target="_blank" rel="noreferrer">Dossier partagé →</a>;
+  return (
+    <button className="text-xs font-medium text-accent disabled:opacity-50" disabled={pending} onClick={() => start(async () => { if (report(await createClientFolder(clientId))) router.refresh(); })}>
+      Créer le dossier partagé
+    </button>
   );
 }
