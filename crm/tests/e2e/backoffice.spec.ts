@@ -72,7 +72,7 @@ test("devis accepté → commande pro → étapes → heures facturables → fac
   await expect(page.getByRole("link", { name: woNumber })).toBeVisible();
   const invNumber = (await page.locator("h1 .font-mono").textContent())!.trim();
   await page.getByRole("button", { name: "Envoyer" }).click();
-  await expect(page.getByText(/Factur-X \(e-mail simulé\)/)).toBeVisible();
+  await expect(page.getByText(/Facture envoyée à .*\(mode simulé/)).toBeVisible();
   await page.goto("/finance/payments");
   await page.getByRole("button", { name: "Relevé d'exemple" }).click();
   await expect(page.getByText(/par référence|par montant/).first()).toBeVisible();

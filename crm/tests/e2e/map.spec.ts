@@ -108,7 +108,7 @@ test("map → base : occuper une salle crée une vraie réservation, visible dan
     await expect(panel.getByRole("button", { name: "Occuper 30 min" })).toBeVisible({ timeout: 15_000 });
   }
   await panel.getByRole("button", { name: "Occuper 30 min" }).click();
-  await expect(panel.getByText("Occupée")).toBeVisible({ timeout: 15_000 });
+  await expect(panel.getByText("Occupée", { exact: true })).toBeVisible({ timeout: 15_000 });
   await page.goto("/ops/planning?kind=salle");
   await expect(page.getByText("Salle occupée (depuis la map)").first()).toBeVisible();
 });
