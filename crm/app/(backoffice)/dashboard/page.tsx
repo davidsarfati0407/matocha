@@ -168,7 +168,7 @@ export default async function Dashboard() {
                 <li key={w.id}>
                   <Link href={`/ops/work-orders/${w.id}`} className="flex items-center justify-between gap-2 hover:text-accent">
                     <span className="truncate">
-                      <span className="font-mono text-xs">{w.number}</span> · {w.clients?.name}
+                      <span className="font-mono text-xs">{w.number}</span> · {w.clients?.name ?? w.title}
                     </span>
                     {w.level >= 50 ? <Badge tone={w.level >= 100 ? "danger" : w.level >= 80 ? "warn" : "info"}>Budget {w.level} %</Badge> : w.status === "attente" ? <Badge tone="warn">En attente</Badge> : <Badge tone="danger">En retard</Badge>}
                   </Link>

@@ -13,3 +13,6 @@ export const DEAL_STAGES: { id: string; label: string }[] = [
   { id: "gagne", label: "Gagné" },
   { id: "perdu", label: "Perdu" },
 ];
+export const PRESENCE: Record<string, string> = { au_poste: "Au poste", reunion: "En réunion", pause: "En pause", teletravail: "Télétravail", deplacement: "En déplacement", absent: "Absent", pas_badge: "Pas encore badgé", parti: "Parti" };
+export const LEAVE_TYPE: Record<string, string> = { conges: "Congés payés", rtt: "RTT", maladie: "Maladie", formation: "Formation", sans_solde: "Sans solde", parental: "Parental" };
+export const LEAVE_STATUS: Record<string, [Tone, string]> = { pending: ["warn", "En attente"], approved: ["ok", "Validé"], rejected: ["danger", "Refusé"], cancelled: ["muted", "Annulé"] };

@@ -1,4 +1,5 @@
 "use client";
+import { backOfficeHref } from "@/lib/map/links";
 /** Coque du back-office : barre latérale groupée, en-tête (fil d'Ariane, ⌘K, notifications, IA), bouton Map. */
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -223,11 +224,11 @@ function Bell({ unread }: { unread: number }) {
         <div className="card absolute right-0 top-11 z-30 max-h-[60vh] w-80 overflow-y-auto p-1.5">
           {items.length === 0 && <p className="p-3 text-sm text-muted">Aucune notification.</p>}
           {items.map((n) => (
-            <div key={n.id} className="rounded-lg px-2.5 py-2 hover:bg-black/[0.03]">
+            <Link key={n.id} onClick={() => setOpen(false)} href={n.entity_type?.startsWith("/") ? n.entity_type : n.entity_type && n.entity_id ? backOfficeHref(n.entity_type, n.entity_id) : "#"} className="block rounded-lg px-2.5 py-2 hover:bg-black/[0.03]">
               <p className="text-[13px] font-medium">{n.title}</p>
               {n.body && <p className="text-xs text-muted">{n.body}</p>}
               <p className="text-[10px] text-muted">{new Date(n.created_at).toLocaleString("fr-FR", { timeZone: "Europe/Paris", dateStyle: "short", timeStyle: "short" })}</p>
-            </div>
+            </Link>
           ))}
         </div>
       )}

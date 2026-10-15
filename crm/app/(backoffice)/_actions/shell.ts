@@ -33,7 +33,7 @@ export async function searchAll(q: string): Promise<SearchHit[]> {
     ...(wos.data ?? []).map((w) => ({ group: "Commandes pro", label: `${w.number} · ${name(w.clients)}`, sub: w.title, href: `/ops/work-orders/${w.id}` })),
     ...(quotes.data ?? []).map((x) => ({ group: "Devis", label: `${x.number} · ${name(x.clients)}`, sub: x.status, href: `/crm/quotes/${x.id}` })),
     ...(invoices.data ?? []).map((x) => ({ group: "Factures", label: `${x.number} · ${name(x.clients)}`, sub: x.status, href: `/finance/invoices/${x.id}` })),
-    ...(stock.data ?? []).map((s) => ({ group: "Stock", label: s.name, sub: `${s.reference} · ${s.location}`, href: `/resources/stock?q=${encodeURIComponent(s.reference)}` })),
+    ...(stock.data ?? []).map((s) => ({ group: "Stock", label: s.name, sub: `${s.reference} · ${s.location}`, href: `/resources/stock/${s.id}` })),
     ...(assets.data ?? []).map((a) => ({ group: "Équipements", label: a.name, sub: a.type, href: `/resources/assets/${a.id}` })),
   ];
 }

@@ -13,7 +13,7 @@ Application de démonstration : une **vue 3D vivante des locaux** (phase 2) reli
 | 0 | Fiche secteur `config/sector.config.ts` (validée par Zod) | ✅ |
 | 1 | Socle : Next.js 16, Supabase (schéma, RLS, auth), seed, page technique | ✅ |
 | 2 | Map vivante (Three.js) branchée sur les vraies tables | ✅ |
-| 3 | Back-office, module par module | à venir |
+| 3 | Back-office complet (9 modules), IA, automatisations | ✅ |
 | 4 | Temps réel bidirectionnel, intégrations, IA, finitions | à venir |
 
 ## Démarrer en local (recommandé : Docker + Supabase CLI)
@@ -98,12 +98,49 @@ boucle côté navigateur.
 5 000 appels de dessin à environ 1 900. Le pas de simulation est borné à 50 ms, et la
 simulation se met en pause quand l'onglet est caché.
 
+## Back-office (phase 3)
+
+Connexion → `/dashboard` (« Aujourd'hui ») ; `⌘K` / `Ctrl+K` cherche partout et propose des actions
+(« Nouveau devis pour … »). Chaque liste : recherche, filtres, tri, sélection multiple, vues
+enregistrées, export CSV/Excel. Chaque action importante affiche un toast avec **Annuler**.
+
+| Module | Pages | Ce qui se fait en un clic |
+| --- | --- | --- |
+| Pilotage | Aujourd'hui (widgets déplaçables), automatisations | tuiles « à faire » → listes filtrées ; règles évaluées et notifiées |
+| Opérations | commandes pro (liste, kanban, fiche), commandes en ligne, planning, heures | glisser une carte d'étape, cocher la check-list, **Facturer** une commande livrée |
+| Ressources | stock, lots & traçabilité, achats/fournisseurs, équipements, rayonnages | **Commander** (bon pré-rempli par fournisseur), **Réceptionner** (lot en quarantaine), **Libérer**, rappel de lot |
+| Commercial | comptes 360°, pipeline, devis, calendrier | devis pré-rempli depuis la dernière commande, **Accepté → commande pro** créée automatiquement, PDF |
+| Finance | factures (PDF + XML Factur-X), paiements, relances, notes de frais, trésorerie | import camt.054 + lettrage, relance pré-rédigée J+1/15/30, export comptable du mois |
+| RH | collaborateurs, présence, congés, salaires, entretiens, recrutement | **Valider** un congé (règles vérifiées, solde décompté), embauche → fiche + intégration |
+| Communication | messagerie, documents | brouillon de réponse (IA si clé, sinon modèle indiqué comme tel) |
+| IA | assistant | questions sur les données, réponses avec liens vers les fiches |
+| Organisation | paramètres, rôles, intégrations, audit, RGPD | export RGPD d'une personne, journal des consultations de salaires |
+
+**Flux sans ressaisie** (testé de bout en bout) : devis accepté → commande pro (CP-24-…) → étapes →
+heures facturables → facture (lignes du devis + heures, remise portée en lignes) → envoi → relevé
+camt.054 → paiement lettré → facture payée.
+
+**Règles métier** dans `lib/domain/*` (testées) et écritures multi-tables atomiques en SQL
+(`save_quote`, `accept_quote`, `create_invoice`, `reorder_stock`, `receive_purchase_order`,
+`hire_candidate`, `run_automations`) qui s'exécutent avec les droits de l'appelant.
+
+**Assistant IA** (`lib/ai/assistant.ts`) : SDK `@anthropic-ai/sdk` (version figée), modèle
+`claude-opus-5-5`, 7 outils **en lecture seule** qui interrogent la base avec la session de
+l'utilisateur (RLS) : il ne voit jamais plus que la personne. Repli serveur en cas de refus du
+modèle. Sans `ANTHROPIC_API_KEY`, l'interface affiche « non configuré » et ne simule aucune réponse.
+
+**Ce qui reste simulé, et affiché comme tel** : envoi d'e-mails, agendas Google/Microsoft,
+boutique, transporteur, banque (l'import camt.054 est réel, la connexion bancaire non), stockage de
+fichiers. Le XML Factur-X est généré et contrôlé ; son embarquement dans un PDF/A-3 est prévu en
+phase 4. Les automatisations « date/seuil » s'exécutent à la demande (bouton) ; leur planification
+(pg_cron) arrive en phase 4.
+
 ## Tests
 
 ```bash
-pnpm test        # Vitest : TVA, arrondis, totaux de devis, alertes de budget
-pnpm test:rls    # droits réels contre l'API (base réinitialisée requise)
-npx playwright test   # 12 parcours navigateur (connexion, droits, map, éditeur) + captures dans test-results/
+pnpm test        # Vitest (58) : TVA, devis, facturation, relances, congés, temps, stock, camt.054, Factur-X, écritures
+pnpm test:rls    # droits réels contre l'API (24), dont masse salariale agrégée et fonctions métier
+npx playwright test   # 17 parcours : connexion, droits, map, éditeur, réappro, devis→paiement, congés, ⌘K, IA
 node scripts/dev/simtest.mjs <dossier> 120   # scénario de démo accéléré + captures
 pnpm typecheck && pnpm lint
 ```
@@ -136,7 +173,7 @@ pnpm typecheck && pnpm lint
 ## Écarts assumés par rapport au cahier des charges
 
 - **France au lieu de la Suisse** : EUR, TVA 5,5 % / 20 %, arrondi au centime et RGPD.
-  La QR-facture suisse ne s'applique pas ; Factur-X est prévu en phase 3.
+  La QR-facture suisse ne s'applique pas ; le XML Factur-X (CII) est généré, le PDF/A-3 hybride arrive en phase 4.
 - **Next.js 16.3**, aligné sur le site vitrine du dépôt.
 - **Intégrations** Google, Microsoft, boutique et transporteur : en *mode simulé*, affiché comme tel.
 - **SSO, 2FA TOTP et lien magique** : le TOTP est activé dans `supabase/config.toml`, mais les écrans

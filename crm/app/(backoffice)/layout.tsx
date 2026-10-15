@@ -17,7 +17,7 @@ export default async function BackOfficeLayout({ children }: { children: React.R
   const nav = NAV.map((g) => ({
     label: g.label,
     items: g.items
-      .filter((i) => ctx.can(i.module) && (!i.requiresSalaries || ctx.role.seesSalaries))
+      .filter((i) => (ctx.can(i.module) && (!i.requiresSalaries || ctx.role.seesSalaries)) || (i.alsoFor && ctx.can(i.alsoFor)))
       .map((i) => ({ href: i.href, label: i.label, icon: i.icon, count: i.counter === "todo" ? todo : i.counter ? c[i.counter] ?? 0 : 0 })),
   })).filter((g) => g.items.length);
   return (

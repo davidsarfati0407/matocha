@@ -130,3 +130,45 @@ describe("KPI partagés", () => {
     expect(k.data.value).toBeGreaterThan(0);
   });
 });
+
+describe("phase 3 : fonctions métier et droits", () => {
+  it("masse salariale : agrégée pour la finance, vide pour un collaborateur, jamais de département < 3 personnes", async () => {
+    const fin = await (await as("finance")).rpc("payroll_summary");
+    expect(fin.error).toBeNull();
+    const rows = fin.data as { department: string; headcount: number }[];
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.every((r) => r.headcount >= 3)).toBe(true);
+    expect(await count(await as("finance"), "employee_salaries")).toBe(0);
+    const emp = await (await as("employe")).rpc("payroll_summary");
+    expect(emp.data).toEqual([]);
+  });
+
+  it("automatisations : exécution réservée (commercial refusé, direction autorisée)", async () => {
+    expect((await (await as("commercial")).rpc("run_automations")).error?.code).toBe("42501");
+    const ok = await (await as("direction")).rpc("run_automations");
+    expect(ok.error).toBeNull();
+    expect((ok.data as unknown[]).length).toBe(10);
+  });
+
+  it("réapprovisionnement : refusé sans droit ressources:create", async () => {
+    const items = [{ stock_item_id: "00000000-0000-0000-0000-000000000000", quantity: 1 }];
+    expect((await (await as("finance")).rpc("reorder_stock", { items })).error?.code).toBe("42501");
+  });
+
+  it("embauche : un collaborateur ne peut pas créer de fiche", async () => {
+    const { data: c } = await (await as("rh")).from("candidates").select("id").limit(1).single();
+    const r = await (await as("employe")).rpc("hire_candidate", { cand: c!.id, job_key: "x", job_title: "x", start_on: "2026-11-01" });
+    expect(r.error).not.toBeNull();
+  });
+
+  it("congés : un collaborateur ne peut pas valider sa propre demande", async () => {
+    const e = await as("employe");
+    const { data: u } = await e.auth.getUser();
+    const { data: me } = await e.from("profiles").select("employee_id").eq("user_id", u.user!.id).single();
+    const ins = await e.from("leave_requests").insert({ employee_id: me!.employee_id, type: "conges", starts_on: "2026-12-28", ends_on: "2026-12-29", days: 2 }).select("id").single();
+    expect(ins.error).toBeNull();
+    const up = await e.from("leave_requests").update({ status: "approved" }).eq("id", ins.data!.id).select("id");
+    expect(up.data ?? []).toHaveLength(0);
+    await e.from("leave_requests").delete().eq("id", ins.data!.id);
+  });
+});

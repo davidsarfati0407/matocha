@@ -85,3 +85,52 @@ test("devis accepté → commande pro → étapes → heures facturables → fac
   await page.screenshot({ path: "test-results/bo-invoice-paid.png", caret: "initial" });
   expect(errors).toEqual([]);
 });
+
+test("congé validé en un clic (solde décompté), puis annulé depuis la notification (solde recrédité)", async ({ page }) => {
+  const errors = watchErrors(page);
+  await login(page, "RH", "/hr/leaves");
+  const card = page.locator("section.card").filter({ hasText: "Romain Faure" });
+  await expect(card).toContainText("solde 19,0 j");
+  await card.getByRole("button", { name: "Valider" }).click();
+  await expect(page.getByText(/Congé validé/)).toBeVisible();
+  await page.goto("/hr/employees");
+  await expect(page.getByRole("row", { name: /Romain Faure/ })).toContainText("14,0 j");
+  await page.goto("/hr/leaves");
+  await expect(page.locator("section.card").filter({ hasText: "Romain Faure" })).toHaveCount(0);
+  // Annulation : la décision repasse en attente et le trigger recrédite le solde
+  await page.locator("section.card").filter({ hasText: "Lucas Fontaine" }).getByRole("button", { name: "Valider" }).click();
+  await page.getByRole("button", { name: "Annuler" }).click();
+  await expect(page.getByText(/Décision annulée/)).toBeVisible();
+  await page.goto("/hr/employees");
+  await expect(page.getByRole("row", { name: /Lucas Fontaine/ })).toContainText("7,0 j");
+  expect(errors).toEqual([]);
+});
+
+test("⌘K : recherche d'un compte puis action « nouveau devis » pré-rempli", async ({ page }) => {
+  const errors = watchErrors(page);
+  await login(page, "Commercial", "/dashboard");
+  await page.waitForLoadState("networkidle");
+  await expect(async () => {
+    await page.keyboard.press("Control+k");
+    await expect(page.getByLabel("Commande ou recherche")).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 30_000 });
+  await page.getByLabel("Commande ou recherche").fill("Hinoki");
+  await page.getByRole("option", { name: /Nouveau devis pour Café Hinoki/ }).click();
+  await page.waitForURL(/\/crm\/quotes\/new\?client=/);
+  await expect(page.getByText(/Pré-rempli avec la dernière commande acceptée \(Q-2026-0140/)).toBeVisible();
+  await expect(page.getByLabel("Quantité").first()).toHaveValue("4");
+  expect(errors).toEqual([]);
+});
+
+test("assistant IA : honnête sans clé (aucune réponse simulée), et droits filtrés côté serveur", async ({ page }) => {
+  const errors = watchErrors(page);
+  await login(page, "Collaborateur", "/ai");
+  await expect(page.getByText(/Assistant non configuré|Connecté ·/).first()).toBeVisible();
+  await page.goto("/hr/salaries");
+  await expect(page.getByText(/ne permet pas|pas accès|Accès/).first()).toBeVisible();
+  await page.goto("/finance/invoices");
+  await expect(page.getByRole("row", { name: /F-2026-/ })).toHaveCount(0);
+  await page.goto("/finance/expenses");
+  await expect(page.getByRole("heading", { name: "Notes de frais" })).toBeVisible();
+  expect(errors).toEqual([]);
+});

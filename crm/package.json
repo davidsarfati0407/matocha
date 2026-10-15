@@ -19,6 +19,7 @@
     "devstack:reset": "pnpm db:seed:gen && bash scripts/devstack/reset.sh"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "0.129.0",
     "@react-pdf/renderer": "4.9.0",
     "@react-three/drei": "10.7.9",
     "@react-three/fiber": "9.8.1",

@@ -9,6 +9,8 @@ export interface NavItem {
   module: Module;
   counter?: string;
   requiresSalaries?: boolean;
+  /** Visible aussi pour ce module (ex. la finance voit la masse salariale agrégée). */
+  alsoFor?: Module;
 }
 export interface NavGroup {
   label: string;
@@ -48,10 +50,10 @@ export const NAV: NavGroup[] = [
   {
     label: "RH",
     items: [
-      { href: "/hr/employees", label: cap(V.employe.pluriel), icon: "users", module: "rh" },
+      { href: "/hr/employees", label: cap(V.employe.pluriel), icon: "users", module: "pilotage" } /* annuaire pour tous ; détail RH filtré */,
       { href: "/hr/presence", label: "Présence", icon: "badge", module: "rh" },
-      { href: "/hr/leaves", label: "Congés", icon: "sun", module: "rh", counter: "leaves_pending" },
-      { href: "/hr/salaries", label: "Salaires", icon: "lock", module: "salaires", requiresSalaries: true },
+      { href: "/hr/leaves", label: "Congés", icon: "sun", module: "pilotage", counter: "leaves_pending" } /* chacun pose ses congés */,
+      { href: "/hr/salaries", label: "Salaires", icon: "lock", module: "salaires", requiresSalaries: true, alsoFor: "finance" },
       { href: "/hr/reviews", label: "Entretiens & formations", icon: "check", module: "rh" },
       { href: "/hr/recruitment", label: "Recrutement", icon: "user-plus", module: "rh" },
     ],

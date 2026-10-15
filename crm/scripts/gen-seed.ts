@@ -99,7 +99,7 @@ insert("orgs", [
     vat_reduced: C.entreprise.tva.reduit,
     rounding: C.entreprise.tva.arrondi,
     demo_mode: true,
-    settings: json({ daily_revenue_target: C.objectifCaJournalierHT, pickup_time: "15:00", demo_notice: C.entreprise.statutDemo, hourly_rate: 65, payment_terms_days: 30, dunning_days: [1, 15, 30], leave_blackouts: [{ from: "12-01", to: "12-24", label: "Pic des fêtes" }], min_presence: 0.5, cash_opening: 52000, legal: { address: C.lieux[0].adresse, siren: "000 000 000 (fictif)", vat_number: "FR00000000000 (fictif)", iban: "FR76 0000 0000 0000 0000 0000 000 (fictif)", bic: "DEMOFRPPXXX", rcs: "RCS Bobigny (fictif)", capital: "10 000 €" } }),
+    settings: json({ daily_revenue_target: C.objectifCaJournalierHT, pickup_time: "15:00", demo_notice: C.entreprise.statutDemo, hourly_rate: 65, payment_terms_days: 30, dunning_days: [1, 15, 30], leave_blackouts: [{ from: "12-01", to: "12-24", label: "Pic des fêtes" }], min_presence: 0.5, cash_opening: 52000, employer_charges: 0.42, legal: { address: C.lieux[0].adresse, siren: "000 000 000 (fictif)", vat_number: "FR00000000000 (fictif)", iban: "FR76 0000 0000 0000 0000 0000 000 (fictif)", bic: "DEMOFRPPXXX", rcs: "RCS Bobigny (fictif)", capital: "10 000 €" } }),
   },
 ]);
 

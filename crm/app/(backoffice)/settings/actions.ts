@@ -1,0 +1,56 @@
+"use server";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { fail, type ActionResult } from "@/lib/backoffice/result";
+import { createClient } from "@/lib/supabase/server";
+
+const settingsSchema = z.object({
+  hourly_rate: z.number().min(0).max(1000),
+  payment_terms_days: z.number().int().min(0).max(120),
+  dunning_days: z.array(z.number().int().min(0).max(120)).length(3),
+  min_presence: z.number().min(0).max(1),
+  daily_revenue_target: z.number().min(0),
+  cash_opening: z.number(),
+  employer_charges: z.number().min(0).max(1),
+});
+
+/** Paramètres de l'organisation : fusionnés dans orgs.settings (droit organisation:update via RLS). */
+export async function saveSettings(input: z.input<typeof settingsSchema>): Promise<ActionResult> {
+  const p = settingsSchema.safeParse(input);
+  if (!p.success) return { ok: false, error: p.error.issues[0].message };
+  if (!(p.data.dunning_days[0] < p.data.dunning_days[1] && p.data.dunning_days[1] < p.data.dunning_days[2])) return { ok: false, error: "Les paliers de relance doivent être croissants." };
+  const supabase = await createClient();
+  const { data: org } = await supabase.from("orgs").select("id, settings").single();
+  if (!org) return { ok: false, error: "Organisation introuvable" };
+  const { error, count } = await supabase.from("orgs").update({ settings: { ...(org.settings as object), ...p.data } }, { count: "exact" }).eq("id", org.id);
+  if (error) return fail(error);
+  if (!count) return { ok: false, error: "Votre rôle ne permet pas cette action." };
+  revalidatePath("/", "layout");
+  return { ok: true, message: "Paramètres enregistrés" };
+}
+
+export async function toggleAutomation(id: string, enabled: boolean): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { error, count } = await supabase.from("automations").update({ enabled }, { count: "exact" }).eq("id", id);
+  if (error) return fail(error);
+  if (!count) return { ok: false, error: "Votre rôle ne permet pas cette action." };
+  revalidatePath("/settings/automations");
+  return { ok: true, message: enabled ? "Automatisation activée" : "Automatisation désactivée" };
+}
+
+export async function runAutomationsNow(): Promise<ActionResult<{ name: string; count: number | null; href: string | null; mode: string }[]>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("run_automations");
+  if (error) return fail(error);
+  const rows = data as { name: string; count: number | null; href: string | null; mode: string }[];
+  revalidatePath("/settings/automations");
+  return { ok: true, message: `${rows.filter((r) => (r.count ?? 0) > 0).length} règle(s) déclenchée(s) · notifications envoyées`, data: rows };
+}
+
+export async function resetDemo(): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("demo_reset", { params: {} });
+  if (error) return fail(error);
+  revalidatePath("/", "layout");
+  return { ok: true, message: "Scénario de démo réinitialisé" };
+}
