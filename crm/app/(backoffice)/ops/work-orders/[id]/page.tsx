@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Badge, ButtonLink, Card, Denied, Dl, Empty, PageHeader, Progress, Tabs } from "@/components/ui/kit";
 import { sectorConfig } from "@/config/sector.config";
 import { requirePerm } from "@/lib/backoffice/context";
@@ -12,11 +13,15 @@ import { createClient } from "@/lib/supabase/server";
 import { BudgetBadge } from "../view";
 import { ChecklistItem, ConsumeForm, StageActions, TimeForm } from "./client";
 
-export const metadata: Metadata = { title: "Commande pro" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("ops.workOrder");
+  return { title: t("title") };
+}
 
 export default async function WorkOrderPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string }> }) {
+  const t = await getTranslations("ops.workOrder");
   const { ctx, allowed } = await requirePerm("operations");
-  if (!allowed) return <Denied what="les opérations" />;
+  if (!allowed) return <Denied what={t("deniedWhat")} />;
   const { id } = await params;
   const tab = (await searchParams).tab ?? "resume";
   const supabase = await createClient();
@@ -43,10 +48,10 @@ export default async function WorkOrderPage({ params, searchParams }: { params: 
   const used = (time.data ?? []).reduce((s, t) => s + Number(t.hours), 0);
   const level = budgetAlertLevel(used, Number(wo.hours_budget));
   const perPerson = new Map<string, number>();
-  for (const t of time.data ?? []) {
-    const e = t.employee as unknown as { first_name: string; last_name: string } | null;
+  for (const te of time.data ?? []) {
+    const e = te.employee as unknown as { first_name: string; last_name: string } | null;
     const k = e ? `${e.first_name} ${e.last_name}` : "—";
-    perPerson.set(k, (perPerson.get(k) ?? 0) + Number(t.hours));
+    perPerson.set(k, (perPerson.get(k) ?? 0) + Number(te.hours));
   }
   const idx = stageIndex(wo.stage);
   const totals = computeTotals((lines.data ?? []).map((l) => ({ quantity: Number(l.quantity), unitPrice: Number(l.unit_price), unitCost: Number(l.unit_cost), vatRate: Number(l.vat_rate) })), { discountPct: Number((wo.quotes as { discount_pct?: number } | null)?.discount_pct ?? 0) });
@@ -61,7 +66,7 @@ export default async function WorkOrderPage({ params, searchParams }: { params: 
         subtitle={wo.title}
         actions={
           <>
-            {wo.zone_id && <ButtonLink href={mapHref(site, "work_orders", id)} icon="map">Voir sur la map</ButtonLink>}
+            {wo.zone_id && <ButtonLink href={mapHref(site, "work_orders", id)} icon="map">{t("viewOnMap")}</ButtonLink>}
             <StageActions id={id} stage={wo.stage} status={wo.status} invoiced={(invoices.data ?? []).length > 0} canUpdate={ctx.can("operations", "update")} canInvoice={ctx.can("finance", "create")} clientName={client?.name ?? ""} number={wo.number} />
           </>
         }
@@ -82,38 +87,38 @@ export default async function WorkOrderPage({ params, searchParams }: { params: 
             );
           })}
         </ol>
-        {wo.blocked_reason && <p className="mt-3 rounded-xl bg-warn/12 px-3 py-2 text-sm text-[#8a5d08]">En attente : {wo.blocked_reason}</p>}
+        {wo.blocked_reason && <p className="mt-3 rounded-xl bg-warn/12 px-3 py-2 text-sm text-[#8a5d08]">{t("onHold", { reason: wo.blocked_reason })}</p>}
       </Card>
       <Tabs
         current={tab}
         tabs={[
-          { id: "resume", label: "Résumé", href: base },
-          { id: "heures", label: "Heures", href: `${base}?tab=heures`, count: (time.data ?? []).length },
-          { id: "stock", label: "Stock consommé", href: `${base}?tab=stock`, count: (moves.data ?? []).length },
-          { id: "devis", label: "Devis & factures", href: `${base}?tab=devis` },
-          { id: "documents", label: "Documents & échanges", href: `${base}?tab=documents`, count: (docs.data ?? []).length + (threads.data ?? []).length },
+          { id: "resume", label: t("tabs.resume"), href: base },
+          { id: "heures", label: t("tabs.heures"), href: `${base}?tab=heures`, count: (time.data ?? []).length },
+          { id: "stock", label: t("tabs.stock"), href: `${base}?tab=stock`, count: (moves.data ?? []).length },
+          { id: "devis", label: t("tabs.devis"), href: `${base}?tab=devis` },
+          { id: "documents", label: t("tabs.documents"), href: `${base}?tab=documents`, count: (docs.data ?? []).length + (threads.data ?? []).length },
         ]}
       />
       {tab === "resume" && (
         <div className="grid gap-4 lg:grid-cols-3">
-          <Card title="Commande" className="lg:col-span-2">
+          <Card title={t("order")} className="lg:col-span-2">
             <Dl
               items={[
-                ["Compte", client ? <Link href={`/crm/clients/${client.id}`} className="text-accent hover:underline">{client.name}</Link> : "—"],
-                ["Colis", wo.physical_object ?? "—"],
-                ["Emplacement", (wo.zones as { name: string } | null)?.name ?? "Hors site / en transit"],
-                ["Responsable", owner ? <Link href={`/hr/employees/${owner.id}`} className="hover:text-accent">{`${owner.first_name} ${owner.last_name}`}</Link> : "—"],
-                ["Reçue le", wo.received_at ? `${formatDate(wo.received_at)} · ${formatTime(wo.received_at)}` : "—"],
-                ["Échéance", wo.due_at ? `${formatDate(wo.due_at)} · ${formatTime(wo.due_at)}` : "—"],
-                ["Montant", `${formatMoney(Number(wo.amount_ht))} HT · ${formatMoney(Number(wo.amount_ttc))} TTC`],
-                ["Avancement", <span key="p" className="flex items-center gap-2"><Progress value={Number(wo.progress)} tone="accent" className="w-40" />{Math.round(Number(wo.progress) * 100)} %</span>],
+                [t("account"), client ? <Link href={`/crm/clients/${client.id}`} className="text-accent hover:underline">{client.name}</Link> : "—"],
+                [t("parcel"), wo.physical_object ?? "—"],
+                [t("location"), (wo.zones as { name: string } | null)?.name ?? t("offSite")],
+                [t("owner"), owner ? <Link href={`/hr/employees/${owner.id}`} className="hover:text-accent">{`${owner.first_name} ${owner.last_name}`}</Link> : "—"],
+                [t("receivedAt"), wo.received_at ? `${formatDate(wo.received_at)} · ${formatTime(wo.received_at)}` : "—"],
+                [t("due"), wo.due_at ? `${formatDate(wo.due_at)} · ${formatTime(wo.due_at)}` : "—"],
+                [t("amount"), t("amountValue", { ht: formatMoney(Number(wo.amount_ht)), ttc: formatMoney(Number(wo.amount_ttc)) })],
+                [t("progress"), <span key="p" className="flex items-center gap-2"><Progress value={Number(wo.progress)} tone="accent" className="w-40" />{Math.round(Number(wo.progress) * 100)} %</span>],
               ]}
             />
           </Card>
-          <Card title="Budget d'heures">
+          <Card title={t("hoursBudget")}>
             <div className="mb-2 flex items-center justify-between">
               <BudgetBadge level={level} used={used} budget={Number(wo.hours_budget)} />
-              <span className="text-xs text-muted">alertes à 50, 80 et 100 %</span>
+              <span className="text-xs text-muted">{t("alerts")}</span>
             </div>
             <Progress value={Number(wo.hours_budget) ? used / Number(wo.hours_budget) : 0} tone={level >= 100 ? "danger" : level >= 80 ? "warn" : "brand"} />
             <ul className="mt-4 space-y-2 text-sm">
@@ -126,10 +131,10 @@ export default async function WorkOrderPage({ params, searchParams }: { params: 
                   <Progress value={Number(wo.hours_budget) ? h / Number(wo.hours_budget) : 0} />
                 </li>
               ))}
-              {perPerson.size === 0 && <li className="text-muted">Aucune heure saisie.</li>}
+              {perPerson.size === 0 && <li className="text-muted">{t("noHours")}</li>}
             </ul>
           </Card>
-          <Card title="Check-list" className="lg:col-span-2">
+          <Card title={t("checklist")} className="lg:col-span-2">
             {(checklists.data ?? []).map((c) => (
               <div key={c.id}>
                 {(c.items as { label: string; done: boolean }[]).map((it, i) => (
@@ -137,79 +142,79 @@ export default async function WorkOrderPage({ params, searchParams }: { params: 
                 ))}
               </div>
             ))}
-            {(checklists.data ?? []).length === 0 && <Empty title="Pas de check-list" />}
+            {(checklists.data ?? []).length === 0 && <Empty title={t("noChecklist")} />}
           </Card>
-          <Card title="Tâches">
+          <Card title={t("tasks")}>
             <ul className="space-y-2 text-sm">
-              {(tasks.data ?? []).map((t) => (
-                <li key={t.id} className="flex items-center justify-between gap-2">
-                  <span className={t.status === "done" ? "text-muted line-through" : ""}>{t.title}</span>
-                  <Badge tone={t.status === "done" ? "ok" : t.status === "doing" ? "info" : "muted"}>{t.status === "done" ? "Faite" : t.status === "doing" ? "En cours" : "À faire"}</Badge>
+              {(tasks.data ?? []).map((task) => (
+                <li key={task.id} className="flex items-center justify-between gap-2">
+                  <span className={task.status === "done" ? "text-muted line-through" : ""}>{task.title}</span>
+                  <Badge tone={task.status === "done" ? "ok" : task.status === "doing" ? "info" : "muted"}>{task.status === "done" ? t("task.done") : task.status === "doing" ? t("task.doing") : t("task.todo")}</Badge>
                 </li>
               ))}
-              {(tasks.data ?? []).length === 0 && <li className="text-muted">Aucune tâche.</li>}
+              {(tasks.data ?? []).length === 0 && <li className="text-muted">{t("noTasks")}</li>}
             </ul>
           </Card>
         </div>
       )}
       {tab === "heures" && (
         <div className="grid gap-4 lg:grid-cols-3">
-          <Card title="Heures saisies" className="lg:col-span-2" padded={false}>
+          <Card title={t("hoursLogged")} className="lg:col-span-2" padded={false}>
             <table className="w-full text-sm">
               <thead className="bg-black/[0.02] text-left text-xs text-muted">
                 <tr>
-                  <th className="px-5 py-2 font-medium">Date</th>
-                  <th className="px-3 py-2 font-medium">Collaborateur</th>
-                  <th className="px-3 py-2 font-medium">Note</th>
-                  <th className="px-3 py-2 text-right font-medium">Heures</th>
-                  <th className="px-5 py-2 font-medium">Facturation</th>
+                  <th className="px-5 py-2 font-medium">{t("col.date")}</th>
+                  <th className="px-3 py-2 font-medium">{t("col.employee")}</th>
+                  <th className="px-3 py-2 font-medium">{t("col.note")}</th>
+                  <th className="px-3 py-2 text-right font-medium">{t("col.hours")}</th>
+                  <th className="px-5 py-2 font-medium">{t("col.billing")}</th>
                 </tr>
               </thead>
               <tbody>
-                {(time.data ?? []).map((t) => {
-                  const e = t.employee as unknown as { first_name: string; last_name: string } | null;
+                {(time.data ?? []).map((te) => {
+                  const e = te.employee as unknown as { first_name: string; last_name: string } | null;
                   return (
-                    <tr key={t.id} className="border-t border-black/5">
-                      <td className="px-5 py-2">{formatDate(t.worked_on)}</td>
+                    <tr key={te.id} className="border-t border-black/5">
+                      <td className="px-5 py-2">{formatDate(te.worked_on)}</td>
                       <td className="px-3 py-2">{e ? `${e.first_name} ${e.last_name}` : "—"}</td>
-                      <td className="px-3 py-2 text-muted">{t.note}</td>
-                      <td className="px-3 py-2 text-right tabular-nums">{formatNumber(Number(t.hours), "fr", 2)}</td>
-                      <td className="px-5 py-2">{t.invoice_id ? <Badge tone="ok">Facturée</Badge> : t.billable ? <Badge tone="info">Facturable</Badge> : <Badge tone="muted">Interne</Badge>}</td>
+                      <td className="px-3 py-2 text-muted">{te.note}</td>
+                      <td className="px-3 py-2 text-right tabular-nums">{formatNumber(Number(te.hours), "fr", 2)}</td>
+                      <td className="px-5 py-2">{te.invoice_id ? <Badge tone="ok">{t("invoiced")}</Badge> : te.billable ? <Badge tone="info">{t("billable")}</Badge> : <Badge tone="muted">{t("internal")}</Badge>}</td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
-            {(time.data ?? []).length === 0 && <Empty title="Aucune heure" icon="timer" />}
+            {(time.data ?? []).length === 0 && <Empty title={t("emptyHours")} icon="timer" />}
           </Card>
-          <Card title="Ajouter des heures">
+          <Card title={t("addHours")}>
             <TimeForm workOrderId={id} />
           </Card>
         </div>
       )}
       {tab === "stock" && (
         <div className="grid gap-4 lg:grid-cols-3">
-          <Card title="Sorties de stock (traçabilité des lots)" className="lg:col-span-2">
+          <Card title={t("stockOut")} className="lg:col-span-2">
             <ul className="divide-y divide-black/5 text-sm">
               {(moves.data ?? []).map((m) => (
                 <li key={m.id} className="flex justify-between gap-3 py-2">
                   <span>
-                    {(m.stock_items as unknown as { name: string } | null)?.name} <span className="text-xs text-muted">{(m.lots as unknown as { number: string } | null)?.number ? `· lot ${(m.lots as unknown as { number: string }).number}` : ""}</span>
+                    {(m.stock_items as unknown as { name: string } | null)?.name} <span className="text-xs text-muted">{(m.lots as unknown as { number: string } | null)?.number ? t("lotRef", { number: (m.lots as unknown as { number: string }).number }) : ""}</span>
                   </span>
                   <span className="tabular-nums">−{formatNumber(Number(m.quantity))}</span>
                 </li>
               ))}
             </ul>
-            {(moves.data ?? []).length === 0 && <Empty title="Aucune sortie rattachée" hint="Les sorties choisissent automatiquement le lot à la DDM la plus proche (FEFO)." />}
+            {(moves.data ?? []).length === 0 && <Empty title={t("emptyStock")} hint={t("emptyStockHint")} />}
           </Card>
-          <Card title="Consommer du stock">
+          <Card title={t("consume")}>
             <ConsumeForm workOrderId={id} items={(stock.data ?? []).map((s) => ({ id: s.id, label: `${s.name} (${formatNumber(Number(s.quantity))})` }))} />
           </Card>
         </div>
       )}
       {tab === "devis" && (
         <div className="grid gap-4 lg:grid-cols-3">
-          <Card title={wo.quote_id ? `Devis ${(wo.quotes as { number: string } | null)?.number}` : "Sans devis"} className="lg:col-span-2" action={wo.quote_id ? <Link href={`/crm/quotes/${wo.quote_id}`} className="text-xs font-medium text-accent">Ouvrir le devis →</Link> : null}>
+          <Card title={wo.quote_id ? t("quote", { number: (wo.quotes as { number: string } | null)?.number ?? "" }) : t("noQuote")} className="lg:col-span-2" action={wo.quote_id ? <Link href={`/crm/quotes/${wo.quote_id}`} className="text-xs font-medium text-accent">{t("openQuote")}</Link> : null}>
             {(lines.data ?? []).length > 0 ? (
               <>
                 <table className="w-full text-sm">
@@ -224,42 +229,42 @@ export default async function WorkOrderPage({ params, searchParams }: { params: 
                   </tbody>
                 </table>
                 <div className="ml-auto mt-3 w-64 text-sm">
-                  <Dl items={[["Total HT", formatMoney(totals.ht)], ...totals.vatByRate.map((v) => [`TVA ${formatNumber(v.rate * 100, "fr", 1)} %`, formatMoney(v.vat)] as [string, string]), ["Total TTC", formatMoney(totals.ttc)], ["Marge", `${formatMoney(totals.margin)} · ${formatNumber((totals.marginRate ?? 0) * 100, "fr", 1)} %`]]} />
+                  <Dl items={[[t("totalHt"), formatMoney(totals.ht)], ...totals.vatByRate.map((v) => [t("vat", { rate: formatNumber(v.rate * 100, "fr", 1) }), formatMoney(v.vat)] as [string, string]), [t("totalTtc"), formatMoney(totals.ttc)], [t("margin"), `${formatMoney(totals.margin)} · ${formatNumber((totals.marginRate ?? 0) * 100, "fr", 1)} %`]]} />
                 </div>
               </>
             ) : (
-              <p className="text-sm text-muted">Montant forfaitaire : {formatMoney(Number(wo.amount_ht))} HT.</p>
+              <p className="text-sm text-muted">{t("flatAmount", { amount: formatMoney(Number(wo.amount_ht)) })}</p>
             )}
           </Card>
-          <Card title="Factures">
+          <Card title={t("invoices")}>
             {(invoices.data ?? []).map((i) => (
               <Link key={i.id} href={`/finance/invoices/${i.id}`} className="flex justify-between py-1.5 text-sm hover:text-accent">
                 <span className="font-mono">{i.number}</span>
                 <span>{formatMoney(Number(i.total_ttc))}</span>
               </Link>
             ))}
-            {(invoices.data ?? []).length === 0 && <p className="text-sm text-muted">Pas encore facturée. Le bouton « Facturer » apparaît quand la commande est livrée.</p>}
+            {(invoices.data ?? []).length === 0 && <p className="text-sm text-muted">{t("notInvoiced")}</p>}
           </Card>
         </div>
       )}
       {tab === "documents" && (
         <div className="grid gap-4 lg:grid-cols-2">
-          <Card title="Documents et photos">
+          <Card title={t("docs")}>
             {(docs.data ?? []).map((d) => (
               <p key={d.id} className="py-1 text-sm">
                 {d.name} <span className="text-xs text-muted">· {d.kind}</span>
               </p>
             ))}
-            {(docs.data ?? []).length === 0 && <Empty title="Aucun document" hint="Dépôt de fichiers et photos avant/après : Supabase Storage (non disponible dans la stack locale sans Docker)." icon="file" />}
+            {(docs.data ?? []).length === 0 && <Empty title={t("noDocs")} hint={t("noDocsHint")} icon="file" />}
           </Card>
-          <Card title="Échanges">
-            {(threads.data ?? []).map((t) => (
-              <Link key={t.id} href={`/comms/inbox?thread=${t.id}`} className="flex justify-between py-1.5 text-sm hover:text-accent">
-                <span>{t.subject}</span>
-                <Badge tone={t.status === "awaiting_reply" ? "warn" : "muted"}>{t.status === "awaiting_reply" ? "À répondre" : "Suivi"}</Badge>
+          <Card title={t("threads")}>
+            {(threads.data ?? []).map((th) => (
+              <Link key={th.id} href={`/comms/inbox?thread=${th.id}`} className="flex justify-between py-1.5 text-sm hover:text-accent">
+                <span>{th.subject}</span>
+                <Badge tone={th.status === "awaiting_reply" ? "warn" : "muted"}>{th.status === "awaiting_reply" ? t("awaitingReply") : t("followUp")}</Badge>
               </Link>
             ))}
-            {(threads.data ?? []).length === 0 && <Empty title="Aucun échange" icon="mail" />}
+            {(threads.data ?? []).length === 0 && <Empty title={t("noThreads")} icon="mail" />}
           </Card>
         </div>
       )}

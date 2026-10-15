@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Badge, ButtonLink, Card, Denied, Dl, PageHeader } from "@/components/ui/kit";
 import { sectorConfig } from "@/config/sector.config";
 import { requirePerm } from "@/lib/backoffice/context";
@@ -10,12 +11,18 @@ import { createClient } from "@/lib/supabase/server";
 import { LOT_STATUS } from "@/lib/backoffice/labels";
 import { QualityActions, RecallButton } from "./client";
 
-export const metadata: Metadata = { title: "Lot" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("resources.lot");
+  return { title: t("title") };
+}
 
 export default async function LotPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const t = await getTranslations("resources.lot");
+  const tAll = await getTranslations();
+  const tl = await getTranslations("resources.lots");
   const { ctx, allowed } = await requirePerm("ressources");
-  if (!allowed) return <Denied what="les lots" />;
+  if (!allowed) return <Denied what={t("deniedWhat")} />;
   const supabase = await createClient();
   const { data: lot } = await supabase.from("lots").select("*, stock_items(id, reference, name), suppliers(name, country)").eq("id", id).maybeSingle();
   if (!lot) notFound();
@@ -39,34 +46,34 @@ export default async function LotPage({ params }: { params: Promise<{ id: string
   return (
     <>
       <PageHeader
-        kicker={`Lot · ${item.reference}`}
+        kicker={t("kicker", { reference: item.reference })}
         title={<span className="font-mono">{lot.number}</span>}
         subtitle={`${item.name}${sup ? ` · ${sup.name} (${sup.country})` : ""}`}
         actions={
           <>
-            <Badge tone={st[0]}>{st[1]}</Badge>
-            <ButtonLink href={mapHref(sectorConfig.lieux[0].id, "lots", id)} icon="map">Voir sur la map</ButtonLink>
+            <Badge tone={st[0]}>{tAll(st[1] as never)}</Badge>
+            <ButtonLink href={mapHref(sectorConfig.lieux[0].id, "lots", id)} icon="map">{tAll("resources.viewOnMap")}</ButtonLink>
             {clients.size > 0 && <RecallButton lot={lot.number} item={item.name} clients={[...clients.values()]} />}
           </>
         }
       />
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card title="Contrôle qualité">
+        <Card title={t("qc")}>
           <Dl
             items={[
-              ["Reçu le", lot.received_at ? formatDate(lot.received_at) : "Pas encore reçu"],
-              ["DDM", lot.best_before ? formatDate(lot.best_before) : "—"],
-              ["Quantité", formatNumber(Number(lot.quantity))],
-              ["Certificat d'analyse", lot.coa_ok == null ? "À vérifier" : lot.coa_ok ? "Conforme" : "Non conforme"],
-              ["Échantillons retenus", `${lot.retained_samples} (échantillothèque)`],
-              ["Notes", lot.qc_notes],
+              [t("receivedAt"), lot.received_at ? formatDate(lot.received_at) : t("notReceived")],
+              [t("bestBefore"), lot.best_before ? formatDate(lot.best_before) : "—"],
+              [t("quantity"), formatNumber(Number(lot.quantity))],
+              [t("coa"), lot.coa_ok == null ? tl("coa.pending") : lot.coa_ok ? tl("coa.ok") : tl("coa.ko")],
+              [t("samples"), t("samplesValue", { count: lot.retained_samples })],
+              [t("notes"), lot.qc_notes],
             ]}
           />
           {["quarantaine", "attendu"].includes(lot.status) && ctx.can("ressources", "update") && <QualityActions id={id} disabled={lot.status === "attendu"} />}
         </Card>
-        <Card title="Clients livrés avec ce lot" className="lg:col-span-2">
+        <Card title={t("clientsTitle")} className="lg:col-span-2">
           {clients.size === 0 && outShop === 0 ? (
-            <p className="text-sm text-muted">Aucune sortie : le lot n'a encore été livré à personne.</p>
+            <p className="text-sm text-muted">{t("noOut")}</p>
           ) : (
             <ul className="divide-y divide-black/5 text-sm">
               {[...clients.entries()].map(([cid, c]) => (
@@ -81,14 +88,14 @@ export default async function LotPage({ params }: { params: Promise<{ id: string
               ))}
               {outShop > 0 && (
                 <li className="flex justify-between py-2">
-                  <span>Commandes en ligne (boutique)</span>
+                  <span>{t("shopOrders")}</span>
                   <span className="tabular-nums text-muted">{formatNumber(outShop)}</span>
                 </li>
               )}
             </ul>
           )}
         </Card>
-        <Card title="Historique du lot" className="lg:col-span-3">
+        <Card title={t("history")} className="lg:col-span-3">
           <ol className="relative ml-2 border-l border-black/10 text-sm">
             {(moves ?? []).map((m) => (
               <li key={m.id} className="mb-2 ml-4">
@@ -96,7 +103,7 @@ export default async function LotPage({ params }: { params: Promise<{ id: string
                 <span className="text-muted">{formatDate(m.at)}</span> · {m.reason} · <span className="tabular-nums">{m.kind === "sortie" ? "−" : "+"}{formatNumber(Number(m.quantity))}</span>
               </li>
             ))}
-            {(moves ?? []).length === 0 && <li className="ml-4 text-muted">Aucun mouvement.</li>}
+            {(moves ?? []).length === 0 && <li className="ml-4 text-muted">{t("noMoves")}</li>}
           </ol>
         </Card>
       </div>

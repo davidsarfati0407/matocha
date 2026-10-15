@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Denied, PageHeader } from "@/components/ui/kit";
 import { sectorConfig } from "@/config/sector.config";
 import { requirePerm } from "@/lib/backoffice/context";
@@ -7,11 +8,15 @@ import { nowMs } from "@/lib/clock";
 import { createClient } from "@/lib/supabase/server";
 import { WorkOrdersView, type WoRow } from "./view";
 
-export const metadata: Metadata = { title: "Commandes pro" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("ops.workOrders");
+  return { title: t("title") };
+}
 
 export default async function WorkOrdersPage({ searchParams }: { searchParams: Promise<{ view?: string; alert?: string }> }) {
+  const t = await getTranslations("ops.workOrders");
   const { ctx, allowed } = await requirePerm("operations");
-  if (!allowed) return <Denied what="les opérations" />;
+  if (!allowed) return <Denied what={t("deniedWhat")} />;
   const sp = await searchParams;
   const supabase = await createClient();
   const [wos, hours, clients] = await Promise.all([
@@ -47,7 +52,7 @@ export default async function WorkOrdersPage({ searchParams }: { searchParams: P
   const V = sectorConfig.vocabulaire.workOrder;
   return (
     <>
-      <PageHeader title={V.pluriel[0].toUpperCase() + V.pluriel.slice(1)} subtitle={`${rows.length} ${V.pluriel}${sp.alert ? " en alerte (budget ≥ 80 %, retard ou attente)" : ""} · créées automatiquement à l'acceptation d'un devis`} />
+      <PageHeader title={V.pluriel[0].toUpperCase() + V.pluriel.slice(1)} subtitle={t(sp.alert ? "subtitleAlert" : "subtitle", { count: rows.length, noun: V.pluriel })} />
       <WorkOrdersView rows={rows} view={sp.view === "kanban" ? "kanban" : "liste"} clients={(clients.data ?? []) as { id: string; name: string }[]} canCreate={ctx.can("operations", "create")} />
     </>
   );

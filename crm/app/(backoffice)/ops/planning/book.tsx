@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Drawer } from "@/components/ui/Drawer";
@@ -8,6 +9,7 @@ import { report } from "@/lib/ui/toast";
 import { bookAsset } from "../actions";
 
 export function BookButton({ assets, day }: { assets: { id: string; name: string }[]; day: string }) {
+  const t = useTranslations("ops.planning");
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
   const router = useRouter();
@@ -15,9 +17,9 @@ export function BookButton({ assets, day }: { assets: { id: string; name: string
   return (
     <>
       <Button variant="accent" icon="plus" onClick={() => setOpen(true)}>
-        Réserver
+        {t("book")}
       </Button>
-      <Drawer open={open} onClose={() => setOpen(false)} title="Nouvelle réservation">
+      <Drawer open={open} onClose={() => setOpen(false)} title={t("newBooking")}>
         <form
           className="flex flex-col gap-4"
           action={(fd) =>
@@ -30,7 +32,7 @@ export function BookButton({ assets, day }: { assets: { id: string; name: string
             })
           }
         >
-          <Field label="Ressource">
+          <Field label={t("resource")}>
             <Select name="asset">
               {assets.map((a) => (
                 <option key={a.id} value={a.id}>
@@ -39,20 +41,20 @@ export function BookButton({ assets, day }: { assets: { id: string; name: string
               ))}
             </Select>
           </Field>
-          <Field label="Objet">
-            <Input name="title" required placeholder="Point équipe" />
+          <Field label={t("fieldTitle")}>
+            <Input name="title" required placeholder={t("titlePlaceholder")} />
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="De">
+            <Field label={t("from")}>
               <Input name="from" type="time" required defaultValue="10:00" />
             </Field>
-            <Field label="À">
+            <Field label={t("to")}>
               <Input name="to" type="time" required defaultValue="11:00" />
             </Field>
           </div>
-          <p className="text-xs text-muted">Les conflits avec une réservation existante sont refusés.</p>
+          <p className="text-xs text-muted">{t("conflictHint")}</p>
           <Button variant="accent" disabled={pending}>
-            Réserver
+            {t("book")}
           </Button>
         </form>
       </Drawer>

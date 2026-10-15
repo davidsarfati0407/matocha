@@ -1,6 +1,7 @@
 "use server";
 /** Actions des opérations : mêmes règles métier et mêmes droits (RLS) que la map. */
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { sectorConfig } from "@/config/sector.config";
 import { invoiceFromWorkOrder } from "@/lib/domain/billing";
@@ -9,10 +10,11 @@ import { createClient } from "@/lib/supabase/server";
 import { fail, type ActionResult } from "@/lib/backoffice/result";
 
 export async function moveStage(workOrderId: string, to: string): Promise<ActionResult> {
+  const t = await getTranslations("ops.actions");
   const supabase = await createClient();
   const { data: wo } = await supabase.from("work_orders").select("stage, progress").eq("id", workOrderId).single();
-  if (!wo) return { ok: false, error: "Commande introuvable" };
-  if (!canMove(wo.stage, to)) return { ok: false, error: to === "facturee" ? "La facturation se fait en créant la facture." : "On avance d'une étape à la fois." };
+  if (!wo) return { ok: false, error: t("notFound") };
+  if (!canMove(wo.stage, to)) return { ok: false, error: to === "facturee" ? t("invoiceViaInvoice") : t("oneStepAtATime") };
   const zoneKey = stageZone(to);
   const { data: zone } = zoneKey ? await supabase.from("zones").select("id").eq("key", zoneKey).maybeSingle() : { data: null };
   const { data: updated, error } = await supabase
@@ -21,23 +23,25 @@ export async function moveStage(workOrderId: string, to: string): Promise<Action
     .eq("id", workOrderId)
     .select("id");
   if (error) return fail(error);
-  if (!updated?.length) return { ok: false, error: "Votre rôle ne permet pas de modifier cette commande." };
+  if (!updated?.length) return { ok: false, error: t("cannotUpdate") };
   revalidatePath("/ops/work-orders");
-  return { ok: true, message: `Étape : ${sectorConfig.objetMetierCentral.etapes.find((s) => s.id === to)?.libelle}` };
+  return { ok: true, message: t("stageMoved", { stage: sectorConfig.objetMetierCentral.etapes.find((s) => s.id === to)?.libelle ?? to }) };
 }
 
 export async function setBlocked(workOrderId: string, reason: string | null): Promise<ActionResult> {
+  const t = await getTranslations("ops.actions");
   const supabase = await createClient();
   const { error } = await supabase.from("work_orders").update({ status: reason ? "attente" : "en_cours", blocked_reason: reason }).eq("id", workOrderId);
   if (error) return fail(error);
   revalidatePath(`/ops/work-orders/${workOrderId}`);
-  return { ok: true, message: reason ? "Commande mise en attente" : "Commande relancée" };
+  return { ok: true, message: reason ? t("putOnHold") : t("resumed") };
 }
 
 export async function toggleChecklist(checklistId: string, index: number): Promise<ActionResult> {
+  const t = await getTranslations("ops.actions");
   const supabase = await createClient();
   const { data: c } = await supabase.from("checklists").select("items, work_order_id").eq("id", checklistId).single();
-  if (!c) return { ok: false, error: "Check-list introuvable" };
+  if (!c) return { ok: false, error: t("checklistNotFound") };
   const items = (c.items as { label: string; done: boolean; done_at?: string | null }[]).map((it, i) => (i === index ? { ...it, done: !it.done, done_at: !it.done ? new Date().toISOString() : null } : it));
   const { error } = await supabase.from("checklists").update({ items }).eq("id", checklistId);
   if (error) return fail(error);
@@ -48,8 +52,9 @@ export async function toggleChecklist(checklistId: string, index: number): Promi
 const timeSchema = z.object({ work_order_id: z.string().uuid().nullable(), worked_on: z.string(), hours: z.coerce.number().positive().max(24), billable: z.boolean(), note: z.string().max(200).optional(), employee_id: z.string().uuid().optional() });
 
 export async function addTime(input: z.input<typeof timeSchema>): Promise<ActionResult> {
+  const t = await getTranslations("ops.actions");
   const p = timeSchema.safeParse(input);
-  if (!p.success) return { ok: false, error: "Saisie invalide (heures entre 0 et 24)." };
+  if (!p.success) return { ok: false, error: t("invalidTime") };
   const supabase = await createClient();
   let employee = p.data.employee_id;
   if (!employee) {
@@ -59,28 +64,30 @@ export async function addTime(input: z.input<typeof timeSchema>): Promise<Action
     const { data: prof } = await supabase.from("profiles").select("employee_id").eq("user_id", user!.id).single();
     employee = prof?.employee_id ?? undefined;
   }
-  if (!employee) return { ok: false, error: "Votre compte n'est pas rattaché à une fiche collaborateur." };
+  if (!employee) return { ok: false, error: t("noEmployee") };
   const { error } = await supabase.from("time_entries").insert({ ...p.data, employee_id: employee });
   if (error) return fail(error);
   revalidatePath("/ops/time");
   if (p.data.work_order_id) revalidatePath(`/ops/work-orders/${p.data.work_order_id}`);
-  return { ok: true, message: `${p.data.hours.toString().replace(".", ",")} h enregistrée(s)` };
+  return { ok: true, message: t("timeSaved", { hours: p.data.hours.toString().replace(".", ",") }) };
 }
 
 export async function deleteTime(id: string): Promise<ActionResult> {
+  const t = await getTranslations("ops.actions");
   const supabase = await createClient();
   const { error } = await supabase.from("time_entries").delete().eq("id", id).is("invoice_id", null);
   if (error) return fail(error);
   revalidatePath("/ops/time");
-  return { ok: true, message: "Saisie supprimée" };
+  return { ok: true, message: t("timeDeleted") };
 }
 
 /** Commande livrée → facture brouillon (lignes du devis + heures facturables), sans ressaisie. */
 export async function invoiceWorkOrder(workOrderId: string): Promise<ActionResult<{ id: string }>> {
+  const tr = await getTranslations("ops.actions");
   const supabase = await createClient();
   const { data: wo } = await supabase.from("work_orders").select("id, client_id, quote_id, title, amount_ht, stage").eq("id", workOrderId).single();
-  if (!wo) return { ok: false, error: "Commande introuvable" };
-  if (wo.stage !== "livree") return { ok: false, error: "Seule une commande livrée peut être facturée." };
+  if (!wo) return { ok: false, error: tr("notFound") };
+  if (wo.stage !== "livree") return { ok: false, error: tr("onlyDelivered") };
   const [lines, time, org, quote] = await Promise.all([
     wo.quote_id ? supabase.from("quote_lines").select("label, quantity, unit_price, unit_cost, vat_rate").eq("quote_id", wo.quote_id).order("position") : Promise.resolve({ data: [] }),
     supabase.from("time_entries").select("id, hours, billable, invoice_id").eq("work_order_id", wo.id),
@@ -113,14 +120,15 @@ export async function invoiceWorkOrder(workOrderId: string): Promise<ActionResul
   if (error) return fail(error);
   revalidatePath("/finance/invoices");
   revalidatePath(`/ops/work-orders/${wo.id}`);
-  return { ok: true, message: "Facture brouillon créée", data: { id: id as string } };
+  return { ok: true, message: tr("invoiceDraftCreated"), data: { id: id as string } };
 }
 
 const woSchema = z.object({ client_id: z.string().uuid(), title: z.string().min(2), hours_budget: z.coerce.number().min(0), due_at: z.string(), amount_ht: z.coerce.number().min(0), physical_object: z.string().optional() });
 
 export async function createWorkOrder(input: z.input<typeof woSchema>): Promise<ActionResult<{ id: string }>> {
+  const t = await getTranslations("ops.actions");
   const p = woSchema.safeParse(input);
-  if (!p.success) return { ok: false, error: "Champs obligatoires manquants." };
+  if (!p.success) return { ok: false, error: t("missingFields") };
   const supabase = await createClient();
   const { data: last } = await supabase.from("work_orders").select("number").order("number", { ascending: false }).limit(1).maybeSingle();
   const n = Number(last?.number?.match(/(\d+)$/)?.[1] ?? 600) + 1;
@@ -132,21 +140,23 @@ export async function createWorkOrder(input: z.input<typeof woSchema>): Promise<
     .single();
   if (error) return fail(error);
   revalidatePath("/ops/work-orders");
-  return { ok: true, message: "Commande pro créée", data: { id: data.id } };
+  return { ok: true, message: t("workOrderCreated"), data: { id: data.id } };
 }
 
 /** Sortie de stock rattachée à la commande, lot le plus ancien d'abord (FEFO). */
 export async function consumeStock(workOrderId: string, stockItemId: string, quantity: number): Promise<ActionResult> {
-  if (!(quantity > 0)) return { ok: false, error: "Quantité invalide" };
+  const t = await getTranslations("ops.actions");
+  if (!(quantity > 0)) return { ok: false, error: t("invalidQuantity") };
   const supabase = await createClient();
   const { data: lot } = await supabase.from("lots").select("id, number").eq("stock_item_id", stockItemId).eq("status", "libere").order("best_before").limit(1).maybeSingle();
   const { error } = await supabase.from("stock_movements").insert({ stock_item_id: stockItemId, lot_id: lot?.id ?? null, work_order_id: workOrderId, kind: "sortie", quantity, reason: "Consommation commande pro" });
   if (error) return fail(error);
   revalidatePath(`/ops/work-orders/${workOrderId}`);
-  return { ok: true, message: lot ? `Sortie enregistrée (lot ${lot.number}, FEFO)` : "Sortie enregistrée" };
+  return { ok: true, message: lot ? t("stockOutLot", { lot: lot.number }) : t("stockOut") };
 }
 
 export async function markShopOrders(ids: string[], status: "preparation" | "emballee" | "expediee"): Promise<ActionResult> {
+  const t = await getTranslations("ops.actions");
   const supabase = await createClient();
   const patch: Record<string, unknown> = { status };
   if (status === "emballee") patch.packed_at = new Date().toISOString();
@@ -154,16 +164,17 @@ export async function markShopOrders(ids: string[], status: "preparation" | "emb
   const { error, count } = await supabase.from("shop_orders").update(patch, { count: "exact" }).in("id", ids);
   if (error) return fail(error);
   revalidatePath("/ops/shop-orders");
-  return { ok: true, message: `${count ?? ids.length} commande(s) mise(s) à jour` };
+  return { ok: true, message: t("shopOrdersUpdated", { count: count ?? ids.length }) };
 }
 
 const bookingSchema = z.object({ asset_id: z.string().uuid(), title: z.string().min(1), starts_at: z.string(), ends_at: z.string() });
 export async function bookAsset(input: z.input<typeof bookingSchema>): Promise<ActionResult> {
+  const t = await getTranslations("ops.actions");
   const p = bookingSchema.safeParse(input);
-  if (!p.success || p.data.ends_at <= p.data.starts_at) return { ok: false, error: "Créneau invalide." };
+  if (!p.success || p.data.ends_at <= p.data.starts_at) return { ok: false, error: t("invalidSlot") };
   const supabase = await createClient();
   const { data: clash } = await supabase.from("asset_bookings").select("title, starts_at, ends_at").eq("asset_id", p.data.asset_id).lt("starts_at", p.data.ends_at).gt("ends_at", p.data.starts_at);
-  if (clash?.length) return { ok: false, error: `Conflit avec « ${clash[0].title} ».` };
+  if (clash?.length) return { ok: false, error: t("bookingConflict", { title: clash[0].title }) };
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -171,5 +182,5 @@ export async function bookAsset(input: z.input<typeof bookingSchema>): Promise<A
   const { error } = await supabase.from("asset_bookings").insert({ ...p.data, employee_id: prof?.employee_id });
   if (error) return fail(error);
   revalidatePath("/ops/planning");
-  return { ok: true, message: "Réservation enregistrée" };
+  return { ok: true, message: t("bookingSaved") };
 }

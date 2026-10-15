@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
@@ -35,28 +36,30 @@ export function BudgetBadge({ level, used, budget }: { level: number; used: numb
 }
 
 export function WorkOrdersView({ rows, view, clients, canCreate }: { rows: WoRow[]; view: "liste" | "kanban"; clients: { id: string; name: string }[]; canCreate: boolean }) {
+  const t = useTranslations("ops.workOrders");
+  const ta = useTranslations("ops.actions");
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
   const [drag, setDrag] = useState<string | null>(null);
 
   const columns: Column<WoRow>[] = [
-    { key: "number", header: "N°", cell: (r) => <span className="font-mono text-[13px]">{r.number}</span> },
-    { key: "client", header: "Compte", cell: (r) => r.client, filter: true },
-    { key: "title", header: "Objet", cell: (r) => <span className="text-muted">{r.title}</span>, hideOnMobile: true },
-    { key: "stage", header: "Étape", value: (r) => stageLabel(r.stage), cell: (r) => <Badge tone={r.stage === "facturee" || r.stage === "livree" ? "ok" : "brand"}>{stageLabel(r.stage)}</Badge>, filter: true },
-    { key: "status", header: "Statut", value: (r) => (r.status === "attente" ? "En attente" : r.late ? "En retard" : "Normal"), cell: (r) => (r.status === "attente" ? <Badge tone="warn">En attente</Badge> : r.late ? <Badge tone="danger">En retard</Badge> : <span className="text-muted">—</span>), filter: true },
-    { key: "budget", header: "Budget d'heures", value: (r) => r.level, cell: (r) => <BudgetBadge level={r.level} used={r.hoursUsed} budget={r.hoursBudget} /> },
-    { key: "owner", header: "Responsable", cell: (r) => r.owner, filter: true, hideOnMobile: true },
-    { key: "due", header: "Échéance", value: (r) => r.dueAt ?? "", cell: (r) => (r.dueAt ? formatDate(r.dueAt) : "—") },
-    { key: "amount", header: "Montant TTC", align: "right", value: (r) => r.amountTtc, cell: (r) => formatMoney(r.amountTtc) },
+    { key: "number", header: t("col.number"), cell: (r) => <span className="font-mono text-[13px]">{r.number}</span> },
+    { key: "client", header: t("col.client"), cell: (r) => r.client, filter: true },
+    { key: "title", header: t("col.title"), cell: (r) => <span className="text-muted">{r.title}</span>, hideOnMobile: true },
+    { key: "stage", header: t("col.stage"), value: (r) => stageLabel(r.stage), cell: (r) => <Badge tone={r.stage === "facturee" || r.stage === "livree" ? "ok" : "brand"}>{stageLabel(r.stage)}</Badge>, filter: true },
+    { key: "status", header: t("col.status"), value: (r) => (r.status === "attente" ? t("onHold") : r.late ? t("late") : t("normal")), cell: (r) => (r.status === "attente" ? <Badge tone="warn">{t("onHold")}</Badge> : r.late ? <Badge tone="danger">{t("late")}</Badge> : <span className="text-muted">—</span>), filter: true },
+    { key: "budget", header: t("col.budget"), value: (r) => r.level, cell: (r) => <BudgetBadge level={r.level} used={r.hoursUsed} budget={r.hoursBudget} /> },
+    { key: "owner", header: t("col.owner"), cell: (r) => r.owner, filter: true, hideOnMobile: true },
+    { key: "due", header: t("col.due"), value: (r) => r.dueAt ?? "", cell: (r) => (r.dueAt ? formatDate(r.dueAt) : "—") },
+    { key: "amount", header: t("col.amount"), align: "right", value: (r) => r.amountTtc, cell: (r) => formatMoney(r.amountTtc) },
   ];
 
   const toggle = (
     <div className="flex rounded-xl bg-black/[0.04] p-0.5 text-xs font-medium">
       {(["liste", "kanban"] as const).map((v) => (
         <Link key={v} href={`?view=${v}`} className={`rounded-lg px-2.5 py-1.5 capitalize ${view === v ? "bg-white shadow-sm" : "text-muted"}`}>
-          {v}
+          {t(`view.${v}`)}
         </Link>
       ))}
     </div>
@@ -68,14 +71,14 @@ export function WorkOrdersView({ rows, view, clients, canCreate }: { rows: WoRow
         {toggle}
         {canCreate && (
           <Button variant="accent" icon="plus" onClick={() => setOpen(true)}>
-            Commande sans devis
+            {t("newWithoutQuote")}
           </Button>
         )}
       </div>
       {view === "liste" ? (
         <DataTable rows={rows} columns={columns} module="ops:work-orders" exportName="commandes-pro" href={(r) => `/ops/work-orders/${r.id}`} />
       ) : (
-        <div className="flex gap-3 overflow-x-auto pb-3" aria-label="Kanban des commandes pro">
+        <div className="flex gap-3 overflow-x-auto pb-3" aria-label={t("kanbanLabel")}>
           {STAGES.map((s) => {
             const items = rows.filter((r) => r.stage === s.id);
             return (
@@ -88,7 +91,7 @@ export function WorkOrdersView({ rows, view, clients, canCreate }: { rows: WoRow
                   setDrag(null);
                   if (!r || r.stage === s.id) return;
                   if (!canMove(r.stage, s.id)) {
-                    report({ ok: false, error: s.id === "facturee" ? "La facturation se fait en créant la facture." : "On avance d'une étape à la fois." });
+                    report({ ok: false, error: s.id === "facturee" ? ta("invoiceViaInvoice") : ta("oneStepAtATime") });
                     return;
                   }
                   start(async () => {
@@ -108,7 +111,7 @@ export function WorkOrdersView({ rows, view, clients, canCreate }: { rows: WoRow
                     <Link key={r.id} href={`/ops/work-orders/${r.id}`} draggable onDragStart={() => setDrag(r.id)} className="card block cursor-grab p-3 text-sm active:cursor-grabbing">
                       <p className="flex justify-between gap-2">
                         <span className="font-mono text-xs">{r.number}</span>
-                        {r.status === "attente" ? <Badge tone="warn">Attente</Badge> : r.late ? <Badge tone="danger">Retard</Badge> : null}
+                        {r.status === "attente" ? <Badge tone="warn">{t("holdShort")}</Badge> : r.late ? <Badge tone="danger">{t("lateShort")}</Badge> : null}
                       </p>
                       <p className="mt-1 truncate font-medium">{r.client}</p>
                       <p className="truncate text-xs text-muted">{r.title}</p>
@@ -131,10 +134,11 @@ export function WorkOrdersView({ rows, view, clients, canCreate }: { rows: WoRow
 }
 
 function NewWorkOrder({ open, onClose, clients }: { open: boolean; onClose: () => void; clients: { id: string; name: string }[] }) {
+  const t = useTranslations("ops.workOrders.new");
   const router = useRouter();
   const [pending, start] = useTransition();
   return (
-    <Drawer open={open} onClose={onClose} title="Commande pro sans devis">
+    <Drawer open={open} onClose={onClose} title={t("title")}>
       <form
         id="new-wo"
         className="flex flex-col gap-4"
@@ -148,11 +152,11 @@ function NewWorkOrder({ open, onClose, clients }: { open: boolean; onClose: () =
           })
         }
       >
-        <p className="rounded-xl bg-ground/70 p-3 text-xs text-muted">Normalement, une commande pro naît d'un devis accepté (sans ressaisie). Ce formulaire sert aux réassorts directs.</p>
-        <Field label="Compte">
+        <p className="rounded-xl bg-ground/70 p-3 text-xs text-muted">{t("hint")}</p>
+        <Field label={t("account")}>
           <Select name="client_id" required defaultValue="">
             <option value="" disabled>
-              Choisir…
+              {t("choose")}
             </option>
             {clients.map((c) => (
               <option key={c.id} value={c.id}>
@@ -161,25 +165,25 @@ function NewWorkOrder({ open, onClose, clients }: { open: boolean; onClose: () =
             ))}
           </Select>
         </Field>
-        <Field label="Objet">
-          <Input name="title" required placeholder="Réassort mensuel" />
+        <Field label={t("object")}>
+          <Input name="title" required placeholder={t("objectPlaceholder")} />
         </Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Montant HT (€)">
+          <Field label={t("amountHt")}>
             <Input name="amount_ht" type="number" step="0.01" min="0" required defaultValue="0" />
           </Field>
-          <Field label="Budget d'heures">
+          <Field label={t("hoursBudget")}>
             <Input name="hours_budget" type="number" step="0.25" min="0" defaultValue="2" />
           </Field>
         </div>
-        <Field label="Échéance">
+        <Field label={t("due")}>
           <Input name="due" type="datetime-local" required />
         </Field>
-        <Field label="Colis (facultatif)">
-          <Input name="physical" placeholder="2 cartons · 8 kg" />
+        <Field label={t("parcel")}>
+          <Input name="physical" placeholder={t("parcelPlaceholder")} />
         </Field>
         <Button variant="accent" disabled={pending}>
-          Créer la commande
+          {t("submit")}
         </Button>
       </form>
     </Drawer>

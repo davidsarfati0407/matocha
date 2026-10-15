@@ -1,15 +1,20 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Denied, PageHeader, Stat } from "@/components/ui/kit";
 import { requirePerm } from "@/lib/backoffice/context";
 import { formatMoney, formatNumber } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { ShopOrdersTable } from "./table";
 
-export const metadata: Metadata = { title: "Commandes en ligne" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("ops.shopOrders");
+  return { title: t("title") };
+}
 
 export default async function ShopOrdersPage({ searchParams }: { searchParams: Promise<{ days?: string }> }) {
+  const t = await getTranslations("ops.shopOrders");
   const { allowed } = await requirePerm("operations");
-  if (!allowed) return <Denied what="les commandes en ligne" />;
+  if (!allowed) return <Denied what={t("deniedWhat")} />;
   const days = Math.min(30, Math.max(1, Number((await searchParams).days ?? 2)));
   const supabase = await createClient();
   const since = new Date(Date.parse(new Date().toISOString().slice(0, 10)) - (days - 1) * 86400_000).toISOString();
@@ -18,11 +23,11 @@ export default async function ShopOrdersPage({ searchParams }: { searchParams: P
   const toPack = rows.filter((r) => ["payee", "preparation"].includes(r.status)).length;
   return (
     <>
-      <PageHeader title="Commandes en ligne" subtitle={`Flux de la boutique (adaptateur en mode simulé) · ${days} dernier(s) jour(s)`} />
+      <PageHeader title={t("title")} subtitle={t("subtitle", { days })} />
       <div className="mb-4 grid gap-4 sm:grid-cols-3">
-        <Stat label="Commandes" value={formatNumber(rows.length)} icon="cart" />
-        <Stat label="À préparer" value={formatNumber(toPack)} tone={toPack > 40 ? "warn" : undefined} icon="box" />
-        <Stat label="CA TTC" value={formatMoney(rows.reduce((s, r) => s + Number(r.total_ttc), 0), "fr", 0)} icon="chart" />
+        <Stat label={t("statOrders")} value={formatNumber(rows.length)} icon="cart" />
+        <Stat label={t("statToPack")} value={formatNumber(toPack)} tone={toPack > 40 ? "warn" : undefined} icon="box" />
+        <Stat label={t("statRevenue")} value={formatMoney(rows.reduce((s, r) => s + Number(r.total_ttc), 0), "fr", 0)} icon="chart" />
       </div>
       <ShopOrdersTable rows={rows.map((r) => ({ ...r, total_ttc: Number(r.total_ttc) }))} />
     </>

@@ -2,6 +2,7 @@ import { nowMs } from "@/lib/clock";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Badge, ButtonLink, Card, Denied, Dl, PageHeader, Stat } from "@/components/ui/kit";
 import { sectorConfig } from "@/config/sector.config";
 import { requirePerm } from "@/lib/backoffice/context";
@@ -11,14 +12,19 @@ import { mapHref } from "@/lib/map/links";
 import { createClient } from "@/lib/supabase/server";
 import { CountForm, ReorderButton } from "./client";
 
-export const metadata: Metadata = { title: "Article" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("resources.stockItem");
+  return { title: t("title") };
+}
 
 import { LOT_STATUS as LOT } from "@/lib/backoffice/labels";
 
 export default async function StockItemPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const t = await getTranslations("resources.stockItem");
+  const tAll = await getTranslations();
   const { ctx, allowed } = await requirePerm("ressources");
-  if (!allowed) return <Denied what="le stock" />;
+  if (!allowed) return <Denied what={t("deniedWhat")} />;
   const supabase = await createClient();
   const { data: it } = await supabase.from("stock_items").select("*, suppliers(name, lead_time_days)").eq("id", id).maybeSingle();
   if (!it) notFound();
@@ -37,23 +43,23 @@ export default async function StockItemPage({ params }: { params: Promise<{ id: 
       <PageHeader
         kicker={`${it.category} · ${it.reference}`}
         title={it.name}
-        subtitle={sup ? `Fournisseur : ${sup.name} · délai ${sup.lead_time_days} j` : undefined}
+        subtitle={sup ? t("supplierSub", { name: sup.name, days: sup.lead_time_days }) : undefined}
         actions={
           <>
-            {it.location && <ButtonLink href={mapHref(sectorConfig.lieux[0].id, "stock_items", id)} icon="map">Voir sur la map</ButtonLink>}
+            {it.location && <ButtonLink href={mapHref(sectorConfig.lieux[0].id, "stock_items", id)} icon="map">{tAll("resources.viewOnMap")}</ButtonLink>}
             {toOrder > 0 && ctx.can("ressources", "create") && <ReorderButton id={id} qty={toOrder} />}
           </>
         }
       />
       <div className="mb-4 grid gap-4 sm:grid-cols-3">
-        <Stat label="En stock" value={`${formatNumber(q)} ${it.unit}`} tone={q < min ? "warn" : undefined} sub={`minimum ${formatNumber(min)}`} icon="layers" />
-        <Stat label="Couverture" value={cov == null ? "—" : `${cov} jours`} tone={cov != null && sup && cov < sup.lead_time_days ? "danger" : undefined} sub={sup && cov != null && cov < sup.lead_time_days ? "inférieure au délai fournisseur" : "au rythme des 30 derniers jours"} icon="clock" />
-        <Stat label="Valeur" value={formatMoney(q * Number(it.unit_cost), "fr", 0)} sub={`${formatMoney(Number(it.unit_cost))} / ${it.unit}`} icon="chart" />
+        <Stat label={t("inStock")} value={`${formatNumber(q)} ${it.unit}`} tone={q < min ? "warn" : undefined} sub={t("minimum", { min: formatNumber(min) })} icon="layers" />
+        <Stat label={t("coverage")} value={cov == null ? "—" : t("coverageDays", { count: cov })} tone={cov != null && sup && cov < sup.lead_time_days ? "danger" : undefined} sub={sup && cov != null && cov < sup.lead_time_days ? t("belowLeadTime") : t("last30")} icon="clock" />
+        <Stat label={t("value")} value={formatMoney(q * Number(it.unit_cost), "fr", 0)} sub={`${formatMoney(Number(it.unit_cost))} / ${it.unit}`} icon="chart" />
       </div>
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card title="Lots" className="lg:col-span-1">
+        <Card title={t("lots")} className="lg:col-span-1">
           {(lots.data ?? []).length === 0 ? (
-            <p className="text-sm text-muted">Article non suivi par lot.</p>
+            <p className="text-sm text-muted">{t("noLots")}</p>
           ) : (
             <ul className="divide-y divide-black/5 text-sm">
               {(lots.data ?? []).map((l) => (
@@ -61,10 +67,10 @@ export default async function StockItemPage({ params }: { params: Promise<{ id: 
                   <Link href={`/resources/lots/${l.id}`} className="flex items-center justify-between gap-2 py-2 hover:text-accent">
                     <span>
                       <span className="font-mono">{l.number}</span>
-                      <span className="block text-xs text-muted">DDM {l.best_before ? formatDate(l.best_before) : "—"}</span>
+                      <span className="block text-xs text-muted">{t("bestBefore", { date: l.best_before ? formatDate(l.best_before) : "—" })}</span>
                     </span>
                     <span className="text-right">
-                      <Badge tone={LOT[l.status][0]}>{LOT[l.status][1]}</Badge>
+                      <Badge tone={LOT[l.status]?.[0]}>{LOT[l.status] ? tAll(LOT[l.status][1] as never) : l.status}</Badge>
                       <span className="block text-xs tabular-nums text-muted">{formatNumber(Number(l.quantity))}</span>
                     </span>
                   </Link>
@@ -72,9 +78,9 @@ export default async function StockItemPage({ params }: { params: Promise<{ id: 
               ))}
             </ul>
           )}
-          <p className="mt-3 text-xs text-muted">Sorties en FEFO : premier lot libéré à expirer, premier sorti.</p>
+          <p className="mt-3 text-xs text-muted">{t("fefoHint")}</p>
         </Card>
-        <Card title="Mouvements" className="lg:col-span-2" action={ctx.can("ressources", "update") ? <CountForm id={id} current={q} /> : undefined}>
+        <Card title={t("moves")} className="lg:col-span-2" action={ctx.can("ressources", "update") ? <CountForm id={id} current={q} /> : undefined}>
           <ul className="divide-y divide-black/5 text-sm">
             {(moves.data ?? []).map((m) => {
               const wo = m.work_orders as unknown as { id: string; number: string } | null;
@@ -83,7 +89,7 @@ export default async function StockItemPage({ params }: { params: Promise<{ id: 
                 <li key={m.id} className="flex items-center justify-between gap-3 py-2">
                   <span className="min-w-0 truncate">
                     <span className="text-muted">{formatDate(m.at)} {formatTime(m.at)}</span> · {m.reason}
-                    {lot && <span className="text-muted"> · lot {lot.number}</span>}
+                    {lot && <span className="text-muted"> · {t("lotRef", { number: lot.number })}</span>}
                     {wo && (
                       <Link className="ml-1 text-accent" href={`/ops/work-orders/${wo.id}`}>
                         {wo.number}
@@ -99,8 +105,8 @@ export default async function StockItemPage({ params }: { params: Promise<{ id: 
             })}
           </ul>
         </Card>
-        <Card title="Fiche" className="lg:col-span-3">
-          <Dl items={[["Emplacement", it.location], ["Unité", it.unit], ["En commande", it.on_order ? "Oui" : "Non"]]} />
+        <Card title={t("card")} className="lg:col-span-3">
+          <Dl items={[[t("location"), it.location], [t("unit"), it.unit], [t("onOrder"), it.on_order ? tAll("common.yes") : tAll("common.no")]]} />
         </Card>
       </div>
     </>

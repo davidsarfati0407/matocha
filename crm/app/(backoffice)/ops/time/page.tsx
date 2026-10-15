@@ -1,12 +1,17 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Card, PageHeader } from "@/components/ui/kit";
 import { getCtx } from "@/lib/backoffice/context";
 import { createClient } from "@/lib/supabase/server";
 import { TimeBoard } from "./board";
 
-export const metadata: Metadata = { title: "Heures" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("ops.time");
+  return { title: t("title") };
+}
 
 export default async function TimePage() {
+  const t = await getTranslations("ops.time");
   const ctx = await getCtx();
   const supabase = await createClient();
   const monday = new Date();
@@ -18,9 +23,9 @@ export default async function TimePage() {
   ]);
   return (
     <>
-      <PageHeader title="Mes heures" subtitle="Minuteur ou saisie rapide de la semaine · heures facturables ou internes" />
+      <PageHeader title={t("heading")} subtitle={t("subtitle")} />
       {!ctx.employeeId ? (
-        <Card>Ce compte n'est pas rattaché à une fiche collaborateur : pas de saisie d'heures.</Card>
+        <Card>{t("noEmployee")}</Card>
       ) : (
         <TimeBoard
           weekStart={weekStart}
