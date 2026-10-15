@@ -26,8 +26,8 @@ export const useToasts = create<S>((set, get) => ({
 }));
 export const toast = (t: Omit<UiToast, "id">) => useToasts.getState().push(t);
 
-/** Résultat standard d'une action serveur. */
-export type ActionResult<T = unknown> = { ok: true; message?: string; data?: T } | { ok: false; error: string };
+import type { ActionResult } from "@/lib/backoffice/result";
+export type { ActionResult };
 
 /** Affiche le résultat d'une action (succès ou erreur). */
 export function report(r: ActionResult, opts: { undo?: () => unknown; success?: string } = {}) {

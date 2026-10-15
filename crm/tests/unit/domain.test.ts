@@ -126,3 +126,19 @@ describe("stock, banque, export, recrutement", () => {
     expect(scoreCandidate(["a", "b", "c"], [])).toBe("C");
   });
 });
+
+import { canMove, nextStage, overlaps, stageZone } from "@/lib/domain/stages";
+describe("étapes et planning", () => {
+  it("avance d'une étape, autorise le retour, pas de facturation manuelle", () => {
+    expect(nextStage("confirmee")).toBe("preparation");
+    expect(canMove("preparation", "controle")).toBe(true);
+    expect(canMove("preparation", "expedition")).toBe(false);
+    expect(canMove("controle", "preparation")).toBe(true);
+    expect(canMove("livree", "facturee")).toBe(false);
+  });
+  it("emplacement physique par étape", () => expect(stageZone("controle")).toBe("quarantaine"));
+  it("détecte les conflits de réservation", () => {
+    expect(overlaps({ start: "10:00", end: "11:00" }, { start: "10:30", end: "12:00" })).toBe(true);
+    expect(overlaps({ start: "10:00", end: "11:00" }, { start: "11:00", end: "12:00" })).toBe(false);
+  });
+});

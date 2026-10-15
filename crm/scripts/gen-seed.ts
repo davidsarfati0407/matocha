@@ -681,7 +681,7 @@ const stock = [
   { ref: "ACC-VERRE", name: "Verre MATOCHA", cat: "Accessoire", qty: 380, min: 150, loc: "B-02", sup: "lumen", sku: "VERRE", cost: 3.1 },
   { ref: "ACC-FOUET", name: "Fouet électrique", cat: "Accessoire", qty: 45, min: 80, loc: "B-03", sup: "fouets", sku: "FOUET", cost: 5.8, onOrder: true },
   { ref: "ACC-COFFRET", name: "Coffret cadeau (vide)", cat: "Accessoire", qty: 120, min: 60, loc: "B-04", sup: "cartonnages", cost: 4.2 },
-  { ref: "EMB-CART-S", name: "Carton d'expédition S", cat: "Emballage", qty: 310, min: 400, loc: "C-01", sup: "cartonnages", cost: 0.38 },
+  { ref: "EMB-CART-S", name: "Carton d'expédition S", cat: "Emballage", qty: 310, min: 400, loc: "C-01", sup: "cartonnages", cost: 0.38, onOrder: true },
   { ref: "EMB-CART-M", name: "Carton d'expédition M", cat: "Emballage", qty: 900, min: 300, loc: "C-02", sup: "cartonnages", cost: 0.52 },
   { ref: "EMB-CALAGE", name: "Calage papier (rouleau)", cat: "Emballage", qty: 18, min: 6, loc: "C-03", sup: "cartonnages", cost: 21 },
   { ref: "EMB-CARTE", name: "Carte manuscrite", cat: "Emballage", qty: 2400, min: 500, loc: "C-04", sup: "imprim", cost: 0.09 },
@@ -711,6 +711,9 @@ for (let d = 29; d >= 1; d--) {
   moves.push({ org_id: ORG, stock_item_id: ST("MT-DB30"), lot_id: uid(`lot:${d > 27 ? "L2026-07A" : "L2026-09B"}`), kind: "sortie", quantity: Math.round(between(60, 95)), reason: "Commandes du jour", at: ts(-d, "15:05") });
   if (d % 3 === 0) moves.push({ org_id: ORG, stock_item_id: ST("EMB-CART-S"), kind: "sortie", quantity: Math.round(between(150, 220)), reason: "Consommation expédition", at: ts(-d, "15:10") });
 }
+// Sorties liées aux commandes pro : la fiche lot sait quels clients ont reçu quel lot (rappel)
+for (const [n, ref, lot, qty, d] of [["CP-24-0601", "MT-DB30", "L2026-09B", 120, -12], ["CP-24-0605", "MT-VR1K", "L2026-08V", 3, -1], ["CP-24-0607", "MT-DB30", "L2026-09B", 40, 0], ["CP-24-0608", "MT-DB10", "L2026-09C", 60, -1], ["CP-24-0604", "MT-DB30", "L2026-09B", 10, -1]] as const)
+  moves.push({ org_id: ORG, stock_item_id: ST(ref), lot_id: uid(`lot:${lot}`), work_order_id: WOID(n), kind: "sortie", quantity: qty, reason: `Préparation ${n}`, at: ts(d, "10:20") });
 moves.push({ org_id: ORG, stock_item_id: ST("MT-DB30"), lot_id: uid("lot:L2026-09B"), kind: "entree", quantity: 2400, reason: "Réception lot L2026-09B", at: ts(-27, "10:15") });
 moves.push({ org_id: ORG, stock_item_id: ST("EMB-CART-S"), kind: "entree", quantity: 1500, reason: "Réception commande cartons", at: ts(-12, "09:00") });
 moves.push({ org_id: ORG, stock_item_id: ST("MT-DB30"), kind: "inventaire", quantity: 1840, reason: "Inventaire tournant allée A", at: ts(-1, "17:30") });
