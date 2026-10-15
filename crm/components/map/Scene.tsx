@@ -2,6 +2,7 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, TransformControls } from "@react-three/drei";
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import * as THREE from "three";
 import type { FloorPlanLayout } from "@/lib/map/layout";
 import { useMap } from "@/lib/map/store";
@@ -167,6 +168,7 @@ const SIMTEST = params?.get("simtest") === "1";
 
 export default function Scene({ layout, labels, onReady }: { layout: FloorPlanLayout; labels: React.RefObject<LabelRefs>; onReady: (e: MapEngine) => void }) {
   const leaving = useMap((s) => s.leaving);
+  const t = useTranslations("map");
   return (
     <Canvas
       frameloop={leaving ? "never" : SIMTEST ? "demand" : "always"}
@@ -176,7 +178,7 @@ export default function Scene({ layout, labels, onReady }: { layout: FloorPlanLa
       camera={{ fov: 26, near: 1, far: 900, position: [80, 120, 120] }}
       onContextMenu={(e) => e.preventDefault()}
       style={{ position: "absolute", inset: 0 }}
-      aria-label="Vue 3D des locaux"
+      aria-label={t("scene.ariaLabel")}
     >
       <World layout={layout} labels={labels} onReady={onReady} />
     </Canvas>

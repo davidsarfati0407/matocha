@@ -3,6 +3,7 @@
  * Actions serveur de la map. Toutes passent par le client Supabase de
  * l'utilisateur : mêmes règles métier et mêmes droits (RLS) que le back-office.
  */
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createEvent } from "@/app/(backoffice)/crm/actions";
@@ -89,7 +90,7 @@ const layoutSchema = z.object({
 export async function savePlan(siteId: string, layout: unknown, publish: boolean) {
   const supabase = await createClient();
   const parsed = layoutSchema.safeParse(layout);
-  if (!parsed.success) return { error: "plan invalide" };
+  if (!parsed.success) return { error: (await getTranslations("map"))("actions.invalidPlan") };
   const { data: last } = await supabase.from("floor_plans").select("version").eq("site_id", siteId).order("version", { ascending: false }).limit(1).maybeSingle();
   const version = (last?.version ?? 0) + 1;
   const { data: plan, error } = await supabase
@@ -97,7 +98,7 @@ export async function savePlan(siteId: string, layout: unknown, publish: boolean
     .insert({ site_id: siteId, version, status: publish ? "published" : "draft", layout: parsed.data, published_at: publish ? new Date().toISOString() : null })
     .select("id, version")
     .single();
-  if (error) return { error: error.code === "42501" ? "Votre rôle ne permet pas de modifier le plan." : error.message };
+  if (error) return { error: error.code === "42501" ? (await getTranslations("map"))("actions.planForbidden") : error.message };
   if (publish) {
     await supabase.from("floor_plans").update({ status: "archived" }).eq("site_id", siteId).eq("status", "published").neq("id", plan.id);
     await supabase.from("map_objects").delete().eq("site_id", siteId);
@@ -142,8 +143,9 @@ export async function releaseRoom(eventId: string): Promise<ActionResult> {
   const supabase = await createClient();
   const { error, count } = await supabase.from("calendar_events").update({ ends_at: new Date().toISOString() }, { count: "exact" }).eq("id", eventId).gt("ends_at", new Date().toISOString());
   if (error) return fail(error);
-  if (!count) return { ok: false, error: "Seul l'organisateur (ou la RH) peut libérer cette salle." };
-  return { ok: true, message: "Salle libérée" };
+  const t = await getTranslations("map");
+  if (!count) return { ok: false, error: t("actions.releaseForbidden") };
+  return { ok: true, message: t("actions.roomReleased") };
 }
 
 /** Affecter un véhicule / équipement à un collaborateur (glisser-déposer sur la map). */
@@ -151,6 +153,7 @@ export async function assignAsset(assetId: string, employeeId: string | null): P
   const supabase = await createClient();
   const { error, count } = await supabase.from("assets").update({ assigned_employee_id: employeeId }, { count: "exact" }).eq("id", assetId);
   if (error) return fail(error);
-  if (!count) return { ok: false, error: "Votre rôle ne permet pas d'affecter ce matériel." };
-  return { ok: true, message: employeeId ? "Affectation enregistrée" : "Affectation retirée" };
+  const t = await getTranslations("map");
+  if (!count) return { ok: false, error: t("actions.assignForbidden") };
+  return { ok: true, message: t(employeeId ? "actions.assignmentSaved" : "actions.assignmentRemoved") };
 }

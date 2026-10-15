@@ -69,7 +69,6 @@
     "all": "ALL",
     "overview": "Overview",
     "presentCount": "{present}/{total} present · {zones} spaces",
-    "occupancy": "{occupied} people out of {capacity}",
     "realtimeSse": "Real time: SSE stream fed by Postgres LISTEN/NOTIFY",
     "realtimeSupabase": "Supabase real time",
     "realtimePolling": "Simulated real time: polling every second (no local Realtime server)",
@@ -121,8 +120,7 @@
     "title": "{object} tracking",
     "eta": "ETA {date}",
     "due": "due {time}",
-    "dueLate": "due {time} · late",
-    "progress": "Progress: {percent}%"
+    "dueLate": "due {time} · late"
   },
   "camera": {
     "zoomIn": "Zoom in",
@@ -262,7 +260,6 @@
     "call": "Call",
     "revealedTitle": "Revealed (logged)",
     "reveal": "Reveal",
-    "revealLabel": "Reveal the salary (access is logged)",
     "nothingPlanned": "Nothing planned.",
     "timelineLabel": "Today's agenda, from 7 am to 6 pm",
     "timelineEvent": "{start}–{end}: {title}",

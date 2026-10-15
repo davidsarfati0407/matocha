@@ -69,7 +69,6 @@
     "all": "ALL",
     "overview": "Vue d’ensemble",
     "presentCount": "{present}/{total} présents · {zones} espaces",
-    "occupancy": "{occupied} personnes sur {capacity}",
     "realtimeSse": "Temps réel : flux SSE alimenté par Postgres LISTEN/NOTIFY",
     "realtimeSupabase": "Temps réel Supabase",
     "realtimePolling": "Mode simulé du temps réel : sondage toutes les secondes (pas de serveur Realtime local)",
@@ -121,8 +120,7 @@
     "title": "Suivi {object}",
     "eta": "ETA {date}",
     "due": "échéance {time}",
-    "dueLate": "échéance {time} · en retard",
-    "progress": "Avancement : {percent} %"
+    "dueLate": "échéance {time} · en retard"
   },
   "camera": {
     "zoomIn": "Zoom avant",
@@ -262,7 +260,6 @@
     "call": "Appeler",
     "revealedTitle": "Révélé (journalisé)",
     "reveal": "Révéler",
-    "revealLabel": "Révéler le salaire (consultation journalisée)",
     "nothingPlanned": "Rien de prévu.",
     "timelineLabel": "Agenda du jour, de 7 h à 18 h",
     "timelineEvent": "{start}–{end} : {title}",

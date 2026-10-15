@@ -203,3 +203,20 @@ test("double authentification : activation par QR/clé, code exigé à la connex
   await expect(page.getByText("Double authentification désactivée")).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test("langue : bascule FR → EN (navigation, page, titre, html lang) puis retour FR", async ({ page }) => {
+  const errors = watchErrors(page);
+  await login(page, "Direction", "/finance/invoices");
+  await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+  await page.getByRole("group", { name: "Langue" }).getByRole("button", { name: "en" }).click();
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page.getByRole("heading", { name: "Invoices", level: 1 })).toBeVisible();
+  await expect(page.getByRole("navigation").getByRole("link", { name: /^Today/ }).first()).toBeVisible();
+  await expect(page).toHaveTitle(/Invoices/);
+  await page.goto("/ops/planning");
+  await expect(page.getByRole("region", { name: /Resource schedule/ })).toBeVisible();
+  await page.getByRole("group", { name: "Language" }).getByRole("button", { name: "fr" }).click();
+  await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+  await expect(page.getByRole("region", { name: /Planning des ressources/ })).toBeVisible();
+  expect(errors).toEqual([]);
+});
