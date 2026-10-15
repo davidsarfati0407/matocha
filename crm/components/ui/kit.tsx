@@ -146,12 +146,13 @@ export function Dl({ items }: { items: [string, ReactNode][] }) {
 }
 
 export function Tabs({ tabs, current }: { tabs: { id: string; label: string; href: string; count?: number }[]; current: string }) {
+  const t = useTranslations("ui");
   return (
-    <nav aria-label="Onglets" className="mb-4 flex gap-1 overflow-x-auto border-b border-black/10">
-      {tabs.map((t) => (
-        <Link key={t.id} href={t.href} aria-current={t.id === current ? "page" : undefined} className={`-mb-px whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium ${t.id === current ? "border-accent text-ink" : "border-transparent text-muted hover:text-ink"}`}>
-          {t.label}
-          {t.count !== undefined && <span className="ml-1.5 rounded-full bg-black/[0.06] px-1.5 text-[11px]">{t.count}</span>}
+    <nav aria-label={t("tabs")} className="mb-4 flex gap-1 overflow-x-auto border-b border-black/10">
+      {tabs.map((tab) => (
+        <Link key={tab.id} href={tab.href} aria-current={tab.id === current ? "page" : undefined} className={`-mb-px whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium ${tab.id === current ? "border-accent text-ink" : "border-transparent text-muted hover:text-ink"}`}>
+          {tab.label}
+          {tab.count !== undefined && <span className="ml-1.5 rounded-full bg-black/[0.06] px-1.5 text-[11px]">{tab.count}</span>}
         </Link>
       ))}
     </nav>

@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { Drawer } from "@/components/ui/Drawer";
 import { Field, Input, Select } from "@/components/ui/Form";
@@ -8,9 +9,10 @@ import { report } from "@/lib/ui/toast";
 import { createEvent } from "../actions";
 
 export function PersonPicker({ people, who }: { people: { id: string; name: string }[]; who: string }) {
+  const t = useTranslations("crm.calendar");
   const router = useRouter();
   return (
-    <select aria-label="Agenda de" value={who} onChange={(e) => router.push(`?who=${e.target.value}`)} className="rounded-xl bg-white px-3 py-2 text-sm ring-1 ring-black/10">
+    <select aria-label={t("agendaOf")} value={who} onChange={(e) => router.push(`?who=${e.target.value}`)} className="rounded-xl bg-white px-3 py-2 text-sm ring-1 ring-black/10">
       {people.map((p) => (
         <option key={p.id} value={p.id}>
           {p.name}
@@ -21,6 +23,7 @@ export function PersonPicker({ people, who }: { people: { id: string; name: stri
 }
 
 export function NewEvent({ clients, rooms, day }: { clients: { id: string; name: string }[]; rooms: { id: string; name: string }[]; day: string }) {
+  const t = useTranslations("crm.calendar");
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
   const router = useRouter();
@@ -28,9 +31,9 @@ export function NewEvent({ clients, rooms, day }: { clients: { id: string; name:
   return (
     <>
       <Button variant="accent" icon="plus" onClick={() => setOpen(true)}>
-        Rendez-vous
+        {t("newShort")}
       </Button>
-      <Drawer open={open} onClose={() => setOpen(false)} title="Nouveau rendez-vous">
+      <Drawer open={open} onClose={() => setOpen(false)} title={t("new")}>
         <form
           className="flex flex-col gap-4"
           action={(fd) =>
@@ -44,19 +47,19 @@ export function NewEvent({ clients, rooms, day }: { clients: { id: string; name:
             })
           }
         >
-          <Field label="Objet">
-            <Input name="title" required placeholder="Dégustation chez le client" />
+          <Field label={t("subject")}>
+            <Input name="title" required placeholder={t("subjectPlaceholder")} />
           </Field>
-          <Field label="Type">
+          <Field label={t("type")}>
             <Select name="type" defaultValue="client">
-              <option value="client">Rendez-vous client</option>
-              <option value="reunion">Réunion</option>
-              <option value="focus">Travail concentré</option>
-              <option value="deplacement">Déplacement</option>
-              <option value="tournage">Tournage</option>
+              <option value="client">{t("types.client")}</option>
+              <option value="reunion">{t("types.reunion")}</option>
+              <option value="focus">{t("types.focus")}</option>
+              <option value="deplacement">{t("types.deplacement")}</option>
+              <option value="tournage">{t("types.tournage")}</option>
             </Select>
           </Field>
-          <Field label="Compte (optionnel)">
+          <Field label={t("account")}>
             <Select name="client" defaultValue="">
               <option value="">—</option>
               {clients.map((c) => (
@@ -66,7 +69,7 @@ export function NewEvent({ clients, rooms, day }: { clients: { id: string; name:
               ))}
             </Select>
           </Field>
-          <Field label="Salle (optionnel)">
+          <Field label={t("room")}>
             <Select name="room" defaultValue="">
               <option value="">—</option>
               {rooms.map((c) => (
@@ -77,21 +80,21 @@ export function NewEvent({ clients, rooms, day }: { clients: { id: string; name:
             </Select>
           </Field>
           <div className="grid grid-cols-3 gap-3">
-            <Field label="Jour">
+            <Field label={t("day")}>
               <Input name="day" type="date" defaultValue={day} required />
             </Field>
-            <Field label="De">
+            <Field label={t("from")}>
               <Input name="from" type="time" defaultValue="10:00" required />
             </Field>
-            <Field label="À">
+            <Field label={t("to")}>
               <Input name="to" type="time" defaultValue="11:00" required />
             </Field>
           </div>
           <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" name="online" className="accent-[var(--accent)]" /> Réunion en ligne (Teams ou Meet selon le compte connecté)
+            <input type="checkbox" name="online" className="accent-[var(--accent)]" /> {t("online")}
           </label>
           <Button variant="accent" disabled={pending}>
-            Ajouter
+            {t("add")}
           </Button>
         </form>
       </Drawer>

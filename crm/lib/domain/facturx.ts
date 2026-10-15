@@ -62,11 +62,11 @@ ${taxes}
 
 /** Contrôle de cohérence avant export : la somme des bases = HT, la somme des TVA = TVA. */
 export function checkFacturX(i: Pick<FxInvoice, "vatByRate" | "ht" | "vat" | "ttc">) {
-  const errors: string[] = [];
+  const errors: ("baseSum" | "vatSum" | "total")[] = []; // codes traduits par l'interface
   const base = Math.round(i.vatByRate.reduce((s, t) => s + t.base, 0) * 100);
   const vat = Math.round(i.vatByRate.reduce((s, t) => s + t.vat, 0) * 100);
-  if (base !== Math.round(i.ht * 100)) errors.push("Somme des bases ≠ total HT");
-  if (vat !== Math.round(i.vat * 100)) errors.push("Somme des TVA ≠ total TVA");
-  if (Math.round((i.ht + i.vat) * 100) !== Math.round(i.ttc * 100)) errors.push("HT + TVA ≠ TTC");
+  if (base !== Math.round(i.ht * 100)) errors.push("baseSum");
+  if (vat !== Math.round(i.vat * 100)) errors.push("vatSum");
+  if (Math.round((i.ht + i.vat) * 100) !== Math.round(i.ttc * 100)) errors.push("total");
   return errors;
 }

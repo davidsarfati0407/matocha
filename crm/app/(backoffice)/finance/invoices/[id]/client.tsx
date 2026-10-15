@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useTransition } from "react";
 import { Input, Select } from "@/components/ui/Form";
 import { Button, btn } from "@/components/ui/kit";
@@ -7,20 +8,21 @@ import { report } from "@/lib/ui/toast";
 import { creditNote, deletePayment, recordPayment, sendInvoice } from "../../actions";
 
 export function InvoiceActions({ id, status, kind, canEdit, canCreate, paid }: { id: string; status: string; kind: string; canEdit: boolean; canCreate: boolean; paid: number }) {
+  const t = useTranslations("finance.invoices");
   const router = useRouter();
   const [pending, start] = useTransition();
   return (
     <>
-      <a className={btn("secondary")} href={`/finance/invoices/${id}/pdf`} target="_blank" rel="noreferrer">PDF</a>
-      <a className={btn("secondary")} href={`/finance/invoices/${id}/xml`} download>XML Factur-X</a>
+      <a className={btn("secondary")} href={`/finance/invoices/${id}/pdf`} target="_blank" rel="noreferrer">{t("pdf")}</a>
+      <a className={btn("secondary")} href={`/finance/invoices/${id}/xml`} download>{t("xml")}</a>
       {status === "draft" && canEdit && (
         <Button variant="accent" icon="send" disabled={pending} onClick={() => start(async () => { if (report(await sendInvoice(id))) router.refresh(); })}>
-          Envoyer
+          {t("send")}
         </Button>
       )}
       {kind === "facture" && status !== "cancelled" && paid === 0 && canCreate && (
         <Button disabled={pending} onClick={() => start(async () => { const r = await creditNote(id); if (report(r) && r.ok && r.data) router.push(`/finance/invoices/${r.data.id}`); })}>
-          Émettre un avoir
+          {t("issueCreditNote")}
         </Button>
       )}
     </>
@@ -28,6 +30,7 @@ export function InvoiceActions({ id, status, kind, canEdit, canCreate, paid }: {
 }
 
 export function PaymentForm({ invoiceId, remaining }: { invoiceId: string; remaining: number }) {
+  const t = useTranslations("finance.invoices.payment");
   const router = useRouter();
   const [pending, start] = useTransition();
   return (
@@ -41,27 +44,28 @@ export function PaymentForm({ invoiceId, remaining }: { invoiceId: string; remai
         })
       }
     >
-      <Input name="amount" type="number" step="0.01" min="0.01" defaultValue={remaining} aria-label="Montant" />
-      <Input name="on" type="date" defaultValue={new Date().toISOString().slice(0, 10)} aria-label="Date" />
-      <Select name="method" aria-label="Moyen">
-        <option value="virement">Virement</option>
-        <option value="carte">Carte</option>
-        <option value="cheque">Chèque</option>
-        <option value="prelevement">Prélèvement</option>
+      <Input name="amount" type="number" step="0.01" min="0.01" defaultValue={remaining} aria-label={t("amount")} />
+      <Input name="on" type="date" defaultValue={new Date().toISOString().slice(0, 10)} aria-label={t("date")} />
+      <Select name="method" aria-label={t("method")}>
+        <option value="virement">{t("methods.virement")}</option>
+        <option value="carte">{t("methods.carte")}</option>
+        <option value="cheque">{t("methods.cheque")}</option>
+        <option value="prelevement">{t("methods.prelevement")}</option>
       </Select>
-      <Input name="ref" placeholder="Référence" aria-label="Référence" />
+      <Input name="ref" placeholder={t("reference")} aria-label={t("reference")} />
       <Button variant="primary" className="col-span-2" disabled={pending}>
-        Enregistrer le paiement
+        {t("submit")}
       </Button>
     </form>
   );
 }
 
 export function UndoPayment({ id }: { id: string }) {
+  const t = useTranslations("finance.invoices.payment");
   const router = useRouter();
   return (
     <button className="text-xs text-muted hover:text-[#b3402a]" onClick={async () => { if (report(await deletePayment(id))) router.refresh(); }}>
-      annuler
+      {t("undo")}
     </button>
   );
 }

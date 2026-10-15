@@ -157,7 +157,7 @@ describe("Factur-X", () => {
     expect(checkFacturX(inv)).toEqual([]);
   });
   it("signale une incohérence de totaux", () => {
-    expect(checkFacturX({ ...inv, vat: 74 })).toContain("Somme des TVA ≠ total TVA");
+    expect(checkFacturX({ ...inv, vat: 74 })).toContain("vatSum");
   });
 });
 

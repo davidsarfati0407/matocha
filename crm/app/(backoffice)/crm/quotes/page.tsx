@@ -1,15 +1,20 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { ButtonLink, Denied, PageHeader, Stat } from "@/components/ui/kit";
 import { requirePerm } from "@/lib/backoffice/context";
 import { formatMoney, formatPercent } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { QuotesTable } from "./table";
 
-export const metadata: Metadata = { title: "Devis" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("crm");
+  return { title: t("quotes.title") };
+}
 
 export default async function QuotesPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
+  const t = await getTranslations("crm");
   const { ctx, allowed } = await requirePerm("commercial");
-  if (!allowed) return <Denied what="les devis" />;
+  if (!allowed) return <Denied what={t("deniedQuotes")} />;
   const status = (await searchParams).status;
   const supabase = await createClient();
   const { data } = await supabase.from("quotes").select("id, number, status, total_ht, total_ttc, issued_on, valid_until, sent_at, clients(name), employees:owner_id(first_name, last_name)").order("number", { ascending: false });
@@ -21,11 +26,11 @@ export default async function QuotesPage({ searchParams }: { searchParams: Promi
   const rows = status ? all.filter((q) => q.status === status) : all;
   return (
     <>
-      <PageHeader title="Devis" subtitle="Éditeur guidé, PDF, envoi et acceptation → commande pro sans ressaisie" actions={ctx.can("commercial", "create") ? <ButtonLink href="/crm/quotes/new" variant="accent" icon="plus">Nouveau devis</ButtonLink> : undefined} />
+      <PageHeader title={t("quotes.title")} subtitle={t("quotes.subtitle")} actions={ctx.can("commercial", "create") ? <ButtonLink href="/crm/quotes/new" variant="accent" icon="plus">{t("quotes.newTitle")}</ButtonLink> : undefined} />
       <div className="mb-4 grid gap-4 sm:grid-cols-3">
-        <Stat label="En attente de réponse" value={formatMoney(all.filter((q) => ["sent", "opened"].includes(q.status)).reduce((s, q) => s + q.ht, 0), "fr", 0)} sub={`${all.filter((q) => ["sent", "opened"].includes(q.status)).length} devis`} icon="send" href="?status=sent" />
-        <Stat label="Brouillons" value={all.filter((q) => q.status === "draft").length} icon="file" href="?status=draft" />
-        <Stat label="Taux de transformation" value={decided.length ? formatPercent(decided.filter((q) => q.status === "accepted").length / decided.length, "fr", 0) : "—"} sub="acceptés / décidés" icon="chart" />
+        <Stat label={t("quotes.awaiting")} value={formatMoney(all.filter((q) => ["sent", "opened"].includes(q.status)).reduce((s, q) => s + q.ht, 0), "fr", 0)} sub={t("quotes.count", { count: all.filter((q) => ["sent", "opened"].includes(q.status)).length })} icon="send" href="?status=sent" />
+        <Stat label={t("quotes.drafts")} value={all.filter((q) => q.status === "draft").length} icon="file" href="?status=draft" />
+        <Stat label={t("quotes.conversion")} value={decided.length ? formatPercent(decided.filter((q) => q.status === "accepted").length / decided.length, "fr", 0) : "—"} sub={t("quotes.conversionSub")} icon="chart" />
       </div>
       <QuotesTable rows={rows} />
     </>

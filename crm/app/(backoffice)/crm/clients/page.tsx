@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Denied, PageHeader } from "@/components/ui/kit";
 import { requirePerm } from "@/lib/backoffice/context";
 import { createClient } from "@/lib/supabase/server";
 import { ClientsTable, NewClient } from "./table";
 
-export const metadata: Metadata = { title: "Comptes" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("crm");
+  return { title: t("clients.title") };
+}
 
 export default async function ClientsPage() {
+  const t = await getTranslations("crm");
   const { ctx, allowed } = await requirePerm("commercial");
-  if (!allowed) return <Denied what="les comptes" />;
+  if (!allowed) return <Denied what={t("deniedClients")} />;
   const supabase = await createClient();
   const [clients, invoices, deals] = await Promise.all([
     supabase.from("clients").select("id, kind, segment, name, email, city, satisfaction, last_contact_at, employees:owner_id(first_name, last_name)").order("name"),
@@ -29,7 +34,7 @@ export default async function ClientsPage() {
   });
   return (
     <>
-      <PageHeader title="Comptes" subtitle="Clients professionnels et particuliers : vue 360°, historique, prochaines actions" actions={ctx.can("commercial", "create") ? <NewClient /> : undefined} />
+      <PageHeader title={t("clients.title")} subtitle={t("clients.subtitle")} actions={ctx.can("commercial", "create") ? <NewClient /> : undefined} />
       <ClientsTable rows={rows} />
     </>
   );

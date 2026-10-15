@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useOptimistic, useState, useTransition } from "react";
 import { Drawer } from "@/components/ui/Drawer";
 import { Field, Input, Select } from "@/components/ui/Form";
@@ -13,6 +14,8 @@ import { createDeal, moveDeal } from "../actions";
 type Deal = { id: string; title: string; stage: string; value: number; probability: number; close: string | null; client: string; clientId: string; owner: string };
 
 export function PipelineBoard({ rows, canEdit }: { rows: Deal[]; canEdit: boolean }) {
+  const t = useTranslations("crm");
+  const tAll = useTranslations();
   const router = useRouter();
   const [, start] = useTransition();
   const [deals, setOptimistic] = useOptimistic(rows, (cur, m: { id: string; stage: string }) => cur.map((d) => (d.id === m.id ? { ...d, stage: m.stage } : d)));
@@ -31,7 +34,7 @@ export function PipelineBoard({ rows, canEdit }: { rows: Deal[]; canEdit: boolea
         return (
           <section
             key={s.id}
-            aria-label={s.label}
+            aria-label={tAll(s.label as never)}
             onDragOver={(e) => canEdit && (e.preventDefault(), setOver(s.id))}
             onDragLeave={() => setOver(null)}
             onDrop={(e) => {
@@ -42,7 +45,7 @@ export function PipelineBoard({ rows, canEdit }: { rows: Deal[]; canEdit: boolea
             className={`min-w-56 rounded-2xl p-2 transition ${over === s.id ? "bg-accent/10 ring-2 ring-accent/40" : "bg-black/[0.03]"}`}
           >
             <header className="flex items-baseline justify-between px-2 py-1.5">
-              <h2 className="text-sm font-semibold">{s.label}</h2>
+              <h2 className="text-sm font-semibold">{tAll(s.label as never)}</h2>
               <span className="text-xs tabular-nums text-muted">{formatMoney(list.reduce((a, d) => a + d.value, 0), "fr", 0)}</span>
             </header>
             <div className="flex flex-col gap-2">
@@ -59,12 +62,12 @@ export function PipelineBoard({ rows, canEdit }: { rows: Deal[]; canEdit: boolea
                   {canEdit && !["gagne", "perdu"].includes(d.stage) && (
                     <div className="mt-2 flex gap-1">
                       <Link href={`/crm/quotes/new?client=${d.clientId}&deal=${d.id}`} className="rounded-lg bg-accent/10 px-2 py-1 text-[11px] font-medium text-accent">
-                        Devis pré-rempli
+                        {t("pipeline.prefilledQuote")}
                       </Link>
-                      <select aria-label="Changer d'étape" className="ml-auto rounded-lg bg-black/[0.04] px-1 text-[11px]" value={d.stage} onChange={(e) => move(d.id, e.target.value)}>
+                      <select aria-label={t("pipeline.changeStage")} className="ml-auto rounded-lg bg-black/[0.04] px-1 text-[11px]" value={d.stage} onChange={(e) => move(d.id, e.target.value)}>
                         {DEAL_STAGES.map((x) => (
                           <option key={x.id} value={x.id}>
-                            {x.label}
+                            {tAll(x.label as never)}
                           </option>
                         ))}
                       </select>
@@ -81,15 +84,16 @@ export function PipelineBoard({ rows, canEdit }: { rows: Deal[]; canEdit: boolea
 }
 
 export function NewDeal({ clients }: { clients: { id: string; name: string }[] }) {
+  const t = useTranslations("crm");
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
   const router = useRouter();
   return (
     <>
       <Button variant="accent" icon="plus" onClick={() => setOpen(true)}>
-        Nouvelle opportunité
+        {t("pipeline.newDeal")}
       </Button>
-      <Drawer open={open} onClose={() => setOpen(false)} title="Nouvelle opportunité">
+      <Drawer open={open} onClose={() => setOpen(false)} title={t("pipeline.newDeal")}>
         <form
           className="flex flex-col gap-4"
           action={(fd) =>
@@ -101,7 +105,7 @@ export function NewDeal({ clients }: { clients: { id: string; name: string }[] }
             })
           }
         >
-          <Field label="Compte">
+          <Field label={t("fields.account")}>
             <Select name="client">
               {clients.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -110,22 +114,22 @@ export function NewDeal({ clients }: { clients: { id: string; name: string }[] }
               ))}
             </Select>
           </Field>
-          <Field label="Intitulé">
+          <Field label={t("pipeline.dealTitle")}>
             <Input name="title" required />
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Valeur HT (€)">
+            <Field label={t("pipeline.value")}>
               <Input name="value" type="number" min="0" step="10" required />
             </Field>
-            <Field label="Signature prévue">
+            <Field label={t("pipeline.expectedClose")}>
               <Input name="close" type="date" />
             </Field>
           </div>
-          <Field label="Source">
-            <Input name="source" placeholder="Salon, recommandation, site…" />
+          <Field label={t("pipeline.source")}>
+            <Input name="source" placeholder={t("pipeline.sourcePlaceholder")} />
           </Field>
           <Button variant="accent" disabled={pending}>
-            Créer
+            {t("create")}
           </Button>
         </form>
       </Drawer>

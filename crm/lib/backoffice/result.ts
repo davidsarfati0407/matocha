@@ -9,5 +9,5 @@ export async function fail(e: { message: string; code?: string } | null | undefi
   const t = await getTranslations("ui");
   if (e?.code === "42501") return { ok: false, error: t("forbidden") };
   if (e?.code === "23505") return { ok: false, error: t("duplicate") };
-  return { ok: false, error: e?.message ?? "Erreur inconnue" };
+  return { ok: false, error: e?.message ?? t("unknownError") };
 }

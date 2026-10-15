@@ -1,6 +1,7 @@
 "use client";
 /** Éditeur de devis guidé : catalogue, totaux et marge en direct (même calcul que le serveur). */
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useMemo, useState, useTransition } from "react";
 import { Field, Input, Select, Textarea } from "@/components/ui/Form";
 import { Button, Card } from "@/components/ui/kit";
@@ -14,6 +15,7 @@ export type Catalog = { id: string; sku: string; name: string; unit: string; uni
 export type Line = { catalog_item_id: string | null; label: string; quantity: number; unit_price: number; unit_cost: number; vat_rate: number };
 
 export function QuoteEditor({ id, clients, catalog, initial }: { id?: string; clients: { id: string; name: string }[]; catalog: Catalog[]; initial: { client_id: string; deal_id: string | null; discount_pct: number; notes: string; lines: Line[]; hint?: string } }) {
+  const t = useTranslations("crm");
   const router = useRouter();
   const [pending, start] = useTransition();
   const [clientId, setClientId] = useState(initial.client_id);
@@ -27,17 +29,17 @@ export function QuoteEditor({ id, clients, catalog, initial }: { id?: string; cl
 
   return (
     <div className="grid gap-4 lg:grid-cols-3">
-      <Card title="Lignes" className="lg:col-span-2" padded={false}>
+      <Card title={t("quotes.editor.lines")} className="lg:col-span-2" padded={false}>
         {initial.hint && <p className="mx-5 mb-2 rounded-xl bg-matcha/15 px-3 py-2 text-sm text-brand">{initial.hint}</p>}
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="text-left text-xs text-muted">
               <tr>
-                <th className="px-5 py-2 font-medium">Désignation</th>
-                <th className="w-24 px-2 py-2 text-right font-medium">Qté</th>
-                <th className="w-28 px-2 py-2 text-right font-medium">PU HT</th>
-                <th className="w-20 px-2 py-2 text-right font-medium">TVA</th>
-                <th className="w-28 px-2 py-2 text-right font-medium">Total HT</th>
+                <th className="px-5 py-2 font-medium">{t("lines.designation")}</th>
+                <th className="w-24 px-2 py-2 text-right font-medium">{t("lines.qty")}</th>
+                <th className="w-28 px-2 py-2 text-right font-medium">{t("lines.unitPrice")}</th>
+                <th className="w-20 px-2 py-2 text-right font-medium">{t("lines.vat")}</th>
+                <th className="w-28 px-2 py-2 text-right font-medium">{t("lines.totalHt")}</th>
                 <th className="w-8" />
               </tr>
             </thead>
@@ -45,18 +47,18 @@ export function QuoteEditor({ id, clients, catalog, initial }: { id?: string; cl
               {lines.map((l, i) => (
                 <tr key={i} className="border-t border-black/5">
                   <td className="px-5 py-1.5">
-                    <input aria-label="Désignation" className="w-full rounded-lg bg-transparent px-1 py-1 outline-none focus:bg-black/[0.03]" value={l.label} onChange={(e) => set(i, { label: e.target.value })} />
+                    <input aria-label={t("lines.designation")} className="w-full rounded-lg bg-transparent px-1 py-1 outline-none focus:bg-black/[0.03]" value={l.label} onChange={(e) => set(i, { label: e.target.value })} />
                   </td>
                   <td className="px-2">
-                    <input aria-label="Quantité" type="number" min="0" step="1" className="w-full rounded-lg bg-black/[0.03] px-2 py-1 text-right tabular-nums" value={l.quantity} onChange={(e) => set(i, { quantity: Number(e.target.value) })} />
+                    <input aria-label={t("lines.quantity")} type="number" min="0" step="1" className="w-full rounded-lg bg-black/[0.03] px-2 py-1 text-right tabular-nums" value={l.quantity} onChange={(e) => set(i, { quantity: Number(e.target.value) })} />
                   </td>
                   <td className="px-2">
-                    <input aria-label="Prix unitaire" type="number" min="0" step="0.01" className="w-full rounded-lg bg-black/[0.03] px-2 py-1 text-right tabular-nums" value={l.unit_price} onChange={(e) => set(i, { unit_price: Number(e.target.value) })} />
+                    <input aria-label={t("lines.unitPriceFull")} type="number" min="0" step="0.01" className="w-full rounded-lg bg-black/[0.03] px-2 py-1 text-right tabular-nums" value={l.unit_price} onChange={(e) => set(i, { unit_price: Number(e.target.value) })} />
                   </td>
                   <td className="px-2 text-right tabular-nums text-muted">{formatPercent(l.vat_rate)}</td>
                   <td className="px-2 text-right tabular-nums">{formatMoney(l.quantity * l.unit_price)}</td>
                   <td>
-                    <button type="button" aria-label="Supprimer la ligne" className="p-1 text-muted hover:text-[#b3402a]" onClick={() => setLines((ls) => ls.filter((_, j) => j !== i))}>
+                    <button type="button" aria-label={t("quotes.editor.removeLine")} className="p-1 text-muted hover:text-[#b3402a]" onClick={() => setLines((ls) => ls.filter((_, j) => j !== i))}>
                       <Icon name="x" size={14} />
                     </button>
                   </td>
@@ -66,21 +68,21 @@ export function QuoteEditor({ id, clients, catalog, initial }: { id?: string; cl
           </table>
         </div>
         <div className="flex flex-wrap gap-1.5 border-t border-black/5 px-5 py-3">
-          <span className="mr-1 self-center text-xs text-muted">Ajouter :</span>
+          <span className="mr-1 self-center text-xs text-muted">{t("quotes.editor.add")}</span>
           {catalog.map((c) => (
             <button key={c.id} type="button" onClick={() => add(c)} className="rounded-full bg-black/[0.04] px-2.5 py-1 text-xs hover:bg-accent/10 hover:text-accent">
               + {c.name} · {formatMoney(c.unit_price)}
             </button>
           ))}
-          <button type="button" onClick={() => setLines((ls) => [...ls, { catalog_item_id: null, label: "Ligne libre", quantity: 1, unit_price: 0, unit_cost: 0, vat_rate: 0.2 }])} className="rounded-full px-2.5 py-1 text-xs text-muted ring-1 ring-black/10">
-            + ligne libre
+          <button type="button" onClick={() => setLines((ls) => [...ls, { catalog_item_id: null, label: "Ligne libre" /* libellé imprimé sur le devis : langue de l'entreprise */, quantity: 1, unit_price: 0, unit_cost: 0, vat_rate: 0.2 }])} className="rounded-full px-2.5 py-1 text-xs text-muted ring-1 ring-black/10">
+            {t("quotes.editor.freeLine")}
           </button>
         </div>
       </Card>
       <div className="flex flex-col gap-4">
-        <Card title="Devis">
+        <Card title={t("quotes.title")}>
           <div className="flex flex-col gap-3">
-            <Field label="Compte">
+            <Field label={t("fields.account")}>
               <Select value={clientId} onChange={(e) => setClientId(e.target.value)}>
                 {clients.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -89,26 +91,26 @@ export function QuoteEditor({ id, clients, catalog, initial }: { id?: string; cl
                 ))}
               </Select>
             </Field>
-            <Field label="Remise globale (%)">
+            <Field label={t("quotes.editor.discount")}>
               <Input type="number" min="0" max="50" step="0.5" value={Math.round(discount * 1000) / 10} onChange={(e) => setDiscount(Math.min(0.5, Math.max(0, Number(e.target.value) / 100)))} />
             </Field>
-            <Field label="Conditions / notes">
+            <Field label={t("quotes.editor.notes")}>
               <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} className="min-h-16" />
             </Field>
           </div>
         </Card>
-        <Card title="Totaux">
+        <Card title={t("quotes.editor.totals")}>
           <dl className="space-y-1 text-sm">
-            <div className="flex justify-between"><dt>Total HT</dt><dd className="tabular-nums">{formatMoney(totals.ht)}</dd></div>
+            <div className="flex justify-between"><dt>{t("lines.totalHt")}</dt><dd className="tabular-nums">{formatMoney(totals.ht)}</dd></div>
             {totals.vatByRate.map((v) => (
-              <div key={v.rate} className="flex justify-between text-muted"><dt>TVA {formatPercent(v.rate)}</dt><dd className="tabular-nums">{formatMoney(v.vat)}</dd></div>
+              <div key={v.rate} className="flex justify-between text-muted"><dt>{t("lines.vatRate", { rate: formatPercent(v.rate) })}</dt><dd className="tabular-nums">{formatMoney(v.vat)}</dd></div>
             ))}
-            <div className="flex justify-between border-t border-black/10 pt-1 text-base font-semibold"><dt>Total TTC</dt><dd className="tabular-nums">{formatMoney(totals.ttc)}</dd></div>
+            <div className="flex justify-between border-t border-black/10 pt-1 text-base font-semibold"><dt>{t("lines.totalTtc")}</dt><dd className="tabular-nums">{formatMoney(totals.ttc)}</dd></div>
             <div className={`mt-2 flex justify-between rounded-lg px-2 py-1 ${lowMargin ? "bg-[#b3402a]/10 text-[#b3402a]" : "bg-matcha/15 text-brand"}`}>
-              <dt>Marge</dt>
+              <dt>{t("quotes.editor.margin")}</dt>
               <dd className="tabular-nums">{formatMoney(totals.margin)} · {totals.marginRate == null ? "—" : formatPercent(totals.marginRate)}</dd>
             </div>
-            {lowMargin && <p className="text-xs text-[#b3402a]">Marge sous 35 % : vérifiez la remise.</p>}
+            {lowMargin && <p className="text-xs text-[#b3402a]">{t("quotes.editor.lowMargin")}</p>}
           </dl>
           <Button
             variant="accent"
@@ -122,7 +124,7 @@ export function QuoteEditor({ id, clients, catalog, initial }: { id?: string; cl
               })
             }
           >
-            {id ? "Enregistrer les modifications" : "Créer le devis"}
+            {id ? t("quotes.editor.saveChanges") : t("quotes.editor.create")}
           </Button>
         </Card>
       </div>

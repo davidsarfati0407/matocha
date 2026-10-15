@@ -1,15 +1,20 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Denied, PageHeader, Stat } from "@/components/ui/kit";
 import { requirePerm } from "@/lib/backoffice/context";
 import { formatMoney } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { InvoicesTable } from "./table";
 
-export const metadata: Metadata = { title: "Factures" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("finance");
+  return { title: t("invoices.title") };
+}
 
 export default async function InvoicesPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
+  const t = await getTranslations("finance");
   const { allowed } = await requirePerm("finance");
-  if (!allowed) return <Denied what="les factures" />;
+  if (!allowed) return <Denied what={t("deniedInvoices")} />;
   const status = (await searchParams).status;
   const supabase = await createClient();
   await supabase.rpc("refresh_overdue"); // échéances dépassées → « échue » (sans effet si rôle en lecture)
@@ -20,11 +25,11 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
   const rows = status ? all.filter((i) => i.status === status) : all;
   return (
     <>
-      <PageHeader title="Factures" subtitle="Créées depuis les commandes livrées, sans ressaisie · PDF + XML Factur-X" />
+      <PageHeader title={t("invoices.title")} subtitle={t("invoices.subtitle")} />
       <div className="mb-4 grid gap-4 sm:grid-cols-3">
-        <Stat label="Encours client" value={formatMoney(open.reduce((s, i) => s + i.ttc - i.paid, 0), "fr", 0)} sub={`${open.length} facture(s) ouverte(s)`} icon="bank" href="?status=sent" />
-        <Stat label="Échu" value={formatMoney(overdue.reduce((s, i) => s + i.ttc - i.paid, 0), "fr", 0)} tone={overdue.length ? "danger" : undefined} sub={`${overdue.length} facture(s) · relances →`} icon="bell" href="/finance/dunning" />
-        <Stat label="Encaissé" value={formatMoney(all.reduce((s, i) => s + (i.kind === "avoir" ? 0 : i.paid), 0), "fr", 0)} icon="check" href="/finance/payments" />
+        <Stat label={t("invoices.outstanding")} value={formatMoney(open.reduce((s, i) => s + i.ttc - i.paid, 0), "fr", 0)} sub={t("invoices.openCount", { count: open.length })} icon="bank" href="?status=sent" />
+        <Stat label={t("invoices.overdue")} value={formatMoney(overdue.reduce((s, i) => s + i.ttc - i.paid, 0), "fr", 0)} tone={overdue.length ? "danger" : undefined} sub={t("invoices.overdueCount", { count: overdue.length })} icon="bell" href="/finance/dunning" />
+        <Stat label={t("invoices.collected")} value={formatMoney(all.reduce((s, i) => s + (i.kind === "avoir" ? 0 : i.paid), 0), "fr", 0)} icon="check" href="/finance/payments" />
       </div>
       <InvoicesTable rows={rows} />
     </>

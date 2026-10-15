@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { Textarea } from "@/components/ui/Form";
 import { Badge, Button, Card } from "@/components/ui/kit";
@@ -10,6 +11,7 @@ import { applyMatches, previewCamt, sampleCamt } from "../actions";
 type M = { amount: number; reference: string; debtor: string | null; bookedOn: string | null; invoiceId: string | null; number: string | null; rule: string | null };
 
 export function CamtImport() {
+  const t = useTranslations("finance.payments.camt");
   const router = useRouter();
   const [pending, start] = useTransition();
   const [xml, setXml] = useState("");
@@ -23,17 +25,17 @@ export function CamtImport() {
       setKeep(new Set(r.data!.flatMap((m, i) => (m.invoiceId ? [i] : []))));
     });
   return (
-    <Card title="Import de relevé camt.054" className="lg:col-span-2">
+    <Card title={t("title")} className="lg:col-span-2">
       <div className="flex flex-col gap-3">
         <label className="rounded-xl border border-dashed border-black/15 p-3 text-center text-sm text-muted">
-          Déposer un fichier XML
+          {t("drop")}
           <input type="file" accept=".xml" className="sr-only" onChange={async (e) => { const f = e.target.files?.[0]; if (f) { const t = await f.text(); setXml(t); preview(t); } }} />
         </label>
-        <Textarea aria-label="Contenu XML" value={xml} onChange={(e) => setXml(e.target.value)} placeholder="…ou collez le XML" className="min-h-20 font-mono text-[11px]" />
+        <Textarea aria-label={t("content")} value={xml} onChange={(e) => setXml(e.target.value)} placeholder={t("paste")} className="min-h-20 font-mono text-[11px]" />
         <div className="flex gap-2">
-          <Button disabled={pending || !xml} onClick={() => preview(xml)}>Analyser</Button>
+          <Button disabled={pending || !xml} onClick={() => preview(xml)}>{t("analyse")}</Button>
           <Button variant="secondary" disabled={pending} onClick={() => start(async () => { const x = await sampleCamt(); setXml(x); preview(x); })}>
-            Relevé d'exemple
+            {t("sample")}
           </Button>
         </div>
         {rows && (
@@ -41,11 +43,11 @@ export function CamtImport() {
             <ul className="divide-y divide-black/5 text-sm">
               {rows.map((m, i) => (
                 <li key={i} className="flex items-center gap-2 py-2">
-                  <input type="checkbox" aria-label="Lettrer" disabled={!m.invoiceId} checked={keep.has(i)} onChange={() => setKeep((k) => { const n = new Set(k); if (n.has(i)) n.delete(i); else n.add(i); return n; })} />
+                  <input type="checkbox" aria-label={t("match")} disabled={!m.invoiceId} checked={keep.has(i)} onChange={() => setKeep((k) => { const n = new Set(k); if (n.has(i)) n.delete(i); else n.add(i); return n; })} />
                   <span className="min-w-0 flex-1 truncate">
-                    <span className="font-medium tabular-nums">{formatMoney(m.amount)}</span> · {m.debtor ?? "?"} <span className="text-muted">« {m.reference} »</span>
+                    <span className="font-medium tabular-nums">{formatMoney(m.amount)}</span> · {m.debtor ?? "?"} <span className="text-muted">{t("quoted", { text: m.reference })}</span>
                   </span>
-                  {m.invoiceId ? <Badge tone={m.rule === "reference" ? "ok" : "info"}>{m.number} · {m.rule === "reference" ? "par référence" : "par montant"}</Badge> : <Badge tone="warn">à affecter</Badge>}
+                  {m.invoiceId ? <Badge tone={m.rule === "reference" ? "ok" : "info"}>{m.number} · {m.rule === "reference" ? t("byReference") : t("byAmount")}</Badge> : <Badge tone="warn">{t("toAssign")}</Badge>}
                 </li>
               ))}
             </ul>
@@ -59,7 +61,7 @@ export function CamtImport() {
                 })
               }
             >
-              Lettrer {keep.size} paiement(s)
+              {t("matchCount", { count: keep.size })}
             </Button>
           </>
         )}

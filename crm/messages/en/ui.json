@@ -7,5 +7,7 @@
   "actionImpossible": "Action not possible",
   "saved": "Saved",
   "forbidden": "Your role does not allow this action.",
-  "duplicate": "This item already exists."
+  "duplicate": "This item already exists.",
+  "tabs": "Tabs",
+  "unknownError": "Unknown error"
 }

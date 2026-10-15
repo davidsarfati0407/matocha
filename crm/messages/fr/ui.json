@@ -7,5 +7,7 @@
   "actionImpossible": "Action impossible",
   "saved": "Enregistré",
   "forbidden": "Votre rôle ne permet pas cette action.",
-  "duplicate": "Cet élément existe déjà."
+  "duplicate": "Cet élément existe déjà.",
+  "tabs": "Onglets",
+  "unknownError": "Erreur inconnue"
 }

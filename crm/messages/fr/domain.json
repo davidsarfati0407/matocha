@@ -1,16 +1,14 @@
 {
-  "domain": {
-    "anomaly": {
-      "doubleIn": "entrée en double",
-      "pauseWithoutIn": "pause sans entrée",
-      "outWithoutIn": "sortie sans entrée",
-      "missingOut": "pas de badge de sortie"
-    },
-    "leave": {
-      "endBeforeStart": "La date de fin précède la date de début.",
-      "balance": "Solde insuffisant ({days} j disponibles).",
-      "blackout": "Période de blocage : {label}.",
-      "presence": "Présence de l'équipe sous {pct} % le {date, date, short}."
-    }
+  "anomaly": {
+    "doubleIn": "entrée en double",
+    "pauseWithoutIn": "pause sans entrée",
+    "outWithoutIn": "sortie sans entrée",
+    "missingOut": "pas de badge de sortie"
+  },
+  "leave": {
+    "endBeforeStart": "La date de fin précède la date de début.",
+    "balance": "Solde insuffisant ({days} j disponibles).",
+    "blackout": "Période de blocage : {label}.",
+    "presence": "Présence de l'équipe sous {pct} % le {date, date, short}."
   }
 }

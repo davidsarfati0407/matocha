@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Badge, Card, PageHeader } from "@/components/ui/kit";
 import { getCtx } from "@/lib/backoffice/context";
@@ -7,14 +8,17 @@ import { formatTime } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { NewEvent, PersonPicker } from "./client";
 
-export const metadata: Metadata = { title: "Calendrier" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("crm");
+  return { title: t("calendar.title") };
+}
 
 const TYPE: Record<string, string> = { reunion: "bg-brand text-ground", client: "bg-accent text-white", focus: "bg-matcha/40 text-brand", pause: "bg-black/10", teletravail: "bg-[#2a78d6]/15 text-[#1d5ba6]", deplacement: "bg-[#9a6a00]/15 text-[#7a5300]", tournage: "bg-[#7b4bb7]/15 text-[#5f3794]", livraison: "bg-black/10", autre: "bg-black/10" };
 const H0 = 8;
 const H1 = 19;
 
 export default async function CalendarPage({ searchParams }: { searchParams: Promise<{ who?: string; week?: string }> }) {
-  const ctx = await getCtx();
+  const [ctx, t, locale] = await Promise.all([getCtx(), getTranslations("crm.calendar"), getLocale()]);
   const sp = await searchParams;
   const who = sp.who ?? ctx.employeeId ?? "";
   const offset = Number(sp.week ?? 0);
@@ -34,13 +38,13 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
   return (
     <>
       <PageHeader
-        title="Calendrier"
-        subtitle="Rendez-vous clients, réunions et tournages · agenda Google/Microsoft en mode simulé"
+        title={t("title")}
+        subtitle={t("subtitle")}
         actions={
           <>
             <PersonPicker people={(emps.data ?? []).map((e) => ({ id: e.id, name: `${e.first_name} ${e.last_name}` }))} who={who} />
             <Link className="rounded-xl px-3 py-2 text-sm ring-1 ring-black/10" href={`?who=${who}&week=${offset - 1}`}>←</Link>
-            <Link className="rounded-xl px-3 py-2 text-sm ring-1 ring-black/10" href={`?who=${who}`}>Cette semaine</Link>
+            <Link className="rounded-xl px-3 py-2 text-sm ring-1 ring-black/10" href={`?who=${who}`}>{t("thisWeek")}</Link>
             <Link className="rounded-xl px-3 py-2 text-sm ring-1 ring-black/10" href={`?who=${who}&week=${offset + 1}`}>→</Link>
             <NewEvent clients={clients.data ?? []} rooms={rooms.data ?? []} day={days.includes(todayIso) ? todayIso : days[0]} />
           </>
@@ -51,13 +55,13 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
           <div />
           {days.map((d) => (
             <div key={d} className={`border-b border-l border-black/5 px-3 py-2 text-sm font-medium ${d === todayIso ? "text-accent" : ""}`}>
-              {new Date(`${d}T12:00:00Z`).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" })}
+              {new Date(`${d}T12:00:00Z`).toLocaleDateString(locale === "en" ? "en-GB" : "fr-FR", { weekday: "short", day: "numeric", month: "short" })}
             </div>
           ))}
           <div className="relative h-[620px] text-[10px] text-muted">
             {Array.from({ length: H1 - H0 }, (_, i) => (
               <span key={i} className="absolute right-2" style={{ top: `${(i / (H1 - H0)) * 100}%` }}>
-                {H0 + i}h
+                {t("hour", { h: H0 + i })}
               </span>
             ))}
           </div>

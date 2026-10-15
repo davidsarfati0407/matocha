@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { getTranslations } from "next-intl/server";
 import { getCtx } from "@/lib/backoffice/context";
 import { invoiceEntries, paymentEntries } from "@/lib/domain/accounting";
 import { toCsv } from "@/lib/domain/csv";
@@ -8,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 /** Export comptable du mois (journaux VT et BQ) au format CSV pour l'expert-comptable. */
 export async function GET(req: NextRequest) {
   const ctx = await getCtx();
-  if (!ctx.can("finance", "export")) return NextResponse.json({ error: "droit export finance requis" }, { status: 403 });
+  if (!ctx.can("finance", "export")) return NextResponse.json({ error: (await getTranslations("finance"))("exportForbidden") }, { status: 403 });
   const month = /^\d{4}-\d{2}$/.test(req.nextUrl.searchParams.get("month") ?? "") ? req.nextUrl.searchParams.get("month")! : new Date().toISOString().slice(0, 7);
   const from = `${month}-01`;
   const to = new Date(Date.UTC(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 1)).toISOString().slice(0, 10);
@@ -27,6 +28,7 @@ export async function GET(req: NextRequest) {
       return paymentEntries({ invoiceNumber: inv?.number ?? "?", client: inv?.clients?.name ?? "", receivedOn: p.received_on, amount: Number(p.amount) });
     }),
   ];
+  // En-têtes du fichier pour l'expert-comptable : langue de l'entreprise
   const csv = toCsv(lines, [
     { header: "Journal", value: (l) => l.journal },
     { header: "Date", value: (l) => l.date.split("-").reverse().join("/") },
