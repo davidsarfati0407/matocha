@@ -1,6 +1,7 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { getCtx } from "@/lib/backoffice/context";
 import { fail, type ActionResult } from "@/lib/backoffice/result";
 import { createClient } from "@/lib/supabase/server";
 
@@ -53,4 +54,19 @@ export async function resetDemo(): Promise<ActionResult> {
   if (error) return fail(error);
   revalidatePath("/", "layout");
   return { ok: true, message: "Scénario de démo réinitialisé" };
+}
+
+const MODS = ["pilotage", "communication", "commercial", "operations", "rh", "salaires", "finance", "ressources", "ia", "organisation", "plan"];
+const ACTS = ["read", "create", "update", "delete", "export"];
+/** Accorder / retirer un droit (RLS organisation:update + garde-fous SQL contre l'escalade). */
+export async function togglePermission(roleId: string, module: string, action: string, on: boolean): Promise<ActionResult> {
+  if (!MODS.includes(module) || !ACTS.includes(action)) return { ok: false, error: "Droit inconnu" };
+  const supabase = await createClient();
+  const { error, count } = on
+    ? await supabase.from("permissions").insert({ org_id: (await getCtx()).orgId, role_id: roleId, module, action }, { count: "exact" })
+    : await supabase.from("permissions").delete({ count: "exact" }).eq("role_id", roleId).eq("module", module).eq("action", action);
+  if (error) return error.code === "42501" ? { ok: false, error: error.message.replace(/^.*?: /, "") } : fail(error);
+  if (!count) return { ok: false, error: "Votre rôle ne permet pas cette action." };
+  revalidatePath("/", "layout");
+  return { ok: true, message: on ? `Droit « ${action} » sur ${module} accordé` : `Droit « ${action} » sur ${module} retiré` };
 }

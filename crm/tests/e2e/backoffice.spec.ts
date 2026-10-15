@@ -151,3 +151,55 @@ test("intégrations : un envoi passe par la file (connecteur simulé, affiché c
   await expect(page.getByText(/Test réussi \(mode simulé/)).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+/** Code TOTP (RFC 6238, SHA-1, 6 chiffres, 30 s) à partir d'une clé base32. */
+async function totp(secret: string, at = Date.now()) {
+  const { createHmac } = await import("node:crypto");
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  let bits = "";
+  for (const ch of secret.replace(/=+$/, "").toUpperCase()) bits += alphabet.indexOf(ch).toString(2).padStart(5, "0");
+  const key = Buffer.from(bits.match(/.{8}/g)!.map((b) => parseInt(b, 2)));
+  const counter = Buffer.alloc(8);
+  counter.writeBigUInt64BE(BigInt(Math.floor(at / 30_000)));
+  const h = createHmac("sha1", key).update(counter).digest();
+  const o = h[h.length - 1] & 0xf;
+  return String((h.readUInt32BE(o) & 0x7fffffff) % 1_000_000).padStart(6, "0");
+}
+
+test("double authentification : activation par QR/clé, code exigé à la connexion, puis désactivation", async ({ page, browser }) => {
+  test.setTimeout(240_000);
+  // État propre : aucun facteur TOTP résiduel sur le compte de test (API d'administration Supabase)
+  const { createClient } = await import("@supabase/supabase-js");
+  const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:54321", process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
+  const { data: users } = await admin.auth.admin.listUsers();
+  const u = users.users.find((x) => x.email === "lecture@matocha.demo")!;
+  const { data: fs } = await admin.auth.admin.mfa.listFactors({ userId: u.id });
+  for (const f of fs?.factors ?? []) expect((await admin.auth.admin.mfa.deleteFactor({ userId: u.id, id: f.id })).error).toBeNull();
+  const errors = watchErrors(page);
+  await login(page, "Lecture seule", "/settings/security");
+  await page.getByRole("button", { name: "Activer" }).click();
+  const secret = (await page.getByTestId("totp-secret").textContent())!.trim();
+  await page.getByLabel("Code de vérification").fill(await totp(secret));
+  await page.getByRole("button", { name: "Vérifier et activer" }).click();
+  await expect(page.getByText("Double authentification activée")).toBeVisible();
+
+  // Nouvelle session : le mot de passe ne suffit plus
+  const ctx2 = await browser.newContext();
+  const p2 = await ctx2.newPage();
+  await p2.goto("/login?next=/dashboard");
+  await p2.getByRole("button", { name: /^Lecture seule/ }).click();
+  await p2.waitForURL(/\/login\/mfa/);
+  const api = await p2.request.get("/api/realtime");
+  expect(api.status()).toBe(401); // les API aussi exigent le code
+  // Nouveau créneau de 30 s pour éviter de rejouer le code déjà utilisé
+  await p2.waitForTimeout(30_000 - (Date.now() % 30_000) + 500);
+  await p2.getByLabel("Code").fill(await totp(secret));
+  await p2.getByRole("button", { name: "Vérifier" }).click();
+  await p2.waitForURL(/\/dashboard/);
+  await ctx2.close();
+
+  page.on("dialog", (d) => void d.accept());
+  await page.getByRole("button", { name: "Désactiver" }).click();
+  await expect(page.getByText("Double authentification désactivée")).toBeVisible();
+  expect(errors).toEqual([]);
+});

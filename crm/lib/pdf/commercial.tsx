@@ -1,8 +1,9 @@
 /**
  * PDF des devis, factures et avoirs (même mise en page). Rendu côté serveur
- * avec @react-pdf/renderer, polices standard (Helvetica, encodage WinAnsi).
+ * avec @react-pdf/renderer. Polices EMBARQUÉES (Liberation Sans, OFL) : exigence PDF/A-3 (Factur-X).
  */
-import { Document, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
+import path from "node:path";
+import { Document, Font, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
 import { sectorConfig } from "@/config/sector.config";
 
 export interface PdfLine {
@@ -25,6 +26,10 @@ export interface CommercialPdf {
   reference?: string | null;
 }
 
+const FONTS = path.join(process.cwd(), "lib/pdf/assets/fonts");
+Font.register({ family: "Liberation Sans", fonts: [{ src: path.join(FONTS, "LiberationSans-Regular.ttf") }, { src: path.join(FONTS, "LiberationSans-Bold.ttf"), fontWeight: 700 }] });
+Font.registerHyphenationCallback((w) => [w]); // pas de césure dans les montants et références
+
 // Les espaces fines insécables d'Intl ne sont pas dans l'encodage des polices standard
 const clean = (s: string) => s.replace(/[  ]/g, " ");
 const money = (v: number) => clean(new Intl.NumberFormat("fr-FR", { style: "currency", currency: sectorConfig.entreprise.devise }).format(v));
@@ -34,12 +39,12 @@ const date = (d: string) => d.slice(0, 10).split("-").reverse().join("/");
 
 const brand = sectorConfig.entreprise.couleurs?.identite ?? "#173D2B";
 const s = StyleSheet.create({
-  page: { padding: 40, fontSize: 9.5, fontFamily: "Helvetica", color: "#1f2421" },
+  page: { padding: 40, fontSize: 9.5, fontFamily: "Liberation Sans", color: "#1f2421" },
   row: { flexDirection: "row" },
   between: { flexDirection: "row", justifyContent: "space-between" },
-  h1: { fontSize: 20, fontFamily: "Helvetica-Bold", color: brand },
+  h1: { fontSize: 20, fontWeight: 700, color: brand },
   muted: { color: "#6b6f6c" },
-  th: { fontFamily: "Helvetica-Bold", fontSize: 8.5, color: "#6b6f6c", paddingVertical: 6, borderBottom: "1pt solid #d9d6cf" },
+  th: { fontWeight: 700, fontSize: 8.5, color: "#6b6f6c", paddingVertical: 6, borderBottom: "1pt solid #d9d6cf" },
   td: { paddingVertical: 5, borderBottom: "0.5pt solid #ebe8e1" },
   box: { padding: 10, backgroundColor: "#f4f2ec", borderRadius: 4 },
 });
@@ -52,14 +57,14 @@ function Doc({ d }: { d: CommercialPdf }) {
       <Page size="A4" style={s.page}>
         <View style={s.between}>
           <View>
-            <Text style={{ fontSize: 16, fontFamily: "Helvetica-Bold", color: brand }}>{e.nomCourt}</Text>
+            <Text style={{ fontSize: 16, fontWeight: 700, color: brand }}>{e.nomCourt}</Text>
             <Text style={s.muted}>{e.nom}</Text>
             <Text style={s.muted}>{d.legal.address}</Text>
             <Text style={s.muted}>SIREN {d.legal.siren} · TVA {d.legal.vat_number}</Text>
           </View>
           <View style={{ alignItems: "flex-end" }}>
             <Text style={s.h1}>{d.kind}</Text>
-            <Text style={{ fontFamily: "Helvetica-Bold", fontSize: 11 }}>{d.number}</Text>
+            <Text style={{ fontWeight: 700, fontSize: 11 }}>{d.number}</Text>
             <Text style={s.muted}>Date : {date(d.issuedOn)}</Text>
             <Text style={s.muted}>
               {d.secondDate.label} : {date(d.secondDate.value)}
@@ -68,7 +73,7 @@ function Doc({ d }: { d: CommercialPdf }) {
           </View>
         </View>
         <View style={[s.box, { marginTop: 24, marginLeft: "55%" }]}>
-          <Text style={{ fontFamily: "Helvetica-Bold" }}>{d.client.name}</Text>
+          <Text style={{ fontWeight: 700 }}>{d.client.name}</Text>
           {d.client.address && <Text>{d.client.address}</Text>}
           {d.client.city && <Text>{d.client.city}</Text>}
           {d.client.email && <Text style={s.muted}>{d.client.email}</Text>}
@@ -117,8 +122,8 @@ function Doc({ d }: { d: CommercialPdf }) {
               <Text>{money(d.totals.vat)}</Text>
             </View>
             <View style={[s.between, s.box, { marginTop: 6 }]}>
-              <Text style={{ fontFamily: "Helvetica-Bold", fontSize: 11 }}>Total TTC</Text>
-              <Text style={{ fontFamily: "Helvetica-Bold", fontSize: 11 }}>{money(d.totals.ttc)}</Text>
+              <Text style={{ fontWeight: 700, fontSize: 11 }}>Total TTC</Text>
+              <Text style={{ fontWeight: 700, fontSize: 11 }}>{money(d.totals.ttc)}</Text>
             </View>
             {d.paid ? (
               <View style={[s.between, { marginTop: 4 }]}>

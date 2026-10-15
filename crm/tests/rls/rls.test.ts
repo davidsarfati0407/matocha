@@ -172,3 +172,30 @@ describe("phase 3 : fonctions métier et droits", () => {
     await e.from("leave_requests").delete().eq("id", ins.data!.id);
   });
 });
+
+describe("phase 4 : édition des droits sans escalade", () => {
+  it("l'administrateur ne peut pas s'accorder les salaires ni se retirer l'administration des droits", async () => {
+    const a = await as("admin");
+    const { data: role } = await a.from("roles").select("id, org_id").eq("key", "admin").single();
+    const grant = await a.from("permissions").insert({ org_id: role!.org_id, role_id: role!.id, module: "salaires", action: "read" });
+    expect(grant.error?.code).toBe("42501");
+    const lock = await a.from("permissions").delete().eq("role_id", role!.id).eq("module", "organisation").eq("action", "update");
+    expect(lock.error?.code).toBe("42501");
+    const flag = await a.from("roles").update({ sees_salaries: true }).eq("id", role!.id);
+    expect(flag.error?.code).toBe("42501");
+  });
+  it("l'administrateur peut accorder un droit ordinaire (puis le retirer) ; un collaborateur ne peut rien changer", async () => {
+    const a = await as("admin");
+    const { data: role } = await a.from("roles").select("id, org_id").eq("key", "lecture").single();
+    expect((await a.from("permissions").insert({ org_id: role!.org_id, role_id: role!.id, module: "commercial", action: "read" })).error).toBeNull();
+    expect((await a.from("permissions").delete().eq("role_id", role!.id).eq("module", "commercial").eq("action", "read")).error).toBeNull();
+    const e = await as("employe");
+    const r = await e.from("permissions").insert({ org_id: role!.org_id, role_id: role!.id, module: "finance", action: "read" });
+    expect(r.error).not.toBeNull();
+  });
+  it("secrets d'intégration et file : illisibles par les clients", async () => {
+    const d = await as("direction");
+    expect(await count(d, "integration_secrets")).toBe(0);
+    expect(await count(d, "integration_subscriptions")).toBe(0);
+  });
+});

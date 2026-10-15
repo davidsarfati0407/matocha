@@ -16,6 +16,9 @@ export async function signIn(_: LoginState, form: FormData): Promise<LoginState>
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email: parsed.data.email, password: parsed.data.password });
   if (error) return { error: "invalid" };
+  // Double authentification activée : le code est demandé avant toute page
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") redirect(`/login/mfa?next=${encodeURIComponent(safeNext(parsed.data.next))}`);
   redirect(safeNext(parsed.data.next));
 }
 

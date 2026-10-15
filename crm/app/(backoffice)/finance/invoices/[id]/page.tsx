@@ -91,7 +91,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
           </Card>
           <Card title="Factur-X">
             {fx.length === 0 ? <p className="text-sm text-brand">Totaux cohérents : XML CII (profil BASIC WL) prêt.</p> : <ul className="text-sm text-[#b3402a]">{fx.map((e) => <li key={e}>{e}</li>)}</ul>}
-            <p className="mt-2 text-xs text-muted">Honnêtement : le XML est exporté à part ; son embarquement dans un PDF/A-3 conforme est prévu en phase 4.</p>
+            <p className="mt-2 text-xs text-muted">Le PDF est une facture électronique Factur-X : PDF/A-3 (polices embarquées, profil sRGB, métadonnées XMP) avec le XML CII joint. XML validé contre le XSD officiel BASIC WL ; conformité PDF/A à faire confirmer par veraPDF.</p>
           </Card>
         </div>
       </div>

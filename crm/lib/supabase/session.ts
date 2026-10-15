@@ -31,5 +31,17 @@ export async function updateSession(request: NextRequest) {
     url.searchParams.set("next", request.nextUrl.pathname + request.nextUrl.search);
     return NextResponse.redirect(url);
   }
+  // Double authentification : un compte avec un facteur TOTP vérifié doit présenter son code (niveau aal2)
+  if (user && !isPublic && !request.nextUrl.pathname.startsWith("/login")) {
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal && aal.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+      if (request.nextUrl.pathname.startsWith("/api/")) return NextResponse.json({ error: "double authentification requise" }, { status: 401 });
+      const url = request.nextUrl.clone();
+      url.pathname = "/login/mfa";
+      url.search = "";
+      url.searchParams.set("next", request.nextUrl.pathname + request.nextUrl.search);
+      return NextResponse.redirect(url);
+    }
+  }
   return response;
 }

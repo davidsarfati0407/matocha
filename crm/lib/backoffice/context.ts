@@ -27,6 +27,9 @@ export const getCtx = cache(async (): Promise<Ctx> => {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+  // Défense en profondeur (en plus du proxy) : pas de données sans le code si la 2FA est active
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") redirect("/login/mfa");
   const { data: p } = await supabase.from("profiles").select("full_name, employee_id, org_id, role_id, roles(key, label, sees_salaries, edits_plan), orgs(name, settings, demo_mode)").eq("user_id", user.id).single();
   if (!p) redirect("/login");
   const { data: perms } = await supabase.from("permissions").select("module, action").eq("role_id", p.role_id);

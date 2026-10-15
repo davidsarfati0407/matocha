@@ -1,0 +1,5 @@
+Liberation Sans (Regular, Bold) — Copyright (c) 2012 Red Hat, Inc.
+Licence SIL Open Font License 1.1 (https://openfontlicense.org). Embarquées dans les PDF
+(exigence PDF/A : toutes les polices doivent être incluses dans le fichier).
+Profil sRGB_IEC61966_2_1.icc : profil de couleur sRGB standard (domaine public / libre redistribution),
+utilisé comme « output intent » PDF/A.

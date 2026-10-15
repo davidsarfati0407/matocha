@@ -92,6 +92,7 @@ export const NAV: NavGroup[] = [
       { href: "/settings/integrations", label: "Intégrations", icon: "plug", module: "organisation" },
       { href: "/settings/audit", label: "Journal d'audit", icon: "list", module: "organisation" },
       { href: "/settings/privacy", label: "Données & RGPD", icon: "shield", module: "organisation" },
+      { href: "/settings/security", label: "Sécurité du compte", icon: "lock", module: "pilotage" } /* chacun gère sa 2FA */,
     ],
   },
 ];
