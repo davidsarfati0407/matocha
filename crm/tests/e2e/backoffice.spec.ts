@@ -109,7 +109,6 @@ test("congé validé en un clic (solde décompté), puis annulé depuis la notif
 test("⌘K : recherche d'un compte puis action « nouveau devis » pré-rempli", async ({ page }) => {
   const errors = watchErrors(page);
   await login(page, "Commercial", "/dashboard");
-  await page.waitForLoadState("networkidle");
   await expect(async () => {
     await page.keyboard.press("Control+k");
     await expect(page.getByLabel("Commande ou recherche")).toBeVisible({ timeout: 1000 });
