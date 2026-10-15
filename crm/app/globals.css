@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+/* Jetons de design : les couleurs de marque sont injectées depuis sector.config (layout). */
+:root {
+  --radius-card: 16px;
+  --status-ok: #2f8f5b;
+  --status-warn: #c98a12;
+  --status-muted: #64707a;
+}
+
+@theme inline {
+  --color-brand: var(--brand);
+  --color-brand-deep: var(--brand-deep);
+  --color-matcha: var(--matcha);
+  --color-accent: var(--accent);
+  --color-ground: var(--ground);
+  --color-ground-deep: var(--ground-deep);
+  --color-ink: var(--ink);
+  --color-ok: var(--status-ok);
+  --color-warn: var(--status-warn);
+  --color-muted: var(--status-muted);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --radius-card: 16px;
+}
+
+html, body { background: var(--ground); color: var(--ink); }
+body { font-feature-settings: "tnum" 1, "cv11" 1; -webkit-font-smoothing: antialiased; }
+
+/* Grain très léger en superposition */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.card {
+  background: #fff;
+  border-radius: var(--radius-card);
+  box-shadow: 0 1px 2px rgb(22 23 19 / 0.04), 0 4px 12px rgb(22 23 19 / 0.04), 0 16px 32px -12px rgb(22 23 19 / 0.08);
+}

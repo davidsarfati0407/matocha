@@ -198,16 +198,18 @@ const config: SectorConfig = {
   ],
 
   roles: [
-    { id: "direction", libelle: "Direction", description: "Accès complet, salaires inclus.", voitSalaires: true, editePlan: true },
-    { id: "admin", libelle: "Administrateur", description: "Paramètres, plan 3D, utilisateurs. Pas les salaires.", voitSalaires: false, editePlan: true },
-    { id: "rh", libelle: "RH", description: "Collaborateurs, présences, congés, salaires, recrutement.", voitSalaires: true, editePlan: false },
-    { id: "finance", libelle: "Finance", description: "Factures, paiements, frais, trésorerie, masse salariale agrégée.", voitSalaires: false, editePlan: false },
-    { id: "operations", libelle: "Opérations", description: "Commandes pro, stock, lots, expéditions, équipements.", voitSalaires: false, editePlan: false },
-    { id: "commercial", libelle: "Commercial", description: "Comptes, pipeline, devis, commandes pro.", voitSalaires: false, editePlan: false },
-    { id: "manager", libelle: "Manager", description: "Son équipe : présences, congés à valider, heures.", voitSalaires: false, editePlan: false },
-    { id: "employe", libelle: "Collaborateur", description: "Ses propres données, map, annuaire.", voitSalaires: false, editePlan: false },
-    { id: "lecture", libelle: "Lecture seule", description: "Map et tableaux de bord, sans données personnelles sensibles.", voitSalaires: false, editePlan: false },
+    { id: "direction", libelle: "Direction", description: "Accès complet, salaires inclus.", voitSalaires: true, editePlan: true, droits: { pilotage: "*", communication: "*", commercial: "*", operations: "*", rh: "*", salaires: "*", finance: "*", ressources: "*", ia: "*", organisation: "*", plan: "*" }, compteDemo: { email: "direction@matocha.demo", poste: "fondateur" } },
+    { id: "admin", libelle: "Administrateur", description: "Paramètres, plan 3D, utilisateurs. Pas les salaires.", voitSalaires: false, editePlan: true, droits: { pilotage: "*", communication: "*", commercial: "*", operations: "*", rh: ["read"], finance: ["read"], ressources: "*", ia: "*", organisation: "*", plan: "*" }, compteDemo: { email: "admin@matocha.demo", poste: "dev_shop" } },
+    { id: "rh", libelle: "RH", description: "Collaborateurs, présences, congés, salaires, recrutement.", voitSalaires: true, editePlan: false, droits: { pilotage: ["read"], communication: ["read", "create", "update"], rh: "*", salaires: "*", operations: ["read"], ia: ["read", "create"], plan: ["read"] }, compteDemo: { email: "rh@matocha.demo", poste: "rh" } },
+    { id: "finance", libelle: "Finance", description: "Factures, paiements, frais, trésorerie, masse salariale agrégée.", voitSalaires: false, editePlan: false, droits: { pilotage: ["read", "export"], communication: ["read", "create", "update"], commercial: ["read", "export"], operations: ["read"], finance: "*", ressources: ["read"], rh: ["read"], ia: ["read", "create"], plan: ["read"] }, compteDemo: { email: "finance@matocha.demo", poste: "daf" } },
+    { id: "operations", libelle: "Opérations", description: "Commandes pro, stock, lots, expéditions, équipements.", voitSalaires: false, editePlan: false, droits: { pilotage: ["read"], communication: ["read", "create", "update"], commercial: ["read"], operations: "*", ressources: "*", ia: ["read", "create"], plan: ["read"] }, compteDemo: { email: "operations@matocha.demo", poste: "head_logistique" } },
+    { id: "commercial", libelle: "Commercial", description: "Comptes, pipeline, devis, commandes pro.", voitSalaires: false, editePlan: false, droits: { pilotage: ["read"], communication: "*", commercial: "*", operations: ["read", "create", "update"], ressources: ["read"], finance: ["read"], ia: ["read", "create"], plan: ["read"] }, compteDemo: { email: "commercial@matocha.demo", poste: "head_sales" } },
+    { id: "manager", libelle: "Manager", description: "Son équipe : présences, congés à valider, heures.", voitSalaires: false, editePlan: false, droits: { pilotage: ["read"], communication: ["read", "create", "update"], operations: ["read", "update"], rh: ["read"], ressources: ["read"], ia: ["read", "create"], plan: ["read"] }, compteDemo: { email: "manager@matocha.demo", poste: "head_brand" } },
+    { id: "employe", libelle: "Collaborateur", description: "Ses propres données, map, annuaire.", voitSalaires: false, editePlan: false, droits: { pilotage: ["read"], communication: ["read", "create"], operations: ["read"], ressources: ["read"], ia: ["read", "create"], plan: ["read"] }, compteDemo: { email: "employe@matocha.demo", poste: "preparateur" } },
+    { id: "lecture", libelle: "Lecture seule", description: "Map et tableaux de bord, sans données personnelles sensibles.", voitSalaires: false, editePlan: false, droits: { pilotage: ["read"], plan: ["read"] }, compteDemo: { email: "lecture@matocha.demo" } },
   ],
+
+  objectifCaJournalierHT: 9000,
 
   hud: {
     miseEnPage: "hybride",

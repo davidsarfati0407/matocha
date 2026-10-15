@@ -48,12 +48,21 @@ export const stageSchema = z.object({
   dureeCibleH: z.number().positive(),
 });
 
+export const moduleSchema = z.enum([
+  "pilotage", "communication", "commercial", "operations", "rh", "salaires",
+  "finance", "ressources", "ia", "organisation", "plan",
+]);
+export const actionSchema = z.enum(["read", "create", "update", "delete", "export"]);
+
 export const roleSchema = z.object({
   id,
   libelle: z.string(),
   description: z.string(),
   voitSalaires: z.boolean(),
   editePlan: z.boolean(),
+  /** Matrice module × actions. "*" = toutes les actions. */
+  droits: z.record(moduleSchema, z.union([z.literal("*"), z.array(actionSchema)])),
+  compteDemo: z.object({ email: z.string().email(), poste: id.optional() }),
 });
 
 export const posteSchema = z.object({
@@ -163,6 +172,7 @@ export const sectorConfigSchema = z.object({
     z.object({ id, nom: z.string(), mode: z.enum(["simule", "connecte"]), usage: z.string() }),
   ),
   roles: z.array(roleSchema),
+  objectifCaJournalierHT: z.number().positive(),
   hud: z.object({ miseEnPage: z.enum(["A", "B", "hybride"]), description: z.string() }),
 });
 
