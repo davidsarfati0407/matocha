@@ -62,7 +62,7 @@ export const NAV: NavGroup[] = [
       { href: "/finance/invoices", label: "Factures", icon: "file", module: "finance", counter: "invoices_overdue" },
       { href: "/finance/payments", label: "Paiements", icon: "bank", module: "finance" },
       { href: "/finance/dunning", label: "Relances", icon: "bell", module: "finance", counter: "dunning_due" },
-      { href: "/finance/expenses", label: "Notes de frais", icon: "receipt", module: "finance", counter: "expenses_pending" },
+      { href: "/finance/expenses", label: "Notes de frais", icon: "receipt", module: "pilotage", counter: "expenses_pending" } /* chacun voit les siennes (RLS) */,
       { href: "/finance/treasury", label: "Trésorerie", icon: "chart", module: "finance" },
     ],
   },

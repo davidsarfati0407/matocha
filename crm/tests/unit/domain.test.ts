@@ -142,3 +142,51 @@ describe("étapes et planning", () => {
     expect(overlaps({ start: "10:00", end: "11:00" }, { start: "11:00", end: "12:00" })).toBe(false);
   });
 });
+
+import { buildFacturX, checkFacturX } from "@/lib/domain/facturx";
+describe("Factur-X", () => {
+  const inv = { number: "F-2026-0001", kind: "facture" as const, issuedOn: "2026-10-15", dueOn: "2026-11-14", currency: "EUR", seller: { name: "MATOCHA SAS", vatNumber: "FR00000000000", address: "14 rue des Glycines", country: "FR" }, buyer: { name: "Café <Test> & Co", city: "Lyon", country: "FR" }, vatByRate: [{ rate: 0.055, base: 1000, vat: 55 }, { rate: 0.2, base: 100, vat: 20 }], ht: 1100, vat: 75, ttc: 1175, paid: 175 };
+  it("produit un CII BASIC WL cohérent et échappé", () => {
+    const x = buildFacturX(inv);
+    expect(x).toContain("urn:factur-x.eu:1p0:basicwl");
+    expect(x).toContain("<ram:TypeCode>380</ram:TypeCode>");
+    expect(x).toContain("20261015");
+    expect(x).toContain("Café &lt;Test&gt; &amp; Co");
+    expect(x).toContain("<ram:RateApplicablePercent>5.50</ram:RateApplicablePercent>");
+    expect(x).toContain("<ram:DuePayableAmount>1000.00</ram:DuePayableAmount>");
+    expect(checkFacturX(inv)).toEqual([]);
+  });
+  it("signale une incohérence de totaux", () => {
+    expect(checkFacturX({ ...inv, vat: 74 })).toContain("Somme des TVA ≠ total TVA");
+  });
+});
+
+import { invoiceEntries, isBalanced, paymentEntries } from "@/lib/domain/accounting";
+describe("Export comptable", () => {
+  const base = { number: "F-1", issuedOn: "2026-10-15", client: "Café", ttc: 1175, vatByRate: [{ rate: 0.055, base: 1000, vat: 55 }, { rate: 0.2, base: 100, vat: 20 }] };
+  it("facture : 411 au débit, produits et TVA par taux au crédit, équilibrée", () => {
+    const l = invoiceEntries({ ...base, kind: "facture" });
+    expect(l.find((x) => x.account === "411000")?.debit).toBe(1175);
+    expect(l.find((x) => x.account === "707100")?.credit).toBe(1000);
+    expect(l.find((x) => x.account === "445712")?.credit).toBe(20);
+    expect(isBalanced(l)).toBe(true);
+  });
+  it("avoir : sens inversé, toujours équilibré", () => {
+    const l = invoiceEntries({ ...base, kind: "avoir" });
+    expect(l.find((x) => x.account === "411000")?.credit).toBe(1175);
+    expect(isBalanced(l)).toBe(true);
+  });
+  it("règlement : 512 / 411", () => {
+    expect(isBalanced(paymentEntries({ invoiceNumber: "F-1", client: "Café", receivedOn: "2026-10-15", amount: 99.99 }))).toBe(true);
+  });
+});
+
+describe("Facture depuis un devis remisé", () => {
+  it("matérialise la remise en lignes par taux, hors heures", () => {
+    const d = invoiceFromWorkOrder({ quoteLines: [{ label: "Box", quantity: 10, unitPrice: 25.5, vatRate: 0.055 }, { label: "Verre", quantity: 4, unitPrice: 9.9, vatRate: 0.2 }], timeEntries: [{ id: "t", hours: 2, billable: true, invoiced: false }], hourlyRate: 65, standardVat: 0.2, reducedVat: 0.055, discountPct: 0.1 });
+    const disc = d.lines.filter((l) => l.unitPrice < 0);
+    expect(disc.map((l) => l.unitPrice)).toEqual([-25.5, -3.96]);
+    expect(d.totals.ht).toBe(395.14);
+    expect(disc[0].label).toBe("Remise 10 % (TVA 5,5 %)");
+  });
+});

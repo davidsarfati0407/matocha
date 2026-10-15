@@ -27,11 +27,20 @@ export interface InvoiceDraft {
 /** Commande → facture : lignes du devis, puis heures facturables non encore facturées (regroupées). */
 export function invoiceFromWorkOrder(o: { quoteLines: QuoteLine[]; amountHt?: number; title?: string; timeEntries: TimeEntry[]; hourlyRate: number; standardVat: number; reducedVat: number; discountPct?: number }): InvoiceDraft {
   const lines: InvoiceDraft["lines"] = o.quoteLines.map((l) => ({ ...l, source: "devis" as const }));
+  // Remise du devis : une ligne négative par taux de TVA, sur les produits du devis seulement.
+  // Les lignes portent ainsi la remise : le PDF et le XML recalculés retombent sur les mêmes totaux.
+  const d = o.discountPct ?? 0;
+  if (d > 0) {
+    const byRate = new Map<number, number>();
+    for (const l of o.quoteLines) byRate.set(l.vatRate, (byRate.get(l.vatRate) ?? 0) + Math.round(l.quantity * l.unitPrice * 100));
+    for (const [rate, cents] of [...byRate].sort(([a], [b]) => a - b))
+      lines.push({ label: `Remise ${Math.round(d * 1000) / 10} % (TVA ${Math.round(rate * 1000) / 10} %)`.replace(/\./g, ","), quantity: 1, unitPrice: -Math.round(cents * d) / 100, vatRate: rate, source: "devis" });
+  }
   if (lines.length === 0 && (o.amountHt ?? 0) > 0) lines.push({ label: o.title ?? "Commande", quantity: 1, unitPrice: o.amountHt!, vatRate: o.reducedVat, source: "montant" });
   const billable = o.timeEntries.filter((t) => t.billable && !t.invoiced && t.hours > 0);
   const hours = Math.round(billable.reduce((s, t) => s + t.hours, 0) * 100) / 100;
   if (hours > 0) lines.push({ label: `Prestations (${hours.toString().replace(".", ",")} h)`, quantity: hours, unitPrice: o.hourlyRate, vatRate: o.standardVat, source: "heures" });
-  const totals = computeTotals(lines as PricedLine[], { discountPct: o.discountPct });
+  const totals = computeTotals(lines as PricedLine[]);
   return { lines, timeEntryIds: billable.map((t) => t.id), totals };
 }
 

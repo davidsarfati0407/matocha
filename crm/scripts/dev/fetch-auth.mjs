@@ -1,0 +1,12 @@
+import { chromium } from "@playwright/test";
+import { writeFileSync } from "node:fs";
+const [, , path, out, role = "Commercial"] = process.argv;
+const browser = await chromium.launch();
+const page = await browser.newPage();
+await page.goto(`http://localhost:3000/login?next=/dashboard`);
+await page.getByRole("button", { name: new RegExp(`^${role}`) }).click();
+await page.waitForURL((u) => !u.pathname.startsWith("/login"));
+const r = await page.request.get(`http://localhost:3000${path}`);
+console.log(r.status(), r.headers()["content-type"]);
+writeFileSync(out, await r.body());
+await browser.close();

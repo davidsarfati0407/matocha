@@ -7,7 +7,7 @@
 select set_config('app.seeding', 'on', false);
 
 insert into public.orgs (id, slug, name, legal_name, country, locale, timezone, currency, vat_standard, vat_reduced, rounding, demo_mode, settings) values
-  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'matocha', 'MATOCHA', 'MATOCHA SAS', 'FR', 'fr-FR', 'Europe/Paris', 'EUR', 0.2, 0.055, 0.01, true, '{"daily_revenue_target":9000,"pickup_time":"15:00","demo_notice":"Projection fictive an 3 — données de démonstration","hourly_rate":65,"payment_terms_days":30,"dunning_days":[1,15,30],"leave_blackouts":[{"from":"12-01","to":"12-24","label":"Pic des fêtes"}],"min_presence":0.5}'::jsonb);
+  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'matocha', 'MATOCHA', 'MATOCHA SAS', 'FR', 'fr-FR', 'Europe/Paris', 'EUR', 0.2, 0.055, 0.01, true, '{"daily_revenue_target":9000,"pickup_time":"15:00","demo_notice":"Projection fictive an 3 — données de démonstration","hourly_rate":65,"payment_terms_days":30,"dunning_days":[1,15,30],"leave_blackouts":[{"from":"12-01","to":"12-24","label":"Pic des fêtes"}],"min_presence":0.5,"cash_opening":52000,"legal":{"address":"14 rue des Glycines, 93100 Montreuil (adresse fictive)","siren":"000 000 000 (fictif)","vat_number":"FR00000000000 (fictif)","iban":"FR76 0000 0000 0000 0000 0000 000 (fictif)","bic":"DEMOFRPPXXX","rcs":"RCS Bobigny (fictif)","capital":"10 000 €"}}'::jsonb);
 
 insert into public.roles (id, org_id, key, label, description, sees_salaries, edits_plan) values
   ('dd6cfe10-dd62-4f72-9ce2-67ae1900b27a', 'af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'direction', 'Direction', 'Accès complet, salaires inclus.', true, true),
@@ -1023,9 +1023,9 @@ insert into public.purchase_orders (org_id, supplier_id, number, status, lines, 
 
 insert into public.invoices (id, org_id, number, client_id, work_order_id, quote_id, status, issued_on, due_on, total_ht, total_vat, total_ttc, paid_amount) values
   ('fe2a538b-a938-421e-b045-c9169c5ce4e0', 'af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'F-2026-0418', 'fefc675c-0584-4c08-af0a-b0f89f283f56', '81cda6a9-60e5-4389-a848-6a5eb27d84bc', null, 'sent', app.local_date(-27), app.local_date(3), 1680, 92.4, 1772.4, 0),
-  ('934bd792-a29e-4f2f-aa19-fab1d5c195ce', 'af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'F-2026-0421', '7ca02feb-f82e-4e38-b939-c87e00416d7e', 'c2262234-8968-4086-b421-caf3035d575a', 'd1f9747d-cbec-4fbb-835e-fc0845639fa3', 'sent', app.local_date(-9), app.local_date(21), 1526.4, 83.95, 1610.35, 0),
-  ('abe34239-172e-484b-9e64-f9dade17d537', 'af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'F-2026-0422', 'ff9babee-e7bd-4c08-a345-79648d7aadb1', 'feaf270f-4f5a-4722-98fa-fe4e3bf5d8ef', 'f2d66dc7-1df3-47e6-b5d1-7f92a2b984be', 'paid', app.local_date(-15), app.local_date(15), 701.4, 38.58, 739.98, 739.98),
-  ('2f901b55-0aaa-40fb-a4ce-ae65b4b4f22b', 'af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'F-2026-0409', '191dc1cb-584d-4b40-aa23-ffbf57d06080', null, null, 'overdue', app.local_date(-52), app.local_date(-22), 1240, 68.2, 1308.2, 0),
+  ('934bd792-a29e-4f2f-aa19-fab1d5c195ce', 'af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'F-2026-0421', '7ca02feb-f82e-4e38-b939-c87e00416d7e', 'c2262234-8968-4086-b421-caf3035d575a', 'd1f9747d-cbec-4fbb-835e-fc0845639fa3', 'sent', app.local_date(-9), app.local_date(21), 1526.4, 101.18, 1627.58, 0),
+  ('abe34239-172e-484b-9e64-f9dade17d537', 'af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'F-2026-0422', 'ff9babee-e7bd-4c08-a345-79648d7aadb1', 'feaf270f-4f5a-4722-98fa-fe4e3bf5d8ef', 'f2d66dc7-1df3-47e6-b5d1-7f92a2b984be', 'paid', app.local_date(-15), app.local_date(15), 701.4, 51.54, 752.94, 752.94),
+  ('2f901b55-0aaa-40fb-a4ce-ae65b4b4f22b', 'af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'F-2026-0409', '191dc1cb-584d-4b40-aa23-ffbf57d06080', null, null, 'overdue', app.local_date(-60), app.local_date(-30), 1240, 68.2, 1308.2, 0),
   ('e5fe8498-777b-4d50-9679-6048737fafe5', 'af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'F-2026-0411', '7d288bff-b5a0-46ae-a53e-db12e29a8279', null, null, 'overdue', app.local_date(-45), app.local_date(-15), 2310, 127.05, 2437.05, 0),
   ('dcb0cfd0-6df2-4c4d-b6eb-e6f678f5eed3', 'af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'F-2026-0414', '4eabdaea-c8ce-4b37-9a01-4d9e57da8e0c', null, null, 'overdue', app.local_date(-38), app.local_date(-8), 980, 53.9, 1033.9, 0),
   ('fe7048e1-d500-414c-a546-85318f234ac0', 'af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'F-2026-0415', 'bc3c88c3-e7f2-4ec5-8bc3-4956ba914a2b', null, null, 'partial', app.local_date(-34), app.local_date(-4), 3150, 173.25, 3323.25, 1500),
@@ -1036,23 +1036,26 @@ insert into public.invoices (id, org_id, number, client_id, work_order_id, quote
   ('b365bb8f-1226-4f9f-a6a5-f5c5f1d659e9', 'af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'F-2026-0412', '5298333f-f85d-4c01-ab7a-c5a82d66ccc5', null, null, 'paid', app.local_date(-41), app.local_date(-11), 4380, 240.9, 4620.9, 4620.9),
   ('0e27b2e5-a59a-4f35-8a04-22af8e29bd10', 'af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'F-2026-0416', '7ca02feb-f82e-4e38-b939-c87e00416d7e', null, null, 'paid', app.local_date(-31), app.local_date(-1), 720, 39.6, 759.6, 759.6);
 
-insert into public.invoice_lines (org_id, invoice_id, label, quantity, unit_price, vat_rate) values
-  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'fe2a538b-a938-421e-b045-c9169c5ce4e0', 'Commande CP-24-0590', 1, 1680, 0.055),
-  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '934bd792-a29e-4f2f-aa19-fab1d5c195ce', 'Commande CP-24-0601', 1, 1526.4, 0.055),
-  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'abe34239-172e-484b-9e64-f9dade17d537', 'Commande CP-24-0598', 1, 701.4, 0.055),
-  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '2f901b55-0aaa-40fb-a4ce-ae65b4b4f22b', 'Commande pro — produits MATOCHA', 1, 1240, 0.055),
-  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'e5fe8498-777b-4d50-9679-6048737fafe5', 'Commande pro — produits MATOCHA', 1, 2310, 0.055),
-  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'dcb0cfd0-6df2-4c4d-b6eb-e6f678f5eed3', 'Commande pro — produits MATOCHA', 1, 980, 0.055),
-  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'fe7048e1-d500-414c-a546-85318f234ac0', 'Commande pro — produits MATOCHA', 1, 3150, 0.055),
-  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '974c0fb2-8cfa-4413-a8aa-1712fa29a908', 'Commande pro — produits MATOCHA', 1, 860, 0.055),
-  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'd021d4e1-9c00-4464-b60c-023100678fc0', 'Commande pro — produits MATOCHA', 1, 1420, 0.055),
-  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '06046248-6c13-48d4-ac08-bd9f891bbc31', 'Commande pro — produits MATOCHA', 1, 2140, 0.055),
-  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '21a405da-4688-4d0d-bccd-2732cf599acc', 'Commande pro — produits MATOCHA', 1, 1590, 0.055),
-  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'b365bb8f-1226-4f9f-a6a5-f5c5f1d659e9', 'Commande pro — produits MATOCHA', 1, 4380, 0.055),
-  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '0e27b2e5-a59a-4f35-8a04-22af8e29bd10', 'Commande pro — produits MATOCHA', 1, 720, 0.055);
+insert into public.invoice_lines (org_id, invoice_id, label, quantity, unit_price, vat_rate, position) values
+  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'fe2a538b-a938-421e-b045-c9169c5ce4e0', 'Commande pro — produits MATOCHA', 1, 1680, 0.055, default),
+  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '934bd792-a29e-4f2f-aa19-fab1d5c195ce', 'Daily Box — 30 sticks × 2 g', 36, 25.5, 0.055, 0),
+  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '934bd792-a29e-4f2f-aa19-fab1d5c195ce', 'Discovery Box — 10 sticks × 2 g', 48, 10.2, 0.055, 1),
+  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '934bd792-a29e-4f2f-aa19-fab1d5c195ce', 'Verre MATOCHA', 12, 9.9, 0.2, 2),
+  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'abe34239-172e-484b-9e64-f9dade17d537', 'Daily Box — 30 sticks × 2 g', 24, 25.5, 0.055, 0),
+  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'abe34239-172e-484b-9e64-f9dade17d537', 'Fouet électrique', 6, 14.9, 0.2, 1),
+  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '2f901b55-0aaa-40fb-a4ce-ae65b4b4f22b', 'Commande pro — produits MATOCHA', 1, 1240, 0.055, default),
+  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'e5fe8498-777b-4d50-9679-6048737fafe5', 'Commande pro — produits MATOCHA', 1, 2310, 0.055, default),
+  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'dcb0cfd0-6df2-4c4d-b6eb-e6f678f5eed3', 'Commande pro — produits MATOCHA', 1, 980, 0.055, default),
+  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'fe7048e1-d500-414c-a546-85318f234ac0', 'Commande pro — produits MATOCHA', 1, 3150, 0.055, default),
+  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '974c0fb2-8cfa-4413-a8aa-1712fa29a908', 'Commande pro — produits MATOCHA', 1, 860, 0.055, default),
+  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'd021d4e1-9c00-4464-b60c-023100678fc0', 'Commande pro — produits MATOCHA', 1, 1420, 0.055, default),
+  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '06046248-6c13-48d4-ac08-bd9f891bbc31', 'Commande pro — produits MATOCHA', 1, 2140, 0.055, default),
+  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '21a405da-4688-4d0d-bccd-2732cf599acc', 'Commande pro — produits MATOCHA', 1, 1590, 0.055, default),
+  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'b365bb8f-1226-4f9f-a6a5-f5c5f1d659e9', 'Commande pro — produits MATOCHA', 1, 4380, 0.055, default),
+  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '0e27b2e5-a59a-4f35-8a04-22af8e29bd10', 'Commande pro — produits MATOCHA', 1, 720, 0.055, default);
 
 insert into public.payments (org_id, invoice_id, amount, received_on, method, reference) values
-  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'abe34239-172e-484b-9e64-f9dade17d537', 739.98, app.local_date(-1), 'virement', 'VIR F-2026-0422'),
+  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'abe34239-172e-484b-9e64-f9dade17d537', 752.94, app.local_date(-1), 'virement', 'VIR F-2026-0422'),
   ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'fe7048e1-d500-414c-a546-85318f234ac0', 1500, app.local_date(-7), 'virement', 'VIR F-2026-0415'),
   ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '974c0fb2-8cfa-4413-a8aa-1712fa29a908', 907.3, app.local_date(-43), 'virement', 'VIR F-2026-0401'),
   ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'd021d4e1-9c00-4464-b60c-023100678fc0', 1498.1, app.local_date(-39), 'virement', 'VIR F-2026-0403'),
@@ -1062,8 +1065,8 @@ insert into public.payments (org_id, invoice_id, amount, received_on, method, re
   ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '0e27b2e5-a59a-4f35-8a04-22af8e29bd10', 759.6, app.local_date(-4), 'virement', 'VIR F-2026-0416');
 
 insert into public.dunning_steps (org_id, invoice_id, level, sent_at, due_at) values
-  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '2f901b55-0aaa-40fb-a4ce-ae65b4b4f22b', 1, app.local_ts(-15, '09:00'), app.local_ts(-15, '09:00')),
-  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '2f901b55-0aaa-40fb-a4ce-ae65b4b4f22b', 2, app.local_ts(-5, '09:00'), app.local_ts(-5, '09:00')),
+  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '2f901b55-0aaa-40fb-a4ce-ae65b4b4f22b', 1, app.local_ts(-29, '09:00'), app.local_ts(-29, '09:00')),
+  ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '2f901b55-0aaa-40fb-a4ce-ae65b4b4f22b', 2, app.local_ts(-15, '09:00'), app.local_ts(-15, '09:00')),
   ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', '2f901b55-0aaa-40fb-a4ce-ae65b4b4f22b', 3, default, app.local_ts(0, '09:00')),
   ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'e5fe8498-777b-4d50-9679-6048737fafe5', 1, app.local_ts(-8, '09:00'), app.local_ts(-8, '09:00')),
   ('af42ec17-371d-4e1a-91bd-e0c06be6ab01', 'e5fe8498-777b-4d50-9679-6048737fafe5', 2, default, app.local_ts(0, '09:00')),

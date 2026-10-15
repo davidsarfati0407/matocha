@@ -43,3 +43,45 @@ test("stock bas → réapprovisionnement en un clic → envoi → réception : l
   await page.screenshot({ path: "test-results/bo-stock-after.png", caret: "initial" });
   expect(errors).toEqual([]);
 });
+
+test("devis accepté → commande pro → étapes → heures facturables → facture → paiement lettré (camt.054), sans ressaisie", async ({ page }) => {
+  test.setTimeout(300_000);
+  const errors = watchErrors(page);
+  await login(page, "Direction", "/crm/quotes");
+  await page.getByRole("row", { name: /Q-2026-0141/ }).click();
+  await page.getByRole("button", { name: /Accepté → créer la commande/ }).click();
+  await expect(page.getByText(/créée automatiquement/).first()).toBeVisible();
+  const woLink = page.getByRole("link", { name: /^Commande CP-24-/ });
+  const woNumber = (await woLink.textContent())!.replace("Commande ", "").trim();
+  await woLink.click();
+  await page.waitForURL(/\/ops\/work-orders\//);
+  for (const stage of ["Préparation", "Contrôle", "Expédition", "Livrée"]) {
+    await page.getByRole("button", { name: `Passer à « ${stage} »` }).click();
+    await expect(page.getByText(`Étape : ${stage}`).first()).toBeVisible();
+  }
+  await expect(page.getByRole("button", { name: "Facturer" })).toBeVisible();
+  await page.getByRole("navigation", { name: "Onglets" }).getByRole("link", { name: /^Heures/ }).click();
+  await page.getByLabel("Heures").fill("1.5");
+  await page.getByLabel("Note").fill("Formation sur site");
+  await page.getByText("Facturable au client").click();
+  await page.getByRole("button", { name: "Enregistrer" }).click();
+  await expect(page.getByText(/Formation sur site/).first()).toBeVisible();
+  await page.getByRole("button", { name: "Facturer" }).click();
+  await page.waitForURL(/\/finance\/invoices\//);
+  await expect(page.getByText(/Prestations \(1,5 h\)/)).toBeVisible();
+  await expect(page.getByRole("link", { name: woNumber })).toBeVisible();
+  const invNumber = (await page.locator("h1 .font-mono").textContent())!.trim();
+  await page.getByRole("button", { name: "Envoyer" }).click();
+  await expect(page.getByText(/Factur-X \(e-mail simulé\)/)).toBeVisible();
+  await page.goto("/finance/payments");
+  await page.getByRole("button", { name: "Relevé d'exemple" }).click();
+  await expect(page.getByText(/par référence|par montant/).first()).toBeVisible();
+  await expect(page.getByText("à affecter")).toBeVisible();
+  await page.getByRole("button", { name: /Lettrer \d+ paiement/ }).click();
+  await expect(page.getByText(/paiement\(s\) lettré/)).toBeVisible();
+  await page.goto("/finance/invoices?status=paid");
+  await expect(page.getByRole("row").filter({ hasText: invNumber })).toBeVisible();
+  await page.waitForLoadState("networkidle");
+  await page.screenshot({ path: "test-results/bo-invoice-paid.png", caret: "initial" });
+  expect(errors).toEqual([]);
+});

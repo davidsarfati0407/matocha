@@ -99,7 +99,7 @@ insert("orgs", [
     vat_reduced: C.entreprise.tva.reduit,
     rounding: C.entreprise.tva.arrondi,
     demo_mode: true,
-    settings: json({ daily_revenue_target: C.objectifCaJournalierHT, pickup_time: "15:00", demo_notice: C.entreprise.statutDemo, hourly_rate: 65, payment_terms_days: 30, dunning_days: [1, 15, 30], leave_blackouts: [{ from: "12-01", to: "12-24", label: "Pic des fêtes" }], min_presence: 0.5 }),
+    settings: json({ daily_revenue_target: C.objectifCaJournalierHT, pickup_time: "15:00", demo_notice: C.entreprise.statutDemo, hourly_rate: 65, payment_terms_days: 30, dunning_days: [1, 15, 30], leave_blackouts: [{ from: "12-01", to: "12-24", label: "Pic des fêtes" }], min_presence: 0.5, cash_opening: 52000, legal: { address: C.lieux[0].adresse, siren: "000 000 000 (fictif)", vat_number: "FR00000000000 (fictif)", iban: "FR76 0000 0000 0000 0000 0000 000 (fictif)", bic: "DEMOFRPPXXX", rcs: "RCS Bobigny (fictif)", capital: "10 000 €" } }),
   },
 ]);
 
@@ -730,7 +730,7 @@ const invoices: { n: string; client: string; wo?: string; quote?: string; status
   { n: "F-2026-0418", client: "tilleuls", wo: "CP-24-0590", status: "sent", issued: -27, due: 3, ht: 1680 },
   { n: "F-2026-0421", client: "seve", wo: "CP-24-0601", quote: "Q-2026-0133", status: "sent", issued: -9, due: 21, ht: quoteTotals.get("Q-2026-0133")!.ht },
   { n: "F-2026-0422", client: "ondine", wo: "CP-24-0598", quote: "Q-2026-0131", status: "paid", issued: -15, due: 15, ht: quoteTotals.get("Q-2026-0131")!.ht },
-  { n: "F-2026-0409", client: "canal", status: "overdue", issued: -52, due: -22, ht: 1240 },
+  { n: "F-2026-0409", client: "canal", status: "overdue", issued: -60, due: -30, ht: 1240 },
   { n: "F-2026-0411", client: "zen", status: "overdue", issued: -45, due: -15, ht: 2310 },
   { n: "F-2026-0414", client: "verlaine", status: "overdue", issued: -38, due: -8, ht: 980 },
   { n: "F-2026-0415", client: "belvedere", status: "partial", issued: -34, due: -4, ht: 3150, paid: 1500 },
@@ -745,18 +745,21 @@ const invRows: Row[] = [];
 const invLines: Row[] = [];
 const payRows: Row[] = [];
 for (const inv of invoices) {
-  const t = computeTotals([{ quantity: 1, unitPrice: inv.ht, vatRate: R }]);
+  // Facture issue d'un devis : mêmes lignes et mêmes totaux (comme le fait l'application)
+  const ql = inv.quote ? quotes.find((x) => x.k === inv.quote)! : null;
+  const t = ql ? quoteTotals.get(ql.k)! : computeTotals([{ quantity: 1, unitPrice: inv.ht, vatRate: R }]);
   const paid = inv.status === "paid" ? t.ttc : inv.paid ?? 0;
   invRows.push({ id: uid(`inv:${inv.n}`), org_id: ORG, number: inv.n, client_id: CL(inv.client), work_order_id: inv.wo ? WOID(inv.wo) : null, quote_id: inv.quote ? uid(`quote:${inv.quote}`) : null, status: inv.status, issued_on: date(inv.issued), due_on: date(inv.due), total_ht: t.ht, total_vat: t.vat, total_ttc: t.ttc, paid_amount: paid });
-  invLines.push({ org_id: ORG, invoice_id: uid(`inv:${inv.n}`), label: inv.wo ? `Commande ${inv.wo}` : "Commande pro — produits MATOCHA", quantity: 1, unit_price: inv.ht, vat_rate: R });
+  if (ql) ql.lines.forEach(([sku, qty], i) => invLines.push({ org_id: ORG, invoice_id: uid(`inv:${inv.n}`), label: cat(sku).name, quantity: qty, unit_price: cat(sku).price, vat_rate: cat(sku).vat, position: i }));
+  else invLines.push({ org_id: ORG, invoice_id: uid(`inv:${inv.n}`), label: "Commande pro — produits MATOCHA", quantity: 1, unit_price: inv.ht, vat_rate: R });
   if (paid > 0) payRows.push({ org_id: ORG, invoice_id: uid(`inv:${inv.n}`), amount: paid, received_on: date(Math.min(-1, inv.due - 3)), method: "virement", reference: `VIR ${inv.n}` });
 }
 insert("invoices", invRows);
 insert("invoice_lines", invLines);
 insert("payments", payRows);
 insert("dunning_steps", [
-  { org_id: ORG, invoice_id: uid("inv:F-2026-0409"), level: 1, sent_at: ts(-15, "09:00"), due_at: ts(-15, "09:00") },
-  { org_id: ORG, invoice_id: uid("inv:F-2026-0409"), level: 2, sent_at: ts(-5, "09:00"), due_at: ts(-5, "09:00") },
+  { org_id: ORG, invoice_id: uid("inv:F-2026-0409"), level: 1, sent_at: ts(-29, "09:00"), due_at: ts(-29, "09:00") },
+  { org_id: ORG, invoice_id: uid("inv:F-2026-0409"), level: 2, sent_at: ts(-15, "09:00"), due_at: ts(-15, "09:00") },
   { org_id: ORG, invoice_id: uid("inv:F-2026-0409"), level: 3, due_at: ts(0, "09:00") },
   { org_id: ORG, invoice_id: uid("inv:F-2026-0411"), level: 1, sent_at: ts(-8, "09:00"), due_at: ts(-8, "09:00") },
   { org_id: ORG, invoice_id: uid("inv:F-2026-0411"), level: 2, due_at: ts(0, "09:00") },
