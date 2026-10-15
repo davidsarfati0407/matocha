@@ -323,8 +323,9 @@ avec `SEED_DEMO=1` et une base vide, les données fictives. Les relances suivant
    - `SEED_DEMO` = `1`.
    L'intégration Supabase de Vercel (Marketplace) pose ces variables elle-même ; le script lit aussi
    `POSTGRES_URL_NON_POOLING` / `POSTGRES_URL`.
-4. **Branche** : Settings → Git → *Production Branch* = la branche qui contient `crm/`, puis
-   *Deployments → Redeploy*.
+4. **Branche** : Vercel ne voit une branche qu'après un push postérieur à la création du projet.
+   Poussez un commit sur la branche qui contient `crm/` (un déploiement *Preview* apparaît), puis
+   Settings → Environments → Production → *Branch Tracking* = cette branche.
 5. Ouvrez `https://<projet>.vercel.app/login` et cliquez sur un compte de démo.
 
 Limites du plan gratuit : le cron Vercel du worker d'intégrations passe une fois par jour (le plan
