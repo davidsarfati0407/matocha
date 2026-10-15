@@ -132,8 +132,8 @@ export async function savePlan(siteId: string, layout: unknown, publish: boolean
 
 /** Marquer une salle occupée maintenant (crée la réservation ; conflits refusés). */
 export async function occupyRoom(assetId: string, minutes: number, title?: string): Promise<ActionResult> {
+  // Pas d'arrondi à la minute : une salle qu'on vient de libérer (fin = maintenant) doit pouvoir être reprise aussitôt
   const start = new Date();
-  start.setSeconds(0, 0);
   const end = new Date(start.getTime() + Math.min(240, Math.max(15, minutes)) * 60_000);
   return createEvent({ title: title?.trim() || "Salle occupée (depuis la map)", type: "reunion", starts_at: start.toISOString(), ends_at: end.toISOString(), resource_id: assetId });
 }

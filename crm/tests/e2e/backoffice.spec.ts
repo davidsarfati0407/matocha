@@ -138,8 +138,11 @@ test("intégrations : un envoi passe par la file (connecteur simulé, affiché c
   const errors = watchErrors(page);
   await login(page, "Direction", "/comms/inbox");
   await page.getByRole("link", { name: /Yoga Shala Marais/ }).click();
-  await page.getByRole("button", { name: "Proposer un brouillon" }).click();
-  await expect(page.getByText(/Modèle \(IA non configurée\)|Rédigé par l'IA/)).toBeVisible();
+  // un clic avant l'hydratation du fil est perdu : on réessaie jusqu'à voir le brouillon
+  await expect(async () => {
+    await page.getByRole("button", { name: "Proposer un brouillon" }).click();
+    await expect(page.getByText(/Modèle \(IA non configurée\)|Rédigé par l'IA/)).toBeVisible({ timeout: 5000 });
+  }).toPass({ timeout: 60_000 });
   await page.getByRole("button", { name: "Envoyer" }).click();
   await expect(page.getByText(/Réponse envoyée à .* \(mode simulé\)/)).toBeVisible();
   await page.goto("/settings/integrations");
