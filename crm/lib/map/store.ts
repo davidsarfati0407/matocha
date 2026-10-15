@@ -41,6 +41,8 @@ interface MapState {
   notices: Notice[];
   flash: Record<string, number>;
   editMode: boolean;
+  /** Navigation en cours vers le back-office : la boucle de rendu s'arrête (transition fluide). */
+  leaving: boolean;
   engineReady: boolean;
   /** Objet du plan en cours d'édition (mode édition). */
   editTarget: string | null;
@@ -75,6 +77,7 @@ export const useMap = create<MapState>((set, get) => ({
   notices: [],
   flash: {},
   editMode: false,
+  leaving: false,
   engineReady: false,
   editTarget: null,
   transformMode: "translate",

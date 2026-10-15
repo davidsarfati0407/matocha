@@ -95,6 +95,65 @@ test("une modification faite hors de la map (étape d'une commande) s'y voit en 
   console.log(`Délai back-office → map : ${Date.now() - t0} ms (mode sondage 1 s, rendu logiciel)`);
 });
 
+test("map → base : occuper une salle crée une vraie réservation, visible dans le planning du back-office", async ({ page }) => {
+  await openMap(page);
+  await page.keyboard.press("/");
+  await page.keyboard.type("Salle Uji");
+  await page.keyboard.press("Enter");
+  const panel = page.getByRole("complementary", { name: /Fiche : Salle Uji/ });
+  await expect(panel).toBeVisible();
+  const busy = panel.getByRole("button", { name: "Libérer maintenant" });
+  if (await busy.isVisible()) {
+    await busy.click();
+    await expect(panel.getByRole("button", { name: "Occuper 30 min" })).toBeVisible({ timeout: 15_000 });
+  }
+  await panel.getByRole("button", { name: "Occuper 30 min" }).click();
+  await expect(panel.getByText("Occupée")).toBeVisible({ timeout: 15_000 });
+  await page.goto("/ops/planning?kind=salle");
+  await expect(page.getByText("Salle occupée (depuis la map)").first()).toBeVisible();
+});
+
+test("glisser-déposer : un véhicule déposé sur une personne de la map lui est affecté en base", async ({ page }) => {
+  await openMap(page);
+  await page.keyboard.press("/");
+  await page.keyboard.type("Vélo-cargo");
+  await page.keyboard.press("Enter");
+  const panel = page.getByRole("complementary", { name: /Fiche : Vélo-cargo/ });
+  await expect(panel).toBeVisible();
+  // En simtest la simulation n'avance qu'au rendu : quelques images pour placer les personnes
+  for (let i = 0; i < 6; i++) {
+    await page.evaluate(() => (window as unknown as { __render: () => void }).__render());
+    await page.waitForTimeout(400);
+  }
+  // Position à l'écran d'une personne visible (projection de sa position 3D)
+  const target = await page.evaluate(() => {
+    type P = { kind: string; entityType: string; entityId: string; label: string; object: unknown };
+    const m = (window as unknown as { __map: { world: { pickables: Map<string, P> }; objectPosition: (id: string) => { clone: () => { project: (c: unknown) => { x: number; y: number; z: number } } } | null; camera: unknown; pickAt: (v: unknown) => P | null } }).__map;
+    const canvas = document.querySelector("canvas")!.getBoundingClientRect();
+    for (const [id, p] of m.world.pickables) {
+      if (p.kind !== "person" || !(p.object as { visible: boolean }).visible) continue;
+      const pos = m.objectPosition(id);
+      if (!pos) continue;
+      const v = pos.clone().project(m.camera);
+      if (v.z > 1 || Math.abs(v.x) > 0.9 || Math.abs(v.y) > 0.9) continue;
+      // on ne garde qu'une personne réellement visible (non masquée) à ce point
+      if (m.pickAt({ x: v.x, y: v.y })?.entityId !== p.entityId) continue;
+      const x = canvas.left + ((v.x + 1) / 2) * canvas.width;
+      const y = canvas.top + ((1 - v.y) / 2) * canvas.height;
+      return { x, y, id: p.entityId, label: p.label };
+    }
+    return null;
+  });
+  expect(target).not.toBeNull();
+  const dt = await page.evaluateHandle(() => new DataTransfer());
+  await panel.getByText("⠿ Glisser").dispatchEvent("dragstart", { dataTransfer: dt });
+  await page.locator("main").dispatchEvent("dragover", { dataTransfer: dt, clientX: target!.x, clientY: target!.y });
+  await page.locator("main").dispatchEvent("drop", { dataTransfer: dt, clientX: target!.x, clientY: target!.y });
+  await expect(page.getByText("Affectation enregistrée").first()).toBeVisible({ timeout: 15_000 });
+  await expect(panel.getByLabel("Affecter à")).toHaveValue(target!.id, { timeout: 15_000 });
+  test.info().annotations.push({ type: "déposé sur", description: target!.label });
+});
+
 test("visite guidée (T) puis arrêt (Échap)", async ({ page }) => {
   await openMap(page);
   await page.keyboard.press("t");

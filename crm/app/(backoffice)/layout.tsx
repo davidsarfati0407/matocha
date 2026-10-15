@@ -1,3 +1,4 @@
+import { ViewTransition } from "react";
 import { Shell } from "@/components/backoffice/Shell";
 import { getCtx } from "@/lib/backoffice/context";
 import { NAV } from "@/lib/backoffice/nav";
@@ -20,7 +21,9 @@ export default async function BackOfficeLayout({ children }: { children: React.R
       .filter((i) => (ctx.can(i.module) && (!i.requiresSalaries || ctx.role.seesSalaries)) || (i.alsoFor && ctx.can(i.alsoFor)))
       .map((i) => ({ href: i.href, label: i.label, icon: i.icon, count: i.counter === "todo" ? todo : i.counter ? c[i.counter] ?? 0 : 0 })),
   })).filter((g) => g.items.length);
+  // Transition douce map ↔ back-office : ce layout n'entre/sort qu'au changement de face
   return (
+    <ViewTransition enter="face-bo-enter" exit="face-bo-exit" default="none">
     <Shell
       nav={nav}
       user={{ name: ctx.fullName, role: ctx.role.label, status: (presence.data as { status?: string } | null)?.status ?? null }}
@@ -32,5 +35,6 @@ export default async function BackOfficeLayout({ children }: { children: React.R
       {children}
       <Toaster />
     </Shell>
+    </ViewTransition>
   );
 }

@@ -83,6 +83,8 @@ export const kpiSchema = z.object({
   unite: z.enum(["nombre", "pourcent", "eur"]),
   sousTitre: z.string(),
   source: z.string().describe("vue SQL ou fonction Postgres qui calcule la valeur"),
+  /** Page du back-office ouverte au clic sur le KPI (map et tableau de bord). */
+  lien: z.string().startsWith("/").optional(),
 });
 
 export const liveEventSchema = z.object({

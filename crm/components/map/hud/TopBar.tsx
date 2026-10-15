@@ -184,7 +184,7 @@ function ZoneSelector() {
 function LiveClock() {
   const now = useNow(1000);
   const mode = useMap((s) => s.realtime);
-  const title = mode === "temps_reel" ? "Temps réel Supabase" : mode === "sondage" ? "Mode simulé du temps réel : sondage toutes les secondes (pas de serveur Realtime local)" : "Connexion…";
+  const title = mode === "temps_reel" ? (process.env.NEXT_PUBLIC_REALTIME === "sse" ? "Temps réel : flux SSE alimenté par Postgres LISTEN/NOTIFY" : "Temps réel Supabase") : mode === "sondage" ? "Mode simulé du temps réel : sondage toutes les secondes (pas de serveur Realtime local)" : "Connexion…";
   return (
     <div title={title} className="flex h-9 items-center gap-2 rounded-xl bg-ok/10 px-3 text-[13px] font-semibold text-ok">
       <span className="relative flex size-2">

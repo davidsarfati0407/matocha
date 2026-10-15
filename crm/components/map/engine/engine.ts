@@ -244,6 +244,7 @@ export class MapEngine {
   objectPosition(pickId: string): THREE.Vector3 | null {
     const p = this.world.pickables.get(pickId);
     if (!p) return null;
+    p.object.updateWorldMatrix(true, true); // matrices à jour même sans rendu récent (rendu à la demande)
     return this.tmpBox.setFromObject(p.object).getCenter(new THREE.Vector3());
   }
 }

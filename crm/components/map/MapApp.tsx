@@ -5,7 +5,7 @@
  * scénario de démonstration.
  */
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { sectorConfig } from "@/config/sector.config";
 import { formatTime } from "@/lib/format";
@@ -13,6 +13,8 @@ import { createClient } from "@/lib/supabase/client";
 import { subscribeActivity, type ActivityEvent } from "@/lib/map/realtime";
 import { Scenario } from "@/lib/map/scenario";
 import { loadSnapshot, type MapSnapshot } from "@/lib/map/snapshot";
+import { assignAsset } from "@/app/(map)/map/actions";
+import { ASSET_DRAG } from "./hud/DetailPanel";
 import { useMap } from "@/lib/map/store";
 import type { LabelRefs, MapEngine } from "./engine/engine";
 import { engineRef } from "./engine/engine";
@@ -166,12 +168,57 @@ export default function MapApp({ initial, focus }: { initial: MapSnapshot; focus
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // Clic sur un lien interne : on fige le rendu pour que la transition vers le back-office soit fluide
+  useEffect(() => {
+    const onClick = (ev: MouseEvent) => {
+      if (ev.defaultPrevented || ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+      const a = (ev.target as HTMLElement | null)?.closest?.("a[href^='/']") as HTMLAnchorElement | null;
+      if (a && !a.target && !a.getAttribute("href")?.startsWith("/map/")) useMap.getState().set({ leaving: true });
+    };
+    document.addEventListener("click", onClick, true);
+    return () => {
+      document.removeEventListener("click", onClick, true);
+      useMap.getState().set({ leaving: false });
+    };
+  }, []);
+
+  // La scène WebGL se monte juste après la transition d'arrivée : la mise à jour du DOM reste
+  // légère (sinon le navigateur abandonne la transition sur une machine lente).
+  const [show3d, setShow3d] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => requestAnimationFrame(() => setShow3d(true)));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  /** Glisser-déposer d'un véhicule (puce de la fiche) sur une personne de la map → affectation en base. */
+  const pickUnder = (ev: React.DragEvent) => {
+    const r = (ev.currentTarget as HTMLElement).getBoundingClientRect();
+    const ndc = new THREE.Vector2(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+    return engineRef.current?.pickAt(ndc) ?? null;
+  };
+  const onAssetDragOver = (ev: React.DragEvent) => {
+    if (!ev.dataTransfer.types.includes(ASSET_DRAG)) return;
+    ev.preventDefault();
+    const p = pickUnder(ev);
+    ev.dataTransfer.dropEffect = p?.entityType === "employees" ? "link" : "none";
+    engineRef.current?.setHover(p?.entityType === "employees" ? p : null);
+  };
+  const onAssetDrop = (ev: React.DragEvent) => {
+    const assetId = ev.dataTransfer.getData(ASSET_DRAG);
+    if (!assetId) return;
+    ev.preventDefault();
+    const p = pickUnder(ev);
+    engineRef.current?.setHover(null);
+    if (p?.entityType !== "employees") return useMap.getState().toast({ title: "Déposez le véhicule sur une personne", tone: "warn" });
+    void assignAsset(assetId, p.entityId).then((r) => useMap.getState().toast(r.ok ? { title: r.message ?? "Affecté", detail: p.label, tone: "ok" } : { title: "Affectation refusée", detail: r.error, tone: "warn" }));
+  };
+
   const hoverLabel = hovered && hovered !== selection?.pickId ? engineRef.current?.world.pickables.get(hovered) : null;
   const hoverStatus = hoverLabel?.kind === "person" ? statusLabel(useMap.getState().snapshot, hoverLabel.entityId) : "";
 
   return (
-    <main className="relative h-dvh w-full overflow-hidden bg-ground">
-      <Scene layout={initial.plan.layout} labels={labels} onReady={onReady} />
+    <main className="relative h-dvh w-full overflow-hidden bg-ground" onDragOver={onAssetDragOver} onDrop={onAssetDrop}>
+      {show3d && <Scene layout={initial.plan.layout} labels={labels} onReady={onReady} />}
 
       {/* Étiquettes projetées (HTML), repositionnées à chaque image par le moteur */}
       <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden">
@@ -290,6 +337,20 @@ function toastFor(e: ActivityEvent, s: MapSnapshot | null): { title: string; det
       return { title: "Congé validé", tone: "ok" };
     case "invoice.paid":
       return { title: "Paiement reçu", tone: "ok" };
+    case "room.insert": {
+      const a = s?.assets.find((x) => x.id === e.entity_id);
+      return { title: `${a?.name ?? "Salle"} réservée`, detail: `${p.title} · ${formatTime(String(p.starts_at))}–${formatTime(String(p.ends_at))}`, tone: "info" };
+    }
+    case "room.delete": {
+      const a = s?.assets.find((x) => x.id === e.entity_id);
+      return { title: `${a?.name ?? "Salle"} libérée`, tone: "info" };
+    }
+    case "asset.assigned": {
+      const who = s?.employees.find((x) => x.id === p.employee_id);
+      return { title: `${p.name} affecté`, detail: who ? `à ${who.firstName} ${who.lastName}` : "affectation retirée", tone: "accent" };
+    }
+    case "stock.entree":
+      return { title: "Entrée en stock", detail: String(p.reason ?? ""), tone: "ok" };
     default:
       return null;
   }

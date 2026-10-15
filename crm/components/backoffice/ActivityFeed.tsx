@@ -28,6 +28,11 @@ const LABEL: Record<string, string> = {
   "stock.entree": "Entrée de stock",
   "stock.sortie": "Sortie de stock",
   "invoice.overdue": "Facture échue",
+  "room.insert": "Salle réservée",
+  "room.update": "Réservation modifiée",
+  "room.delete": "Salle libérée",
+  "booking.created": "Réservation d'équipement",
+  "asset.assigned": "Matériel affecté",
   "quote.draft": "Devis créé",
   "leave.rejected": "Congé refusé",
 };

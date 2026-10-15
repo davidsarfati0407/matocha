@@ -166,9 +166,10 @@ const LOW = params?.get("quality") === "low";
 const SIMTEST = params?.get("simtest") === "1";
 
 export default function Scene({ layout, labels, onReady }: { layout: FloorPlanLayout; labels: React.RefObject<LabelRefs>; onReady: (e: MapEngine) => void }) {
+  const leaving = useMap((s) => s.leaving);
   return (
     <Canvas
-      frameloop={SIMTEST ? "demand" : "always"}
+      frameloop={leaving ? "never" : SIMTEST ? "demand" : "always"}
       shadows={LOW ? false : "percentage"}
       dpr={LOW ? 1 : [1, 2]}
       gl={{ antialias: !LOW, toneMapping: THREE.NeutralToneMapping, toneMappingExposure: 1.05, powerPreference: "high-performance" }}

@@ -27,7 +27,7 @@ export function Kpis() {
         const target = v?.target ? ` · objectif ${formatMoney(Number(v.target), "fr", 0)}` : "";
         return (
           // La clé change à chaque flash : l'animation CSS est rejouée
-          <div key={`${k.id}:${flash[k.id] ?? 0}`} className={`${panel} flex min-w-44 items-center gap-3 px-3.5 py-2.5 ${flash[k.id] ? "animate-[kpiflash_1.6s_ease-out]" : ""}`}>
+          <Link href={k.lien ?? "/dashboard"} title="Ouvrir dans le back-office" key={`${k.id}:${flash[k.id] ?? 0}`} className={`${panel} flex min-w-44 items-center gap-3 px-3.5 py-2.5 transition hover:-translate-y-0.5 ${flash[k.id] ? "animate-[kpiflash_1.6s_ease-out]" : ""}`}>
             <span className="grid size-9 place-items-center rounded-xl bg-accent/10 text-accent">
               <Icon name={KPI_ICON[k.unite]} size={17} />
             </span>
@@ -41,7 +41,7 @@ export function Kpis() {
                 {target}
               </p>
             </div>
-          </div>
+          </Link>
         );
       })}
     </div>

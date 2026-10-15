@@ -5,6 +5,8 @@
  */
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { createEvent } from "@/app/(backoffice)/crm/actions";
+import { fail, type ActionResult } from "@/lib/backoffice/result";
 
 const stepSchema = z.enum(["badge", "work_order_stage", "lot_received", "quote_accepted", "pickup", "ambient"]);
 
@@ -122,4 +124,33 @@ export async function savePlan(siteId: string, layout: unknown, publish: boolean
     if (rows.length) await supabase.from("map_objects").insert(rows);
   }
   return { version: plan.version, id: plan.id, published: publish };
+}
+
+// ------------------------------------------------------------- écritures depuis la map
+// Mêmes fonctions et mêmes droits que le back-office (RLS) : la map n'a pas de règles à part.
+
+/** Marquer une salle occupée maintenant (crée la réservation ; conflits refusés). */
+export async function occupyRoom(assetId: string, minutes: number, title?: string): Promise<ActionResult> {
+  const start = new Date();
+  start.setSeconds(0, 0);
+  const end = new Date(start.getTime() + Math.min(240, Math.max(15, minutes)) * 60_000);
+  return createEvent({ title: title?.trim() || "Salle occupée (depuis la map)", type: "reunion", starts_at: start.toISOString(), ends_at: end.toISOString(), resource_id: assetId });
+}
+
+/** Libérer une salle : met fin maintenant à la réservation en cours (la sienne, ou RH). */
+export async function releaseRoom(eventId: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { error, count } = await supabase.from("calendar_events").update({ ends_at: new Date().toISOString() }, { count: "exact" }).eq("id", eventId).gt("ends_at", new Date().toISOString());
+  if (error) return fail(error);
+  if (!count) return { ok: false, error: "Seul l'organisateur (ou la RH) peut libérer cette salle." };
+  return { ok: true, message: "Salle libérée" };
+}
+
+/** Affecter un véhicule / équipement à un collaborateur (glisser-déposer sur la map). */
+export async function assignAsset(assetId: string, employeeId: string | null): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { error, count } = await supabase.from("assets").update({ assigned_employee_id: employeeId }, { count: "exact" }).eq("id", assetId);
+  if (error) return fail(error);
+  if (!count) return { ok: false, error: "Votre rôle ne permet pas d'affecter ce matériel." };
+  return { ok: true, message: employeeId ? "Affectation enregistrée" : "Affectation retirée" };
 }

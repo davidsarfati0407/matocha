@@ -98,9 +98,9 @@ export default async function Dashboard() {
             const v = (kpis[i].data ?? {}) as { value: number | null; delta: number | null };
             const value = v.value == null ? "—" : k.unite === "eur" ? formatMoney(Number(v.value), "fr", 0) : k.unite === "pourcent" ? formatPercent(Number(v.value)) : formatNumber(Number(v.value));
             const d = v.delta == null ? null : Number(v.delta);
-            return <Stat key={k.id} label={k.libelle} value={value} sub={`${d == null ? "" : `${d >= 0 ? "↑" : "↓"} ${k.unite === "nombre" ? formatNumber(Math.abs(d)) : formatPercent(Math.abs(d))} · `}${k.sousTitre}`} icon={["box", "clock", "chart"][i]} />;
+            return <Stat key={k.id} label={k.libelle} value={value} sub={`${d == null ? "" : `${d >= 0 ? "↑" : "↓"} ${k.unite === "nombre" ? formatNumber(Math.abs(d)) : formatPercent(Math.abs(d))} · `}${k.sousTitre}`} icon={["box", "clock", "chart"][i]} href={k.lien} />;
           })}
-          <Stat label="CA HT sur 30 jours" value={formatMoney(rev30, "fr", 0)} sub="en ligne + commandes pro" icon="chart" />
+          <Stat label="CA HT sur 30 jours" value={formatMoney(rev30, "fr", 0)} sub="en ligne + commandes pro" icon="chart" href="/finance/treasury" />
         </div>
       ),
     },

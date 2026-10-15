@@ -52,3 +52,16 @@ body::before {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* Passage map ↔ back-office : la map « s'ouvre » sur la donnée et s'y referme. */
+::view-transition-old(.face-map-exit) { animation: 260ms ease-in both face-zoom-out; }
+::view-transition-new(.face-bo-enter) { animation: 320ms ease-out 80ms both face-rise; }
+::view-transition-old(.face-bo-exit) { animation: 200ms ease-in both face-fade-out; }
+::view-transition-new(.face-map-enter) { animation: 420ms cubic-bezier(.2,.7,.2,1) both face-zoom-in; }
+@keyframes face-zoom-out { to { opacity: 0; transform: scale(1.06); filter: blur(2px); } }
+@keyframes face-zoom-in { from { opacity: 0; transform: scale(1.06); } }
+@keyframes face-rise { from { opacity: 0; transform: translateY(10px) scale(0.99); } }
+@keyframes face-fade-out { to { opacity: 0; transform: scale(0.98); } }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}

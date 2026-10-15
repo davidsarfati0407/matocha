@@ -2,7 +2,9 @@
 /**
  * Flux d'événements en direct (activity_events) pour la map.
  * 1. Supabase Realtime (Postgres Changes) quand il est disponible ;
- * 2. sinon, repli automatique sur un sondage toutes les secondes, signalé à
+ * 2. NEXT_PUBLIC_REALTIME=sse : flux SSE du serveur Next (Postgres LISTEN/NOTIFY),
+ *    pour une stack sans serveur Realtime — même latence (< 1 s) ;
+ * 3. sinon, repli automatique sur un sondage toutes les secondes, signalé à
  *    l'interface (mode « sondage ») : on ne prétend pas faire du temps réel.
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -47,6 +49,58 @@ export function subscribeActivity(
     onMode("sondage");
     void poll();
   };
+
+  // Flux SSE (Postgres LISTEN/NOTIFY via le serveur Next) ; repli sur le sondage en cas d'échec.
+  if (process.env.NEXT_PUBLIC_REALTIME === "sse" && typeof EventSource !== "undefined") {
+    onMode("connexion");
+    let es: EventSource | null = null;
+    let failures = 0;
+    const open = () => {
+      if (stopped) return;
+      es = new EventSource("/api/realtime");
+      es.addEventListener("ready", () => {
+        failures = 0;
+        onMode("temps_reel");
+        if (pollTimer) {
+          clearTimeout(pollTimer);
+          pollTimer = null;
+        }
+        void catchUp(); // événements manqués pendant une coupure
+      });
+      es.addEventListener("activity", (m) => {
+        try {
+          emit(JSON.parse((m as MessageEvent).data) as ActivityEvent);
+        } catch {
+          /* message illisible */
+        }
+      });
+      es.onerror = () => {
+        if (++failures >= 3) {
+          es?.close();
+          es = null;
+          startPolling();
+          setTimeout(() => {
+            if (!stopped && pollTimer) {
+              clearTimeout(pollTimer);
+              pollTimer = null;
+              failures = 0;
+              open();
+            }
+          }, 30_000);
+        }
+      };
+    };
+    const catchUp = async () => {
+      const { data } = await supabase.from("activity_events").select("id, type, entity, entity_id, payload, at").gt("at", lastAt).order("at").limit(50);
+      for (const e of data ?? []) emit(e as ActivityEvent);
+    };
+    open();
+    return () => {
+      stopped = true;
+      es?.close();
+      if (pollTimer) clearTimeout(pollTimer);
+    };
+  }
 
   // Stack locale sans serveur Realtime : sondage direct (évite des erreurs WebSocket en console).
   if (process.env.NEXT_PUBLIC_REALTIME === "off") {

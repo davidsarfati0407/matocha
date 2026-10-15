@@ -163,9 +163,9 @@ const config: SectorConfig = {
   },
 
   kpisEnTete: [
-    { id: "commandes_jour", libelle: "Commandes du jour", unite: "nombre", sousTitre: "en ligne + pros · vs hier", source: "kpi_orders_today()" },
-    { id: "expedie_avant_15h", libelle: "Expédiées à temps", unite: "pourcent", sousTitre: "avant l'enlèvement de 15 h · 30 j", source: "kpi_shipped_on_time()" },
-    { id: "ca_jour", libelle: "CA du jour", unite: "eur", sousTitre: "HT · objectif journalier", source: "kpi_revenue_today()" },
+    { id: "commandes_jour", libelle: "Commandes du jour", unite: "nombre", sousTitre: "en ligne + pros · vs hier", source: "kpi_orders_today()", lien: "/ops/shop-orders" },
+    { id: "expedie_avant_15h", libelle: "Expédiées à temps", unite: "pourcent", sousTitre: "avant l'enlèvement de 15 h · 30 j", source: "kpi_shipped_on_time()", lien: "/ops/shop-orders?days=30" },
+    { id: "ca_jour", libelle: "CA du jour", unite: "eur", sousTitre: "HT · objectif journalier", source: "kpi_revenue_today()", lien: "/finance/treasury" },
   ],
 
   evenementsLiveDeDemo: [

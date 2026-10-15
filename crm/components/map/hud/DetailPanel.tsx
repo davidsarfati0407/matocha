@@ -8,6 +8,7 @@ import { backOfficeHref } from "@/lib/map/links";
 import type { MapAsset, MapEmployee, MapSnapshot, MapWorkOrder } from "@/lib/map/snapshot";
 import { useMap } from "@/lib/map/store";
 import { revealSalary } from "@/app/(tech)/tech/actions";
+import { assignAsset, occupyRoom, releaseRoom } from "@/app/(map)/map/actions";
 import { engineRef } from "../engine/engine";
 import { Bar, Icon, Pill, Ring, Row, SectionTitle, panel } from "./ui";
 
@@ -257,8 +258,8 @@ function assetContent(a: MapAsset, s: MapSnapshot): Content {
             )}
             <Row label="Pages du jour">{formatNumber(Number(tel.pages_jour ?? 0) + 140)}</Row>
             <Row label="Coût / page">{formatMoney(Number(tel.cout_page ?? 0.01), "fr", 3)}</Row>
-            <button className="mt-3 w-full rounded-xl bg-brand px-3 py-2 text-sm font-medium text-ground" onClick={() => useMap.getState().toast({ title: "Commande de consommables préparée", detail: "Toner magenta + ramette A3 (brouillon).", tone: "ok" })}>
-              Commander en un clic
+            <button className="mt-3 w-full rounded-xl bg-brand px-3 py-2 text-sm font-medium text-ground" onClick={() => useMap.getState().toast({ title: "Commande de consommables (mode simulé)", detail: "Toner magenta + ramette A3 : fournisseur bureautique non branché, rien n'est commandé.", tone: "info" })}>
+              Préparer la commande (simulé)
             </button>
           </div>
         ),
@@ -290,9 +291,7 @@ function assetContent(a: MapAsset, s: MapSnapshot): Content {
                 {c.title}
               </Row>
             ))}
-            <button className="mt-3 w-full rounded-xl bg-brand px-3 py-2 text-sm font-medium text-ground" onClick={() => useMap.getState().toast({ title: `${a.name} réservée`, detail: "Créneau de 30 min proposé (à confirmer dans l'agenda).", tone: "ok" })}>
-              Réserver
-            </button>
+            <RoomActions assetId={a.id} current={current ? { id: current.id, title: current.title } : null} />
           </div>
         ),
       };
@@ -313,6 +312,7 @@ function assetContent(a: MapAsset, s: MapSnapshot): Content {
               </span>
             </Row>
             <Row label="Entretien">{a.nextMaintenanceOn ? formatDate(a.nextMaintenanceOn) : "—"}</Row>
+            <AssignControl assetId={a.id} assigned={a.assignedEmployeeId} s={s} />
             <SectionTitle>Réservations</SectionTitle>
             {s.bookings.filter((b) => b.assetId === a.id).map((b, i) => (
               <Row key={i} label={`${formatTime(b.startsAt)}–${formatTime(b.endsAt)}`}>
@@ -620,3 +620,55 @@ function Square({ icon }: { icon: string }) {
 }
 
 export { Ring };
+
+export const ASSET_DRAG = "application/x-matocha-asset";
+const say = (r: { ok: boolean; message?: string; error?: string }, ok: string) => useMap.getState().toast(r.ok ? { title: r.message ?? ok, tone: "ok" } : { title: "Action refusée", detail: r.error, tone: "warn" });
+
+/** Salle : occuper maintenant (réservation réelle, conflits refusés) ou libérer. */
+function RoomActions({ assetId, current }: { assetId: string; current: { id: string; title: string } | null }) {
+  const [pending, start] = useTransition();
+  return current ? (
+    <button disabled={pending} className="mt-3 w-full rounded-xl px-3 py-2 text-sm font-medium ring-1 ring-black/10 hover:bg-black/5" onClick={() => start(async () => say(await releaseRoom(current.id), "Salle libérée"))}>
+      Libérer maintenant
+    </button>
+  ) : (
+    <div className="mt-3 grid grid-cols-2 gap-2">
+      {[30, 60].map((m) => (
+        <button key={m} disabled={pending} className="rounded-xl bg-brand px-3 py-2 text-sm font-medium text-ground disabled:opacity-60" onClick={() => start(async () => say(await occupyRoom(assetId, m), "Salle réservée"))}>
+          Occuper {m} min
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Véhicule : affectation par liste ou par glisser-déposer de la puce sur une personne de la map. */
+function AssignControl({ assetId, assigned, s }: { assetId: string; assigned: string | null; s: MapSnapshot }) {
+  const [pending, start] = useTransition();
+  return (
+    <div className="mt-3 rounded-xl bg-ground/60 p-3">
+      <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">Affectation</p>
+      <div className="flex items-center gap-2">
+        <span
+          draggable
+          onDragStart={(e) => {
+            e.dataTransfer.setData(ASSET_DRAG, assetId);
+            e.dataTransfer.effectAllowed = "link";
+          }}
+          title="Glissez sur une personne de la map"
+          className="cursor-grab rounded-full bg-accent px-2.5 py-1 text-[11px] font-semibold text-white active:cursor-grabbing"
+        >
+          ⠿ Glisser
+        </span>
+        <select aria-label="Affecter à" disabled={pending} value={assigned ?? ""} onChange={(e) => start(async () => say(await assignAsset(assetId, e.target.value || null), "Affectation enregistrée"))} className="min-w-0 flex-1 rounded-lg bg-white px-2 py-1 text-sm ring-1 ring-black/10">
+          <option value="">Non affecté</option>
+          {s.employees.map((e) => (
+            <option key={e.id} value={e.id}>
+              {e.firstName} {e.lastName}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}
