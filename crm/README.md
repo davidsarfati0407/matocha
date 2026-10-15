@@ -308,20 +308,43 @@ pnpm typecheck && pnpm lint
 
 ## Déploiement
 
-1. Créez un projet Supabase, région **Zurich (eu-central-2)** ou **Francfort (eu-central-1)**.
-2. Liez-le et poussez les migrations : `npx supabase link` puis `npx supabase db push`. Le seed est
-   réservé à un environnement de démo.
+### Démo en ligne en 10 minutes (Vercel + Supabase, sans terminal)
+
+Le build Vercel lance `scripts/deploy/migrate.mjs` : il applique les migrations manquantes, puis,
+avec `SEED_DEMO=1` et une base vide, les données fictives. Les relances suivantes ne refont rien.
+
+1. **Supabase** (supabase.com) : nouveau projet, région Francfort (eu-central-1). Notez le mot de
+   passe de la base.
+2. **Vercel** (vercel.com) : *Add New → Project*, importez le dépôt, **Root Directory = `crm`**.
+3. **Variables** (Settings → Environment Variables) :
+   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` :
+     Supabase → Project Settings → API ;
+   - `DATABASE_URL` : Supabase → *Connect* → **Session pooler** (remplacez `[YOUR-PASSWORD]`) ;
+   - `SEED_DEMO` = `1`.
+   L'intégration Supabase de Vercel (Marketplace) pose ces variables elle-même ; le script lit aussi
+   `POSTGRES_URL_NON_POOLING` / `POSTGRES_URL`.
+4. **Branche** : Settings → Git → *Production Branch* = la branche qui contient `crm/`, puis
+   *Deployments → Redeploy*.
+5. Ouvrez `https://<projet>.vercel.app/login` et cliquez sur un compte de démo.
+
+Limites du plan gratuit : le cron Vercel du worker d'intégrations passe une fois par jour (le plan
+Hobby n'accepte pas plus) ; pg_cron, côté base, garde ses horaires. Le temps réel passe par Supabase
+Realtime (`NEXT_PUBLIC_REALTIME` vide).
+
+### Production
+
+1. Projet Supabase en région **Zurich (eu-central-2)** ou **Francfort (eu-central-1)**.
+2. Migrations : automatiques au build (ci-dessus) ou `npx supabase link` puis `npx supabase db push`.
+   **Ne mettez jamais `SEED_DEMO=1` en production.**
 3. Sur Vercel (région `fra1`, déjà fixée dans `vercel.json`), renseignez les variables de
-   `.env.example` avec les clés du projet, et la racine du projet sur `crm/`.
-4. **Variables à ne jamais exposer au navigateur** : `SUPABASE_SERVICE_ROLE_KEY`,
+   `.env.example`, racine du projet sur `crm/`.
+4. **Variables à ne jamais exposer au navigateur** : `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`,
    `INTEGRATIONS_ENCRYPTION_KEY`, `CRON_SECRET`, `ANTHROPIC_API_KEY` et les secrets OAuth.
-5. **Temps réel** : laissez `NEXT_PUBLIC_REALTIME` vide (Supabase Realtime). Activez la publication
-   Realtime de la table `activity_events`.
+5. **Temps réel** : laissez `NEXT_PUBLIC_REALTIME` vide (Supabase Realtime) ; la migration ajoute
+   `activity_events` à la publication Realtime.
 6. **Intégrations** : déclarez les URI de redirection et l'URL publique des webhooks
-   (`APP_URL/api/integrations/{microsoft|google}/notify`). Ces URL doivent être accessibles en HTTPS.
-7. **Planification** : `pg_cron` s'installe tout seul avec les migrations sur Supabase ; Vercel Cron
-   appelle le worker des intégrations.
+   (`APP_URL/api/integrations/{microsoft|google}/notify`), en HTTPS. Plan Vercel Pro pour un worker
+   toutes les 10 min (`vercel.json`).
+7. **Planification** : `pg_cron` s'installe avec les migrations sur Supabase.
 8. **Sécurité** : activez la 2FA pour les comptes Direction, RH et Finance, puis configurez le SSO
    (Entra ID / Google) dans Supabase Auth.
-9. **Démo** : `pnpm db:reset` rejoue migrations et seed (données fictives). Ne lancez jamais le seed
-   en production.
