@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
+import { sectorConfig } from "@/config/sector.config";
 
-// Phase 1 : la page technique sert d'accueil. En phase 2, ce sera la Map vivante.
+// Accueil après connexion : la Map vivante du premier site.
 export default function Home() {
-  redirect("/tech");
+  redirect(`/map/${sectorConfig.lieux[0].id}`);
 }

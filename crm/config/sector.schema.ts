@@ -93,6 +93,8 @@ export const liveEventSchema = z.object({
   detail: z.string(),
   zone: id,
   effets: z.array(z.string()),
+  /** Paramètres du scénario : collaborateur (clé de poste « poste:index »), lot, commande, devis… */
+  params: z.record(z.string(), z.string()).default({}),
 });
 
 export const sectorConfigSchema = z.object({

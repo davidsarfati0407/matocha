@@ -25,7 +25,7 @@ pkill -f "devstack/gateway.mjs" 2>/dev/null || true
   GOTRUE_JWT_ADMIN_ROLES=service_role \
   GOTRUE_EXTERNAL_EMAIL_ENABLED=true GOTRUE_MAILER_AUTOCONFIRM=true \
   GOTRUE_DISABLE_SIGNUP=false GOTRUE_MFA_TOTP_ENROLL_ENABLED=true GOTRUE_MFA_TOTP_VERIFY_ENABLED=true \
-  nohup ./auth > "$LOG/auth.log" 2>&1 &)
+  nohup ./auth > "$LOG/auth.log" 2>&1 < /dev/null &)
 
 for i in $(seq 1 30); do curl -sf http://127.0.0.1:9999/health >/dev/null && break; sleep 0.5; done
 curl -sf http://127.0.0.1:9999/health >/dev/null || { echo "GoTrue n'a pas démarré"; tail -20 "$LOG/auth.log"; exit 1; }
@@ -34,8 +34,8 @@ PGRST_DB_URI="postgres://authenticator:postgres@127.0.0.1:5432/postgres" \
 PGRST_DB_SCHEMAS=public PGRST_DB_ANON_ROLE=anon PGRST_JWT_SECRET="$JWT_SECRET" \
 PGRST_DB_EXTRA_SEARCH_PATH=public,extensions PGRST_SERVER_PORT=3001 PGRST_SERVER_HOST=127.0.0.1 \
 PGRST_DB_CHANNEL_ENABLED=true \
-nohup "$DEVSTACK_DIR/postgrest" > "$LOG/postgrest.log" 2>&1 &
+nohup "$DEVSTACK_DIR/postgrest" > "$LOG/postgrest.log" 2>&1 < /dev/null &
 
-nohup node "$HERE/gateway.mjs" > "$LOG/gateway.log" 2>&1 &
+nohup node "$HERE/gateway.mjs" > "$LOG/gateway.log" 2>&1 < /dev/null &
 sleep 1
 echo "Stack prête : API http://127.0.0.1:54321 · Postgres $DB_URL · logs $LOG"

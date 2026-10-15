@@ -9,7 +9,7 @@ function watchConsole(page: Page) {
 }
 
 async function loginAs(page: Page, roleLabel: string) {
-  await page.goto("/login");
+  await page.goto("/login?next=%2Ftech");
   await page.getByRole("button", { name: new RegExp(`^${roleLabel}`) }).click();
   await page.waitForURL("**/tech");
 }

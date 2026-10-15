@@ -16,6 +16,7 @@ import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { sectorConfig as C } from "../config/sector.config";
 import { computeTotals } from "../lib/domain/money";
+import { DESK_ZONES, generatePlan } from "../lib/map/generate";
 
 // ------------------------------------------------------------------ outils
 type Raw = { raw: string };
@@ -123,7 +124,6 @@ insert(
   "zones",
   site.zones.map((z) => ({ id: Z(z.id), org_id: ORG, site_id: SITE, key: z.id, code: z.code, name: z.nom, type: z.type, wing: z.aile, floor_material: z.sol, capacity: z.capacite, description: z.description })),
 );
-insert("floor_plans", [{ id: uid("plan:v1"), org_id: ORG, site_id: SITE, version: 1, status: "draft", layout: json({ generated: false, note: "Plan généré en phase 2 depuis la fiche secteur" }) }]);
 insert("departments", C.departements.map((d) => ({ id: uid(`dept:${d.id}`), org_id: ORG, key: d.id, name: d.nom })));
 
 // ------------------------------------------------------------------ collaborateurs (fictifs)
@@ -235,6 +235,7 @@ const empRows: Row[] = employees.map((e, n) => {
     skills: SKILLS[e.poste.id],
     avatar_color: pick(["#173D2B", "#79A84B", "#E07A5F", "#3D5A80", "#8E7DBE", "#C9A227", "#5C6B73"]),
     appearance: json({
+      slot: e.key,
       skin: SKIN[n % SKIN.length],
       hair: HAIR[(n * 5) % HAIR.length],
       hairStyle: n % 3 === 0 ? "long" : n % 3 === 1 ? "court" : "chignon",
@@ -298,7 +299,7 @@ const assets: AssetDef[] = [
   { key: "armoire_echantillons", type: "equipement", name: "Armoire de l'échantillothèque", zone: "echantillotheque", telemetry: { temperature_c: 17.8, humidite: 0.41, boites: 27 } },
   { key: "badgeuse", type: "equipement", name: "Badgeuse d'accueil", zone: "accueil" },
 ];
-const officeZones = new Set(["open_space", "direction", "accueil", "studio", "labo"]);
+const officeZones = DESK_ZONES;
 const APPS = ["crm", "tableur", "design", "code", "terminal", "visio", "mail"];
 for (const e of employees.filter((x) => officeZones.has(x.poste.zone))) {
   assets.push({
@@ -319,6 +320,26 @@ insert(
     assigned_employee_id: a.emp?.id ?? null, specs: json(a.specs ?? {}), telemetry: json(a.telemetry ?? {}),
     next_maintenance_on: a.maint ? date(a.maint) : null, purchase_cost: a.cost ?? null,
   })),
+);
+
+// ------------------------------------------------------------------ plan 3D (généré depuis la fiche)
+const plan = generatePlan(C, (type, key) => {
+  if (type === "assets") {
+    if (!assets.some((a) => a.key === key)) throw new Error(`plan : équipement inconnu ${key}`);
+    return A(key);
+  }
+  return uid(`${type}:${key}`);
+});
+insert("floor_plans", [{ id: uid("plan:v1"), org_id: ORG, site_id: SITE, version: 1, status: "published", layout: json(plan), published_at: raw("now()") }]);
+insert(
+  "map_objects",
+  plan.objects
+    .filter((o) => o.entity)
+    .map((o) => ({
+      org_id: ORG, site_id: SITE, zone_id: o.zone ? Z(o.zone) : null, type: o.kit, kit: o.kit, label: o.label ?? null,
+      position: json([o.at[0], o.y ?? 0, o.at[1]]), rotation: o.rotation, params: json({ ...(o.params ?? {}), layout_id: o.id, entity_key: o.entity!.key }),
+      entity_type: o.entity!.type, entity_id: o.entity!.type === "assets" ? o.entity!.id : null,
+    })),
 );
 
 // ------------------------------------------------------------------ agenda et présence du jour
@@ -503,9 +524,10 @@ const wos: WO[] = [
   { n: "CP-24-0611", client: "zen", title: "Échantillons 3 coffee shops", stage: "confirmee", object: "1 carton · 2 kg", owner: ["head_logistique", 0], budget: 1, due: [2, "15:00"], received: 0, progress: 0 },
   { n: "CP-24-0608", quote: "Q-2026-0138", client: "koen", title: "Corner retail Discovery Box", stage: "preparation", object: "Palette · 6 cartons", owner: ["preparateur", 2], zone: "preparation", budget: 4, due: [0, "15:00"], received: -2, progress: 0.55 },
   { n: "CP-24-0609", client: "seve", title: "Réassort épicerie — Daily Box", stage: "preparation", status: "attente", blocked: "Cartons S en rupture — livraison fournisseur demain 9 h", object: "4 cartons", owner: ["preparateur", 3], zone: "preparation", budget: 2, due: [0, "15:00"], received: -1, progress: 0.3 },
-  { n: "CP-24-0607", quote: "Q-2026-0140", client: "hinoki", title: "Vrac barista + Daily Box", stage: "controle", object: "2 cartons · 9,6 kg", owner: ["qualite", 0], zone: "quarantaine", budget: 2.5, due: [0, "13:30"], received: -3, progress: 0.7 },
+  { n: "CP-24-0607", quote: "Q-2026-0140", client: "hinoki", title: "Vrac barista + Daily Box", stage: "preparation", object: "2 cartons · 9,6 kg", owner: ["preparateur", 2], zone: "preparation", budget: 2.5, due: [0, "13:30"], received: -3, progress: 0.6 },
   { n: "CP-24-0605", quote: "Q-2026-0136", client: "kissa", title: "Vrac cérémonie + formation", stage: "expedition", object: "1 carton · 3 kg", owner: ["head_logistique", 0], zone: "expedition", budget: 1.5, due: [0, "15:00"], received: -6, progress: 0.85 },
   { n: "CP-24-0604", client: "belvedere", title: "Échantillons carte hiver", stage: "expedition", object: "1 colis · 1,2 kg", owner: ["head_logistique", 0], zone: "expedition", budget: 0.5, due: [0, "15:00"], received: -2, progress: 0.9 },
+  { n: "CP-24-0603", client: "canal", title: "Réassort vrac", stage: "controle", object: "1 carton · 5 kg", owner: ["qualite", 0], zone: "quarantaine", budget: 1, due: [0, "15:00"], received: -2, progress: 0.75 },
   { n: "CP-24-0601", quote: "Q-2026-0133", client: "seve", title: "Commande d'ouverture", stage: "livree", object: "3 cartons", owner: ["head_logistique", 0], budget: 2.5, due: [-10, "15:00"], received: -14, progress: 0.95 },
   { n: "CP-24-0598", quote: "Q-2026-0131", client: "ondine", title: "Daily Box + fouets", stage: "livree", object: "2 cartons", owner: ["head_logistique", 0], budget: 1.5, due: [-16, "15:00"], received: -19, progress: 0.95 },
   { n: "CP-24-0590", client: "tilleuls", title: "Réassort mensuel", stage: "facturee", status: "termine", object: "3 cartons", owner: ["head_logistique", 0], budget: 3, due: [-28, "15:00"], received: -31, progress: 1 },
@@ -822,7 +844,7 @@ const activity: Row[] = [
   ...badges.filter((b) => b.kind === "in").map((b) => ({ org_id: ORG, type: "badge.in", entity: "employees", entity_id: b.employee_id, payload: json({ reader: "accueil" }), at: b.at })),
   { org_id: ORG, type: "quote.accepted", entity: "quotes", entity_id: uid("quote:Q-2026-0144"), payload: json({ number: "Q-2026-0144", client: "Hôtel des Tilleuls" }), at: ts(0, "08:40") },
   { org_id: ORG, type: "work_order.created", entity: "work_orders", entity_id: WOID("CP-24-0612"), payload: json({ number: "CP-24-0612" }), at: ts(0, "08:41") },
-  { org_id: ORG, type: "work_order.stage", entity: "work_orders", entity_id: WOID("CP-24-0607"), payload: json({ number: "CP-24-0607", from: "preparation", to: "controle" }), at: rel(-35) },
+  { org_id: ORG, type: "work_order.stage", entity: "work_orders", entity_id: WOID("CP-24-0603"), payload: json({ number: "CP-24-0603", from: "preparation", to: "controle" }), at: rel(-35) },
   { org_id: ORG, type: "stock.low", entity: "stock_items", entity_id: ST("EMB-CART-S"), payload: json({ quantity: 310, min: 400 }), at: rel(-90) },
 ];
 for (const e of PAUSE_NOW) activity.push({ org_id: ORG, type: "badge.pause_start", entity: "employees", entity_id: e.id, payload: json({ reader: "detente" }), at: rel(-8) });

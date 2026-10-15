@@ -1,0 +1,10 @@
+import { chromium } from "@playwright/test";
+const browser = await chromium.launch({ args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
+const page = await browser.newPage({ viewport: { width: 1600, height: 960 } });
+await page.goto("http://localhost:3000/login");
+await page.getByRole("button", { name: /^Direction/ }).click();
+await page.waitForURL("**/map/**", { timeout: 90000 });
+await page.waitForTimeout(5000);
+const fps = await page.evaluate(() => new Promise((r) => { let n = 0; const t0 = performance.now(); const f = () => { n++; if (performance.now() - t0 < 3000) requestAnimationFrame(f); else r(n / 3); }; requestAnimationFrame(f); }));
+console.log("fps (swiftshader, sans GPU):", fps);
+await browser.close();

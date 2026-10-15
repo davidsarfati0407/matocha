@@ -12,7 +12,7 @@ Application de démonstration : une **vue 3D vivante des locaux** (phase 2) reli
 | --- | --- | --- |
 | 0 | Fiche secteur `config/sector.config.ts` (validée par Zod) | ✅ |
 | 1 | Socle : Next.js 16, Supabase (schéma, RLS, auth), seed, page technique | ✅ |
-| 2 | Map vivante (Three.js) | à venir |
+| 2 | Map vivante (Three.js) branchée sur les vraies tables | ✅ |
 | 3 | Back-office, module par module | à venir |
 | 4 | Temps réel bidirectionnel, intégrations, IA, finitions | à venir |
 
@@ -55,12 +55,56 @@ pnpm devstack:start && pnpm devstack:reset && pnpm dev
 
 Dans ce mode, mettez `DATABASE_URL` sur le port 5432 dans `.env.local`.
 
+## Map vivante (phase 2)
+
+L'accueil après connexion est `/map/maison_montreuil`.
+
+**Raccourcis** : `/` ouvre la recherche, `T` lance la visite guidée, `H` revient à la vue d'ensemble,
+`Échap` ferme ou désélectionne. Cliquer-glisser déplace la carte, le clic droit la fait pivoter et
+la molette zoome.
+
+**Plan** :
+- `lib/map/generate.ts` transforme les espaces de la fiche en plan JSON : bâtiment en L, murs en
+  coupe, cloisons vitrées, mobilier, un poste de travail par collaborateur et les liens vers les
+  entités.
+- Le plan est stocké dans `floor_plans.layout`. Le moteur reconstruit toute la scène à partir de
+  ce JSON.
+- Les rôles qui ont le droit `plan` peuvent l'éditer : grille de 0,5 m, rotation par pas de 15°,
+  palette, liaison à une entité, annuler/rétablir, versions enregistrées et publication.
+
+**Données → animation** :
+- La map lit les mêmes tables que le back-office.
+- Chaque action métier écrit dans `activity_events`. La map s'y abonne via Supabase Realtime ; si
+  Realtime est absent, elle bascule sur un sondage d'une seconde, signalé par le badge
+  « sondage ».
+- À chaque événement, la map recharge les données et les « réconcilie » avec la scène :
+  déplacements calculés par A*, colis, palettes et véhicules.
+
+**Mode démo** : le scénario des 75 premières secondes rejoue les événements de la fiche. Chaque
+étape écrit réellement en base, via `demo_step()`, au bon moment de l'animation.
+`demo_reset()` le rend rejouable. Des notifications d'ambiance arrivent ensuite toutes les 14 à
+20 s. En production, `supabase/functions/demo-simulator` (à planifier avec pg_cron) remplace la
+boucle côté navigateur.
+
+**Paramètres d'URL utiles** :
+
+| Paramètre | Effet |
+| --- | --- |
+| `?quality=low` | Sans ombres ni anticrénelage (machines modestes) |
+| `?simtest=1` | Tests sans GPU : simulation à pas fixe, rendu à la demande |
+| `?focus=type:id` | Vol vers l'objet et ouverture de sa fiche (liens profonds) |
+
+**Performance** : les maillages statiques sont fusionnés par matériau, ce qui ramène environ
+5 000 appels de dessin à environ 1 900. Le pas de simulation est borné à 50 ms, et la
+simulation se met en pause quand l'onglet est caché.
+
 ## Tests
 
 ```bash
 pnpm test        # Vitest : TVA, arrondis, totaux de devis, alertes de budget
 pnpm test:rls    # droits réels contre l'API (base réinitialisée requise)
-npx playwright test   # parcours navigateur + captures dans test-results/
+npx playwright test   # 12 parcours navigateur (connexion, droits, map, éditeur) + captures dans test-results/
+node scripts/dev/simtest.mjs <dossier> 120   # scénario de démo accéléré + captures
 pnpm typecheck && pnpm lint
 ```
 
