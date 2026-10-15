@@ -253,14 +253,19 @@ l'environnement de développement. À faire avant la production.
   et de mois suivent la langue choisie.
 - **Accessibilité** : audit axe-core (WCAG 2.1 A/AA) avec `node scripts/dev/a11y.mjs [rôle]`.
   L'accent de marque `#E07A5F` est conservé pour la map et les éléments décoratifs ; une variante
-  contrastée (`accentTexte`, fiche secteur) sert aux textes et aux boutons.
+  contrastée (`accentTexte`, fiche secteur) sert aux textes et aux boutons. Résultat : 0 anomalie sur
+  29 pages, en FR et en EN, pour les rôles Direction et Collaborateur.
+- **Vocabulaire métier** : les libellés venant de la fiche secteur (« Comptes », « Commandes pro »,
+  KPI…) restent dans la langue de la fiche, même en anglais : ils sont de la configuration, pas du code.
 
 ## Tests
 
 ```bash
-pnpm test        # Vitest (58) : TVA, devis, facturation, relances, congés, temps, stock, camt.054, Factur-X, écritures
-pnpm test:rls    # droits réels contre l'API (24), dont masse salariale agrégée et fonctions métier
-npx playwright test   # 17 parcours : connexion, droits, map, éditeur, réappro, devis→paiement, congés, ⌘K, IA
+pnpm test        # Vitest (69) : TVA, devis, facturation, relances, congés, temps, stock, camt.054, Factur-X, écritures, intégrations (chiffrement, file, reprise)
+pnpm test:rls    # droits réels contre l'API (27), dont masse salariale agrégée, fonctions métier et escalade de droits
+npx playwright test   # 22 parcours : connexion, 2FA, droits, map (lien profond, temps réel, salle, glisser-déposer), éditeur,
+                      # réappro, devis→paiement, congés, ⌘K, IA, intégrations, bascule FR/EN
+node scripts/dev/a11y.mjs Direction [--lang en]   # audit axe-core WCAG 2.1 A/AA de 29 pages (0 anomalie)
 node scripts/dev/simtest.mjs <dossier> 120   # scénario de démo accéléré + captures
 pnpm typecheck && pnpm lint
 ```

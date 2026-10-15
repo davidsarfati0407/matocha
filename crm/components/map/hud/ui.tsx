@@ -73,18 +73,18 @@ export function Icon({ name, size = 16, className = "" }: { name: keyof typeof I
 
 /** Couleurs des pastilles ; libellés traduits au rendu (status.presence.* ou map.pill.*). */
 export const STATUS: Record<string, { cls: string; dot: string }> = {
-  au_poste: { cls: "bg-[#2f8f5b]/12 text-[#2f8f5b]", dot: "bg-[#2f8f5b]" },
+  au_poste: { cls: "bg-[#2f8f5b]/12 text-[#1f6b45]", dot: "bg-[#2f8f5b]" },
   reunion: { cls: "bg-[#3D5A80]/12 text-[#3D5A80]", dot: "bg-[#3D5A80]" },
-  pause: { cls: "bg-[#c98a12]/15 text-[#a36f0c]", dot: "bg-[#c98a12]" },
+  pause: { cls: "bg-[#c98a12]/15 text-[#7a5206]", dot: "bg-[#c98a12]" },
   teletravail: { cls: "bg-[#79A84B]/20 text-[#173D2B]", dot: "bg-[#79A84B]" },
-  deplacement: { cls: "bg-black/5 text-[#64707a]", dot: "bg-[#64707a]" },
-  absent: { cls: "bg-black/5 text-[#64707a]", dot: "bg-[#64707a]" },
-  pas_badge: { cls: "bg-[#E07A5F]/12 text-[#c2573c]", dot: "bg-[#E07A5F]" },
-  parti: { cls: "bg-black/5 text-[#64707a]", dot: "bg-[#64707a]" },
-  ok: { cls: "bg-[#2f8f5b]/12 text-[#2f8f5b]", dot: "bg-[#2f8f5b]" },
-  warn: { cls: "bg-[#c98a12]/15 text-[#a36f0c]", dot: "bg-[#c98a12]" },
-  accent: { cls: "bg-[#E07A5F]/12 text-[#c2573c]", dot: "bg-[#E07A5F]" },
-  muted: { cls: "bg-black/5 text-[#64707a]", dot: "bg-[#64707a]" },
+  deplacement: { cls: "bg-black/5 text-[#566069]", dot: "bg-[#64707a]" },
+  absent: { cls: "bg-black/5 text-[#566069]", dot: "bg-[#64707a]" },
+  pas_badge: { cls: "bg-[#E07A5F]/12 text-[#a23f27]", dot: "bg-[#E07A5F]" },
+  parti: { cls: "bg-black/5 text-[#566069]", dot: "bg-[#64707a]" },
+  ok: { cls: "bg-[#2f8f5b]/12 text-[#1f6b45]", dot: "bg-[#2f8f5b]" },
+  warn: { cls: "bg-[#c98a12]/15 text-[#7a5206]", dot: "bg-[#c98a12]" },
+  accent: { cls: "bg-[#E07A5F]/12 text-[#a23f27]", dot: "bg-[#E07A5F]" },
+  muted: { cls: "bg-black/5 text-[#566069]", dot: "bg-[#64707a]" },
 };
 
 /** Clé de libellé (traducteur racine) d'une pastille ; vide pour les tons purement décoratifs. */

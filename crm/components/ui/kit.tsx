@@ -37,8 +37,8 @@ export function ButtonLink({ href, variant = "secondary", size = "md", icon, chi
 }
 
 const TONES = {
-  ok: "bg-[#2f8f5b]/12 text-[#25734a]",
-  warn: "bg-[#c98a12]/15 text-[#8a5d08]",
+  ok: "bg-[#2f8f5b]/12 text-[#1f6b45]",
+  warn: "bg-[#c98a12]/15 text-[#7a5206]",
   danger: "bg-[#E07A5F]/14 text-[#b3402a]",
   info: "bg-[#3D5A80]/12 text-[#3D5A80]",
   muted: "bg-black/[0.05] text-[#5b666e]",
@@ -92,7 +92,7 @@ export function Stat({ label, value, sub, tone, href, icon }: { label: string; v
       )}
       <div className="min-w-0">
         <p className="text-[12px] font-medium text-muted">{label}</p>
-        <p className={`text-2xl font-semibold tracking-tight ${tone === "danger" ? "text-[#b3402a]" : tone === "warn" ? "text-[#8a5d08]" : ""}`}>{value}</p>
+        <p className={`text-2xl font-semibold tracking-tight ${tone === "danger" ? "text-[#b3402a]" : tone === "warn" ? "text-[#7a5206]" : ""}`}>{value}</p>
         {sub && <p className="text-[11px] text-muted">{sub}</p>}
       </div>
     </div>
