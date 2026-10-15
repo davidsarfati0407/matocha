@@ -1,0 +1,37 @@
+{
+  "backOffice": "Back office",
+  "map": "Live map",
+  "mainNav": "Main navigation",
+  "breadcrumb": "Breadcrumb",
+  "menu": "Menu",
+  "signOut": "Sign out",
+  "search": "Search or act…",
+  "assistant": "Assistant",
+  "language": "Language",
+  "palette": {
+    "label": "Command palette",
+    "input": "Command or search",
+    "placeholder": "Search an account, an order, a person… or an action",
+    "actions": "Actions",
+    "goTo": "Go to",
+    "none": "No results."
+  },
+  "quick": {
+    "newQuote": "New quote",
+    "newQuoteSub": "Guided quote",
+    "leaves": "Approve leave",
+    "leavesSub": "Pending requests",
+    "invoice": "Invoice delivered orders",
+    "invoiceSub": "Invoice from order",
+    "dunning": "Send due reminders",
+    "dunningSub": "3-level reminders",
+    "reorder": "Order missing stock",
+    "reorderSub": "One-click purchase order",
+    "time": "Log my hours",
+    "timeSub": "Timer and quick entry"
+  },
+  "bell": {
+    "label": "Notifications ({count} unread)",
+    "none": "No notifications."
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "lot": {
+    "attendu": "Expected",
+    "quarantaine": "Quarantine",
+    "libere": "Released",
+    "bloque": "Blocked",
+    "epuise": "Depleted"
+  },
+  "assetType": {
+    "vehicule": "Vehicle",
+    "equipement": "Equipment",
+    "salle": "Room",
+    "poste_informatique": "Workstation",
+    "machine": "Machine",
+    "imprimante": "Printer",
+    "serveur": "Server",
+    "mobilier": "Furniture"
+  },
+  "asset": {
+    "ok": "OK",
+    "en_service": "In use",
+    "maintenance": "Maintenance",
+    "panne": "Out of order",
+    "hors_service": "Decommissioned"
+  },
+  "quote": {
+    "draft": "Draft",
+    "sent": "Sent",
+    "opened": "Opened",
+    "accepted": "Accepted",
+    "rejected": "Rejected",
+    "expired": "Expired"
+  },
+  "invoice": {
+    "draft": "Draft",
+    "sent": "Sent",
+    "paid": "Paid",
+    "partial": "Partly paid",
+    "overdue": "Overdue",
+    "cancelled": "Cancelled"
+  },
+  "deal": {
+    "froid": "Cold",
+    "tiede": "Warm",
+    "chaud": "Hot",
+    "gagne": "Won",
+    "perdu": "Lost"
+  },
+  "presence": {
+    "au_poste": "At desk",
+    "reunion": "In a meeting",
+    "pause": "On a break",
+    "teletravail": "Remote",
+    "deplacement": "Travelling",
+    "absent": "Absent",
+    "pas_badge": "Not badged in yet",
+    "parti": "Left"
+  },
+  "leaveType": {
+    "conges": "Paid leave",
+    "rtt": "RTT day",
+    "maladie": "Sick leave",
+    "formation": "Training",
+    "sans_solde": "Unpaid",
+    "parental": "Parental"
+  },
+  "leave": {
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "cancelled": "Cancelled"
+  }
+}

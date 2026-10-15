@@ -1,0 +1,21 @@
+{
+  "title": "Sign in",
+  "subtitle": "Access the {company} House.",
+  "email": "Email",
+  "password": "Password",
+  "submit": "Sign in",
+  "magicLink": "Send me a magic link",
+  "magicSent": "Link sent. Locally, open the Mailpit test inbox (http://127.0.0.1:54324).",
+  "error": "Invalid credentials.",
+  "demoAccounts": "Demo accounts",
+  "demoHint": "One click fills the form. Shared password: {password}",
+  "ssoTitle": "Single sign-on",
+  "ssoMicrosoft": "Continue with Microsoft",
+  "ssoGoogle": "Continue with Google",
+  "ssoOff": "Microsoft / Google SSO is not configured on this server (NEXT_PUBLIC_SSO_PROVIDERS). TOTP two-factor authentication is available in “Account security”.",
+  "mfaTitle": "Two-factor authentication",
+  "mfaHint": "Enter the 6-digit code from your authenticator app.",
+  "mfaCode": "Code",
+  "mfaVerify": "Verify",
+  "mfaError": "Wrong or expired code. Try again with the code shown now."
+}

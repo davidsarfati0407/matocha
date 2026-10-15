@@ -1,0 +1,73 @@
+{
+  "lot": {
+    "attendu": "Attendu",
+    "quarantaine": "Quarantaine",
+    "libere": "Libéré",
+    "bloque": "Bloqué",
+    "epuise": "Épuisé"
+  },
+  "assetType": {
+    "vehicule": "Véhicule",
+    "equipement": "Équipement",
+    "salle": "Salle",
+    "poste_informatique": "Poste informatique",
+    "machine": "Machine",
+    "imprimante": "Imprimante",
+    "serveur": "Serveur",
+    "mobilier": "Mobilier"
+  },
+  "asset": {
+    "ok": "OK",
+    "en_service": "En service",
+    "maintenance": "Maintenance",
+    "panne": "En panne",
+    "hors_service": "Hors service"
+  },
+  "quote": {
+    "draft": "Brouillon",
+    "sent": "Envoyé",
+    "opened": "Ouvert",
+    "accepted": "Accepté",
+    "rejected": "Refusé",
+    "expired": "Expiré"
+  },
+  "invoice": {
+    "draft": "Brouillon",
+    "sent": "Envoyée",
+    "paid": "Payée",
+    "partial": "Partielle",
+    "overdue": "Échue",
+    "cancelled": "Annulée"
+  },
+  "deal": {
+    "froid": "Froid",
+    "tiede": "Tiède",
+    "chaud": "Chaud",
+    "gagne": "Gagné",
+    "perdu": "Perdu"
+  },
+  "presence": {
+    "au_poste": "Au poste",
+    "reunion": "En réunion",
+    "pause": "En pause",
+    "teletravail": "Télétravail",
+    "deplacement": "En déplacement",
+    "absent": "Absent",
+    "pas_badge": "Pas encore badgé",
+    "parti": "Parti"
+  },
+  "leaveType": {
+    "conges": "Congés payés",
+    "rtt": "RTT",
+    "maladie": "Maladie",
+    "formation": "Formation",
+    "sans_solde": "Sans solde",
+    "parental": "Parental"
+  },
+  "leave": {
+    "pending": "En attente",
+    "approved": "Validé",
+    "rejected": "Refusé",
+    "cancelled": "Annulé"
+  }
+}

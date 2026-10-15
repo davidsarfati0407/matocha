@@ -14,7 +14,7 @@ Application de démonstration : une **vue 3D vivante des locaux** (phase 2) reli
 | 1 | Socle : Next.js 16, Supabase (schéma, RLS, auth), seed, page technique | ✅ |
 | 2 | Map vivante (Three.js) branchée sur les vraies tables | ✅ |
 | 3 | Back-office complet (9 modules), IA, automatisations | ✅ |
-| 4 | Temps réel bidirectionnel, intégrations, IA, finitions | à venir |
+| 4 | Connexion fine map ↔ back-office, intégrations M365/Google, Factur-X, 2FA/SSO, i18n, accessibilité | ✅ |
 
 ## Démarrer en local (recommandé : Docker + Supabase CLI)
 
@@ -45,6 +45,8 @@ Outils locaux de Supabase : Studio `http://127.0.0.1:54323`, Mailpit (liens magi
 
 `scripts/devstack/` assemble Postgres local, GoTrue (auth) et PostgREST, plus une petite passerelle
 sur `:54321`. Les routes sont les mêmes que Supabase, mais **sans Realtime, Storage ni Studio**.
+Le temps réel y passe par le serveur Next (`NEXT_PUBLIC_REALTIME=sse` : Postgres `LISTEN/NOTIFY` →
+flux SSE), avec la même latence (< 1 s).
 Ce mode a servi à vérifier la phase 1 dans un conteneur sans Docker. Il suppose PostgreSQL 16
 installé sur la machine, ainsi que les binaires `postgrest` et `auth` dans `/opt/devstack`
 (voir `start.sh`).
@@ -135,6 +137,124 @@ fichiers. Le XML Factur-X est généré et contrôlé ; son embarquement dans un
 phase 4. Les automatisations « date/seuil » s'exécutent à la demande (bouton) ; leur planification
 (pg_cron) arrive en phase 4.
 
+## Phase 4 : connexion fine, intégrations, finitions
+
+### Map ↔ back-office
+
+- **Temps réel < 1 s, dans les deux sens.** Chaque écriture métier produit un `activity_events` (triggers).
+  - Avec Supabase, la diffusion passe par Realtime.
+  - Sans serveur Realtime, un `pg_notify` alimente un hub `LISTEN` unique, et une route SSE
+    authentifiée (`/api/realtime`) relaie les événements filtrés par organisation.
+  - Latence mesurée de l'écriture en base à la réception navigateur : **médiane 7 ms, max 25 ms**
+    (`node scripts/dev/latency.mjs`).
+- **Écritures depuis la map**, avec les mêmes fonctions et droits que le back-office :
+  - occuper ou libérer une salle (vraie réservation, conflits refusés) ;
+  - affecter un véhicule par **glisser-déposer** sur une personne de la scène.
+- **Liens profonds dans les deux sens.**
+  - Fiche de la map → « Back-office ».
+  - Fiche du back-office → « Voir sur la map » : vol de caméra et sélection.
+  - KPI (liens définis dans la fiche secteur), lignes, notifications et fil d'activité sont cliquables.
+  - La caméra et la sélection sont mémorisées.
+- **Transition douce** entre map et back-office (React `ViewTransition`, zoom et fondu). La boucle de
+  rendu se fige pendant la sortie de la map.
+
+### Intégrations Microsoft 365 et Google Workspace
+
+Sans compte connecté, tout passe par le **connecteur simulé**, signalé comme tel dans l'interface. Pour
+brancher un vrai compte, renseignez `.env.local` comme suit.
+
+| Variable | Rôle |
+| --- | --- |
+| `APP_URL` | URL publique (redirections OAuth, adresses des webhooks) |
+| `INTEGRATIONS_ENCRYPTION_KEY` | 32 octets en base64 (`openssl rand -base64 32`) : chiffrement AES-256-GCM des jetons |
+| `MICROSOFT_CLIENT_ID` / `_SECRET` / `_TENANT_ID` | Inscription d'application Entra ID (permissions déléguées : `User.Read Mail.ReadWrite Mail.Send Calendars.ReadWrite OnlineMeetings.ReadWrite Files.ReadWrite offline_access`), URI de redirection `APP_URL/api/integrations/microsoft/callback` |
+| `GOOGLE_CLIENT_ID` / `_SECRET` | Client OAuth « Application Web » (Gmail, Calendar, Drive), URI de redirection `APP_URL/api/integrations/google/callback` |
+| `CRON_SECRET` | Protège le worker `/api/integrations/worker` (appelé par Vercel Cron toutes les 10 min) |
+
+Fonctionnement :
+
+- **Jetons** : chiffrés et stockés dans `integration_secrets`, une table sans aucune politique RLS,
+  donc illisible par les clients. Ils sont rafraîchis automatiquement ; si le rafraîchissement échoue,
+  le compte passe « en erreur ».
+- **File `sync_jobs`** : chaque tâche n'est exécutée qu'une fois (réservation atomique). En cas
+  d'échec, reprise après 30 s, 1 min, 2 min… jusqu'à 6 h, et abandon après 6 essais ou sur une erreur
+  définitive. L'écran Intégrations permet de tester la connexion, de traiter la file et de relancer
+  une tâche.
+- **Microsoft Graph** :
+  - Outlook : envoi avec pièces jointes, brouillons, réception par requêtes delta ;
+  - Agenda : création des rendez-vous, réunion Teams, `transactionId` contre les doublons ;
+  - OneDrive : un dossier par compte client ;
+  - **webhooks** : validation, vérification `clientState`, renouvellement automatique.
+- **Google** :
+  - Gmail : envoi MIME avec pièces jointes ; réception par historique, via la file (le push Gmail
+    exigerait Pub/Sub) ;
+  - Agenda : rendez-vous avec Meet, **notifications push** et renouvellement des canaux ;
+  - Drive : dossiers par compte client.
+- **Flux branchés** : réponses de la messagerie, devis et factures (PDF joint), relances, rendez-vous,
+  dossiers partagés.
+
+> **Honnêtement :** la forme des requêtes Graph, Gmail et OAuth est testée unitairement avec un `fetch`
+> simulé (`tests/unit/integrations.test.ts`). Faute d'identifiants, aucun appel n'a été fait contre de
+> vrais comptes Microsoft ou Google : à valider lors du premier branchement.
+
+### Factures électroniques Factur-X
+
+Le PDF de facture est un **PDF/A-3b Factur-X (profil BASIC WL)** :
+
+- polices Liberation Sans embarquées (licence OFL) ;
+- profil de couleur sRGB ;
+- métadonnées XMP (`pdfaid` et extension `fx`) ;
+- `factur-x.xml` joint (`AFRelationship /Data`, entrée `/AF` du catalogue).
+
+Le XML est **validé contre le XSD officiel** :
+
+```bash
+python3 -m venv .fx && .fx/bin/pip install factur-x
+.fx/bin/python -I scripts/dev/check_facturx.py facture.pdf   # → factur-x basicwl · XSD valide
+```
+
+La conformité PDF/A n'a pas été vérifiée avec veraPDF : le téléchargement était bloqué dans
+l'environnement de développement. À faire avant la production.
+
+### Sécurité
+
+- **Double authentification TOTP** (« Sécurité du compte ») :
+  - une fois activée, le code est exigé avant toute page **et toute API** : proxy, action de
+    connexion et `getCtx` vérifient tous trois le niveau `aal2` ;
+  - test E2E avec calcul réel des codes (RFC 6238).
+- **SSO Microsoft Entra ID / Google** via les fournisseurs Supabase Auth :
+  - activez-les dans `supabase/config.toml` (`[auth.external.azure|google]`), puis listez-les dans
+    `NEXT_PUBLIC_SSO_PROVIDERS=azure,google` ;
+  - non testé ici, faute de fournisseur d'identité.
+- **Droits éditables** (« Rôles & droits »), avec des garde-fous en base :
+  - seules la RH et la direction peuvent distribuer l'accès aux salaires ;
+  - personne ne peut retirer à son propre rôle l'administration des droits ;
+  - les tests RLS couvrent ces tentatives d'escalade.
+
+### Planification
+
+- **`pg_cron`**, installé par la migration lorsque l'extension existe (Supabase hébergé) :
+  - factures échues : toutes les heures ;
+  - automatisations de chaque organisation : chaque nuit.
+- **Vercel Cron** (`vercel.json`) : worker des intégrations toutes les 10 minutes. Le plan Hobby
+  limite la fréquence ; sinon, utilisez `pg_cron` + `pg_net` vers la même URL.
+- En local, sans `pg_cron`, les boutons « Exécuter maintenant » et « Traiter la file » font le même
+  travail.
+
+### Langues et accessibilité
+
+- **Interface en FR et EN** (next-intl) : sélecteur dans la barre latérale, un fichier de messages par
+  module dans `messages/{fr,en}/`.
+- **Ne sont pas traduits, volontairement**, car ce sont des données et non de l'interface :
+  - le vocabulaire et les libellés de la fiche secteur ;
+  - les données saisies ;
+  - les courriers envoyés aux clients.
+- **Formats** : les montants et nombres suivent le format régional de l'entreprise ; les noms de jours
+  et de mois suivent la langue choisie.
+- **Accessibilité** : audit axe-core (WCAG 2.1 A/AA) avec `node scripts/dev/a11y.mjs [rôle]`.
+  L'accent de marque `#E07A5F` est conservé pour la map et les éléments décoratifs ; une variante
+  contrastée (`accentTexte`, fiche secteur) sert aux textes et aux boutons.
+
 ## Tests
 
 ```bash
@@ -173,16 +293,30 @@ pnpm typecheck && pnpm lint
 ## Écarts assumés par rapport au cahier des charges
 
 - **France au lieu de la Suisse** : EUR, TVA 5,5 % / 20 %, arrondi au centime et RGPD.
-  La QR-facture suisse ne s'applique pas ; le XML Factur-X (CII) est généré, le PDF/A-3 hybride arrive en phase 4.
+  La QR-facture suisse ne s'applique pas ; la facture électronique est un Factur-X (PDF/A-3 + XML CII).
 - **Next.js 16.3**, aligné sur le site vitrine du dépôt.
-- **Intégrations** Google, Microsoft, boutique et transporteur : en *mode simulé*, affiché comme tel.
-- **SSO, 2FA TOTP et lien magique** : le TOTP est activé dans `supabase/config.toml`, mais les écrans
-  arrivent en phase 4. Le lien magique fonctionne avec Supabase local (Mailpit).
+- **Intégrations** :
+  - Microsoft 365 et Google Workspace sont implémentées ; elles restent en connecteur simulé tant
+    qu'aucun compte n'est connecté ;
+  - la boutique, le transporteur et la banque restent en *mode simulé*, affiché comme tel.
+- **Formats** : français (et non suisses) par défaut, cohérents avec le choix France ci-dessus.
 
 ## Déploiement
 
 1. Créez un projet Supabase, région **Zurich (eu-central-2)** ou **Francfort (eu-central-1)**.
 2. Liez-le et poussez les migrations : `npx supabase link` puis `npx supabase db push`. Le seed est
    réservé à un environnement de démo.
-3. Sur Vercel (région `fra1`), renseignez les variables de `.env.example` avec les clés du projet,
-   et la racine du projet sur `crm/`.
+3. Sur Vercel (région `fra1`, déjà fixée dans `vercel.json`), renseignez les variables de
+   `.env.example` avec les clés du projet, et la racine du projet sur `crm/`.
+4. **Variables à ne jamais exposer au navigateur** : `SUPABASE_SERVICE_ROLE_KEY`,
+   `INTEGRATIONS_ENCRYPTION_KEY`, `CRON_SECRET`, `ANTHROPIC_API_KEY` et les secrets OAuth.
+5. **Temps réel** : laissez `NEXT_PUBLIC_REALTIME` vide (Supabase Realtime). Activez la publication
+   Realtime de la table `activity_events`.
+6. **Intégrations** : déclarez les URI de redirection et l'URL publique des webhooks
+   (`APP_URL/api/integrations/{microsoft|google}/notify`). Ces URL doivent être accessibles en HTTPS.
+7. **Planification** : `pg_cron` s'installe tout seul avec les migrations sur Supabase ; Vercel Cron
+   appelle le worker des intégrations.
+8. **Sécurité** : activez la 2FA pour les comptes Direction, RH et Finance, puis configurez le SSO
+   (Entra ID / Google) dans Supabase Auth.
+9. **Démo** : `pnpm db:reset` rejoue migrations et seed (données fictives). Ne lancez jamais le seed
+   en production.

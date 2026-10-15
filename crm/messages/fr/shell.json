@@ -1,0 +1,37 @@
+{
+  "backOffice": "Back-office",
+  "map": "Map vivante",
+  "mainNav": "Navigation principale",
+  "breadcrumb": "Fil d'Ariane",
+  "menu": "Menu",
+  "signOut": "Se déconnecter",
+  "search": "Rechercher ou agir…",
+  "assistant": "Assistant",
+  "language": "Langue",
+  "palette": {
+    "label": "Palette de commandes",
+    "input": "Commande ou recherche",
+    "placeholder": "Rechercher un compte, une commande, une personne… ou une action",
+    "actions": "Actions",
+    "goTo": "Aller à",
+    "none": "Aucun résultat."
+  },
+  "quick": {
+    "newQuote": "Nouveau devis",
+    "newQuoteSub": "Devis guidé",
+    "leaves": "Valider les congés",
+    "leavesSub": "Demandes en attente",
+    "invoice": "Facturer les commandes livrées",
+    "invoiceSub": "Facture depuis commande",
+    "dunning": "Lancer les relances dues",
+    "dunningSub": "Relances 3 niveaux",
+    "reorder": "Commander le stock manquant",
+    "reorderSub": "Bon de commande en un clic",
+    "time": "Saisir mes heures",
+    "timeSub": "Minuteur et saisie rapide"
+  },
+  "bell": {
+    "label": "Notifications ({count} non lues)",
+    "none": "Aucune notification."
+  }
+}

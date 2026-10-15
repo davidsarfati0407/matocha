@@ -320,6 +320,23 @@ max_frequency = "5s"
 # Use an external OAuth provider. The full list of providers are: `apple`, `azure`, `bitbucket`,
 # `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin_oidc`, `notion`, `twitch`,
 # `twitter`, `x`, `slack`, `spotify`, `workos`, `zoom`.
+# SSO de l'application (bouton « Continuer avec … » si NEXT_PUBLIC_SSO_PROVIDERS les liste).
+[auth.external.azure]
+enabled = false
+client_id = "env(SUPABASE_AUTH_EXTERNAL_AZURE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_AZURE_SECRET)"
+# Locataire Entra ID unique (recommandé) : https://login.microsoftonline.com/<tenant-id>
+url = "env(SUPABASE_AUTH_EXTERNAL_AZURE_URL)"
+redirect_uri = ""
+skip_nonce_check = false
+
+[auth.external.google]
+enabled = false
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
+redirect_uri = ""
+skip_nonce_check = true
+
 [auth.external.apple]
 enabled = false
 client_id = ""

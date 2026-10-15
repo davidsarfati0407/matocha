@@ -1,0 +1,11 @@
+{
+  "close": "Close",
+  "undo": "Undo",
+  "denied": "Access denied",
+  "deniedHint": "Your role does not give access to {what}. Ask an administrator if needed.",
+  "thisPage": "this page",
+  "actionImpossible": "Action not possible",
+  "saved": "Saved",
+  "forbidden": "Your role does not allow this action.",
+  "duplicate": "This item already exists."
+}

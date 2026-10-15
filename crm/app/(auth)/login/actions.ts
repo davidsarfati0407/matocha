@@ -33,3 +33,17 @@ export async function sendMagicLink(_: LoginState, form: FormData): Promise<Logi
   });
   return error ? { error: "invalid" } : { magicSent: true };
 }
+
+/** Authentification unique (SSO) Microsoft Entra ID / Google, via les fournisseurs OAuth de Supabase Auth. */
+export async function ssoStart(provider: "azure" | "google", next?: string) {
+  const enabled = (process.env.NEXT_PUBLIC_SSO_PROVIDERS ?? "").split(",").map((x) => x.trim());
+  if (!enabled.includes(provider)) return { error: "sso_disabled" as const };
+  const origin = (await headers()).get("origin") ?? process.env.APP_URL ?? "http://localhost:3000";
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: { redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(safeNext(next))}`, scopes: provider === "azure" ? "email" : undefined },
+  });
+  if (error || !data.url) return { error: "sso_failed" as const };
+  redirect(data.url);
+}

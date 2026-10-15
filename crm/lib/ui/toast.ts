@@ -31,7 +31,8 @@ export type { ActionResult };
 
 /** Affiche le résultat d'une action (succès ou erreur). */
 export function report(r: ActionResult, opts: { undo?: () => unknown; success?: string } = {}) {
-  if (r.ok) toast({ title: r.message ?? opts.success ?? "Enregistré", tone: "ok", undo: opts.undo });
-  else toast({ title: "Action impossible", detail: r.error, tone: "danger" });
+  // Titres « ui.* » : clés traduites à l'affichage par le Toaster
+  if (r.ok) toast({ title: r.message ?? opts.success ?? "ui.saved", tone: "ok", undo: opts.undo });
+  else toast({ title: "ui.actionImpossible", detail: r.error, tone: "danger" });
   return r.ok;
 }

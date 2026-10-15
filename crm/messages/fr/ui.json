@@ -1,0 +1,11 @@
+{
+  "close": "Fermer",
+  "undo": "Annuler",
+  "denied": "Accès refusé",
+  "deniedHint": "Votre rôle ne donne pas accès à {what}. Demandez à un administrateur si besoin.",
+  "thisPage": "cette page",
+  "actionImpossible": "Action impossible",
+  "saved": "Enregistré",
+  "forbidden": "Votre rôle ne permet pas cette action.",
+  "duplicate": "Cet élément existe déjà."
+}

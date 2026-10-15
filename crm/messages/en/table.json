@@ -1,0 +1,23 @@
+{
+  "search": "Search…",
+  "searchLabel": "Search the list",
+  "filter": "Filter: {col}",
+  "all": "{col}: all",
+  "views": "Views…",
+  "viewsLabel": "Saved views",
+  "saveView": "+ Save current view",
+  "viewName": "View name",
+  "viewSaved": "View “{name}” saved",
+  "viewDeleted": "View deleted",
+  "deleteView": "Delete “{name}”",
+  "csvTitle": "CSV readable by Excel",
+  "selected": "{count} selected",
+  "clear": "Clear selection",
+  "emptyTitle": "No results",
+  "emptyHint": "Change the search or filters.",
+  "selectAll": "Select all",
+  "selectRow": "Select row",
+  "rows": "{count} row(s)",
+  "ofTotal": " of {total}",
+  "more": "Show more"
+}

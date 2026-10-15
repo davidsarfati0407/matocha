@@ -3,6 +3,7 @@
  * boutons, badges, cartes, en-têtes de page, tuiles KPI, états vides.
  */
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import type { ComponentProps, ReactNode } from "react";
 import { Icon } from "@/components/map/hud/ui";
 
@@ -118,10 +119,11 @@ export function Empty({ title, hint, action, icon = "box" }: { title: string; hi
   );
 }
 
-export function Denied({ what = "cette page" }: { what?: string }) {
+export function Denied({ what }: { what?: string }) {
+  const t = useTranslations("ui");
   return (
     <div className="card mx-auto mt-10 max-w-md">
-      <Empty icon="lock" title="Accès refusé" hint={`Votre rôle ne donne pas accès à ${what}. Demandez à un administrateur si besoin.`} />
+      <Empty icon="lock" title={t("denied")} hint={t("deniedHint", { what: what ?? t("thisPage") })} />
     </div>
   );
 }
@@ -156,10 +158,11 @@ export function Tabs({ tabs, current }: { tabs: { id: string; label: string; hre
   );
 }
 
-export function Progress({ value, tone = "brand", className = "" }: { value: number; tone?: "brand" | "accent" | "warn" | "danger" | "ok"; className?: string }) {
+/** Jauge ; `value` est une fraction de 0 à 1. `label` : nom accessible (sinon « n % »). */
+export function Progress({ value, tone = "brand", className = "", label }: { value: number; tone?: "brand" | "accent" | "warn" | "danger" | "ok"; className?: string; label?: string }) {
   const c = { brand: "bg-brand", accent: "bg-accent", warn: "bg-warn", danger: "bg-[#b3402a]", ok: "bg-ok" }[tone];
   return (
-    <div className={`h-1.5 overflow-hidden rounded-full bg-black/[0.07] ${className}`} role="progressbar" aria-valuenow={Math.round(value * 100)} aria-valuemin={0} aria-valuemax={100}>
+    <div className={`h-1.5 overflow-hidden rounded-full bg-black/[0.07] ${className}`} role="progressbar" aria-label={label ?? `${Math.round(value * 100)} %`} aria-valuenow={Math.round(value * 100)} aria-valuemin={0} aria-valuemax={100}>
       <div className={`h-full rounded-full ${c}`} style={{ width: `${Math.max(0, Math.min(1, value)) * 100}%` }} />
     </div>
   );

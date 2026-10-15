@@ -5,6 +5,7 @@
  */
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { toCsv } from "@/lib/domain/csv";
 import { Icon } from "@/components/map/hud/ui";
@@ -56,6 +57,7 @@ export function DataTable<T extends { id: string }>({
   pageSize?: number;
 }) {
   const router = useRouter();
+  const tt = useTranslations("table");
   const [q, setQ] = useState("");
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [sort, setSort] = useState<ViewState["sort"]>(initialSort);
@@ -130,13 +132,13 @@ export function DataTable<T extends { id: string }>({
       <div className="flex flex-wrap items-center gap-2 border-b border-black/5 p-3">
         <label className="flex h-9 min-w-48 flex-1 items-center gap-2 rounded-xl bg-black/[0.03] px-3 text-sm ring-1 ring-black/5 focus-within:ring-accent/50 sm:max-w-xs">
           <Icon name="search" size={14} className="text-muted" />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher…" aria-label="Rechercher dans la liste" className="min-w-0 flex-1 bg-transparent outline-none" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={tt("search")} aria-label={tt("searchLabel")} className="min-w-0 flex-1 bg-transparent outline-none" />
         </label>
         {columns
           .filter((c) => c.filter)
           .map((c) => (
-            <select key={c.key} aria-label={`Filtrer : ${c.header}`} value={filters[c.key] ?? ""} onChange={(e) => setFilters({ ...filters, [c.key]: e.target.value })} className="h-9 rounded-xl bg-white px-2 text-sm ring-1 ring-black/10">
-              <option value="">{c.header} : tous</option>
+            <select key={c.key} aria-label={tt("filter", { col: c.header })} value={filters[c.key] ?? ""} onChange={(e) => setFilters({ ...filters, [c.key]: e.target.value })} className="h-9 rounded-xl bg-white px-2 text-sm ring-1 ring-black/10">
+              <option value="">{tt("all", { col: c.header })}</option>
               {options(c).map((o) => (
                 <option key={o} value={o}>
                   {o}
@@ -152,18 +154,18 @@ export function DataTable<T extends { id: string }>({
         <div className="ml-auto flex items-center gap-2">
           {toolbar}
           <select
-            aria-label="Vues enregistrées"
+            aria-label={tt("viewsLabel")}
             className="h-9 rounded-xl bg-white px-2 text-sm ring-1 ring-black/10"
             value=""
             onChange={async (e) => {
               const v = e.target.value;
               if (v === "__save") {
-                const name = window.prompt("Nom de la vue");
+                const name = window.prompt(tt("viewName"));
                 if (!name) return;
                 const r = await saveView(module, name, { q, filters, sort });
                 if (r.ok) {
                   setViews(await listViews(module));
-                  toast({ title: `Vue « ${name} » enregistrée`, tone: "ok" });
+                  toast({ title: tt("viewSaved", { name }), tone: "ok" });
                 }
               } else if (v.startsWith("del:")) {
                 await deleteView(v.slice(4));
@@ -174,7 +176,7 @@ export function DataTable<T extends { id: string }>({
               }
             }}
           >
-            <option value="">Vues…</option>
+            <option value="">{tt("views")}</option>
             {views.map((v) => (
               <option key={v.id} value={v.id}>
                 {v.name}
@@ -183,11 +185,11 @@ export function DataTable<T extends { id: string }>({
             <option value="__save">+ Enregistrer la vue actuelle</option>
             {views.map((v) => (
               <option key={`d${v.id}`} value={`del:${v.id}`}>
-                Supprimer « {v.name} »
+                {tt("deleteView", { name: v.name })}
               </option>
             ))}
           </select>
-          <button className={btn("secondary", "sm")} onClick={exportCsv} title="CSV lisible par Excel">
+          <button className={btn("secondary", "sm")} onClick={exportCsv} title={tt("csvTitle")}>
             <Icon name="download" size={14} /> CSV
           </button>
           <button className={btn("secondary", "sm")} onClick={() => void exportXlsx()}>
@@ -197,7 +199,7 @@ export function DataTable<T extends { id: string }>({
       </div>
       {selRows.length > 0 && bulk.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 border-b border-black/5 bg-accent/[0.06] px-3 py-2 text-sm">
-          <span className="font-medium">{selRows.length} sélectionné(s)</span>
+          <span className="font-medium">{tt("selected", { count: selRows.length })}</span>
           {bulk.map((b) => (
             <button
               key={b.label}
@@ -218,7 +220,7 @@ export function DataTable<T extends { id: string }>({
         </div>
       )}
       {filtered.length === 0 ? (
-        empty ?? <Empty title="Aucun résultat" hint="Modifiez la recherche ou les filtres." icon="search" />
+        empty ?? <Empty title={tt("emptyTitle")} hint={tt("emptyHint")} icon="search" />
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -226,7 +228,7 @@ export function DataTable<T extends { id: string }>({
               <tr>
                 {bulk.length > 0 && (
                   <th className="w-10 px-3 py-2">
-                    <input type="checkbox" aria-label="Tout sélectionner" checked={allChecked} onChange={() => setSelected(allChecked ? new Set() : new Set(filtered.map((r) => r.id)))} className="accent-[var(--accent)]" />
+                    <input type="checkbox" aria-label={tt("selectAll")} checked={allChecked} onChange={() => setSelected(allChecked ? new Set() : new Set(filtered.map((r) => r.id)))} className="accent-[var(--accent)]" />
                   </th>
                 )}
                 {columns.map((c) => (
@@ -246,7 +248,7 @@ export function DataTable<T extends { id: string }>({
                     <td className="px-3 py-2">
                       <input
                         type="checkbox"
-                        aria-label="Sélectionner la ligne"
+                        aria-label={tt("selectRow")}
                         checked={selected.has(r.id)}
                         onChange={() => {
                           const s = new Set(selected);
@@ -277,11 +279,11 @@ export function DataTable<T extends { id: string }>({
       )}
       <footer className="flex items-center justify-between border-t border-black/5 px-3 py-2 text-xs text-muted">
         <span>
-          {filtered.length} ligne(s){rows.length !== filtered.length ? ` sur ${rows.length}` : ""}
+          {tt("rows", { count: filtered.length })}{rows.length !== filtered.length ? tt("ofTotal", { total: rows.length }) : ""}
         </span>
         {filtered.length > limit && (
           <button className={btn("ghost", "sm")} onClick={() => setLimit(limit + pageSize)}>
-            Afficher plus
+            {tt("more")}
           </button>
         )}
       </footer>

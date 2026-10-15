@@ -1,7 +1,10 @@
 "use client";
 import { useActionState, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { sendMagicLink, signIn, type LoginState } from "./actions";
+
+/** Fournisseurs SSO activés côté Supabase Auth (Entra ID « azure », Google). */
+const SSO = (process.env.NEXT_PUBLIC_SSO_PROVIDERS ?? "").split(",").map((x) => x.trim()).filter((x): x is "azure" | "google" => x === "azure" || x === "google");
+import { sendMagicLink, signIn, ssoStart, type LoginState } from "./actions";
 
 type DemoAccount = { email: string; role: string; name: string };
 
@@ -46,7 +49,17 @@ export function LoginForm({ accounts, password, next }: { accounts: DemoAccount[
         {magic.magicSent && <p className="text-sm text-ok">{t("magicSent")}</p>}
         <div className="mt-2 rounded-xl bg-ground/60 p-3 text-xs text-muted">
           <p className="font-semibold text-ink">{t("ssoTitle")}</p>
-          <p>{t("ssoPending")}</p>
+          {SSO.length ? (
+            <div className="mt-2 flex gap-2">
+              {SSO.map((p) => (
+                <button key={p} type="button" onClick={() => void ssoStart(p, next)} className="flex-1 rounded-lg bg-white px-3 py-2 text-sm font-medium text-ink ring-1 ring-black/10 hover:ring-brand/40">
+                  {t(p === "azure" ? "ssoMicrosoft" : "ssoGoogle")}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p>{t("ssoOff")}</p>
+          )}
         </div>
       </form>
 

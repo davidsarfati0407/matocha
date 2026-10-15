@@ -1,0 +1,21 @@
+{
+  "title": "Connexion",
+  "subtitle": "Accédez à la Maison {company}.",
+  "email": "E-mail",
+  "password": "Mot de passe",
+  "submit": "Se connecter",
+  "magicLink": "Recevoir un lien magique",
+  "magicSent": "Lien envoyé. En local, ouvrez la boîte de test Mailpit (http://127.0.0.1:54324).",
+  "error": "Identifiants invalides.",
+  "demoAccounts": "Comptes de démonstration",
+  "demoHint": "Un clic remplit le formulaire. Mot de passe commun : {password}",
+  "ssoTitle": "Authentification unique",
+  "ssoMicrosoft": "Continuer avec Microsoft",
+  "ssoGoogle": "Continuer avec Google",
+  "ssoOff": "SSO Microsoft / Google non configuré sur ce serveur (NEXT_PUBLIC_SSO_PROVIDERS). Double authentification TOTP disponible dans « Sécurité du compte ».",
+  "mfaTitle": "Double authentification",
+  "mfaHint": "Saisissez le code à 6 chiffres de votre application d'authentification.",
+  "mfaCode": "Code",
+  "mfaVerify": "Vérifier",
+  "mfaError": "Code incorrect ou expiré. Réessayez avec le code affiché maintenant."
+}

@@ -22,6 +22,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     "--brand-deep": c.identiteProfonde,
     "--matcha": c.matcha,
     "--accent": c.accent,
+    "--accent-ui": c.accentTexte,
     "--ground": c.fond,
     "--ground-deep": c.fondProfond,
     "--ink": c.encre,

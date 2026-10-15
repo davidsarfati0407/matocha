@@ -1,10 +1,12 @@
 "use client";
+import { useTranslations } from "next-intl";
 /** Tiroir latéral d'édition rapide (aria-modal, Échap pour fermer, focus initial). */
 import { useEffect, useRef, type ReactNode } from "react";
 import { Icon } from "@/components/map/hud/ui";
 
 export function Drawer({ open, onClose, title, children, footer, width = 480 }: { open: boolean; onClose: () => void; title: ReactNode; children: ReactNode; footer?: ReactNode; width?: number }) {
   const ref = useRef<HTMLDivElement>(null);
+  const tUi = useTranslations("ui");
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -18,7 +20,7 @@ export function Drawer({ open, onClose, title, children, footer, width = 480 }: 
       <div ref={ref} role="dialog" aria-modal aria-label={typeof title === "string" ? title : undefined} className="flex h-full max-w-full flex-col bg-white shadow-2xl animate-[toastin_.25s_ease-out]" style={{ width }} onClick={(e) => e.stopPropagation()}>
         <header className="flex items-center justify-between gap-3 border-b border-black/5 px-5 py-4">
           <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
-          <button aria-label="Fermer" onClick={onClose} className="grid size-8 place-items-center rounded-full hover:bg-black/5">
+          <button aria-label={tUi("close")} onClick={onClose} className="grid size-8 place-items-center rounded-full hover:bg-black/5">
             <Icon name="x" size={16} />
           </button>
         </header>
@@ -30,6 +32,7 @@ export function Drawer({ open, onClose, title, children, footer, width = 480 }: 
 }
 
 export function Modal({ open, onClose, title, children, footer, width = 560 }: { open: boolean; onClose: () => void; title: ReactNode; children: ReactNode; footer?: ReactNode; width?: number }) {
+  const tUi = useTranslations("ui");
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -42,7 +45,7 @@ export function Modal({ open, onClose, title, children, footer, width = 560 }: {
       <div role="dialog" aria-modal aria-label={typeof title === "string" ? title : undefined} className="card flex max-h-[88vh] w-full flex-col overflow-hidden" style={{ maxWidth: width }} onClick={(e) => e.stopPropagation()}>
         <header className="flex items-center justify-between gap-3 border-b border-black/5 px-5 py-4">
           <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
-          <button aria-label="Fermer" onClick={onClose} className="grid size-8 place-items-center rounded-full hover:bg-black/5">
+          <button aria-label={tUi("close")} onClick={onClose} className="grid size-8 place-items-center rounded-full hover:bg-black/5">
             <Icon name="x" size={16} />
           </button>
         </header>

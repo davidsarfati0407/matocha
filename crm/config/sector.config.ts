@@ -35,6 +35,7 @@ const config: SectorConfig = {
       identiteProfonde: "#0F2A1E",
       matcha: "#79A84B",
       accent: "#E07A5F",
+      accentTexte: "#A84B33",
       fond: "#F3EFE5",
       fondProfond: "#E7E1D2",
       encre: "#161713",

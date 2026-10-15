@@ -3,16 +3,18 @@
 /* Jetons de design : les couleurs de marque sont injectées depuis sector.config (layout). */
 :root {
   --radius-card: 16px;
-  --status-ok: #2f8f5b;
+  /* Statuts et texte secondaire : contraste ≥ 4,5:1 sur blanc et sur le fond crème (WCAG AA) */
+  --status-ok: #1f6b45;
   --status-warn: #c98a12;
-  --status-muted: #64707a;
+  --status-muted: #566069;
 }
 
 @theme inline {
   --color-brand: var(--brand);
   --color-brand-deep: var(--brand-deep);
   --color-matcha: var(--matcha);
-  --color-accent: var(--accent);
+  /* Accent d'interface (textes, boutons) : variante contrastée de l'accent de marque */
+  --color-accent: var(--accent-ui);
   --color-ground: var(--ground);
   --color-ground-deep: var(--ground-deep);
   --color-ink: var(--ink);

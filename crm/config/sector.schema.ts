@@ -125,6 +125,8 @@ export const sectorConfigSchema = z.object({
       identiteProfonde: hex,
       matcha: hex,
       accent: hex,
+      /** Variante de l'accent pour textes et fonds sous texte blanc : contraste WCAG AA (≥ 4,5:1). */
+      accentTexte: hex,
       fond: hex,
       fondProfond: hex,
       encre: hex,

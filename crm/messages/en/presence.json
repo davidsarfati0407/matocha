@@ -1,0 +1,10 @@
+{
+  "au_poste": "At desk",
+  "reunion": "In a meeting",
+  "pause": "On break",
+  "teletravail": "Remote",
+  "absent": "Absent",
+  "deplacement": "Travelling",
+  "pas_badge": "Not badged in yet",
+  "parti": "Left"
+}
