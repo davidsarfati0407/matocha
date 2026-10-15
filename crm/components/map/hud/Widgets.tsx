@@ -2,9 +2,11 @@
 /** KPI, notifications volantes, tableau en direct, suivi du dossier, boutons caméra, rail, visite. */
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { sectorConfig } from "@/config/sector.config";
 import { formatDate, formatMoney, formatNumber, formatPercent, formatTime } from "@/lib/format";
 import { backOfficeHref } from "@/lib/map/links";
+import type { Translate } from "@/lib/map/scenario";
 import type { MapSnapshot, MapWorkOrder } from "@/lib/map/snapshot";
 import { useMap } from "@/lib/map/store";
 import { engineRef } from "../engine/engine";
@@ -16,6 +18,7 @@ const KPI_ICON: Record<string, string> = { nombre: "box", pourcent: "clock", eur
 export function Kpis() {
   const kpis = useMap((s) => s.snapshot?.kpis);
   const flash = useMap((s) => s.flash);
+  const t = useTranslations("map");
   if (!kpis) return null;
   return (
     <div className="pointer-events-auto flex gap-2.5">
@@ -24,10 +27,10 @@ export function Kpis() {
         const value = v?.value == null ? "—" : k.unite === "eur" ? formatMoney(Number(v.value), "fr", 0) : k.unite === "pourcent" ? formatPercent(Number(v.value)) : formatNumber(Number(v.value));
         const d = v?.delta == null ? null : Number(v.delta);
         const delta = d == null ? null : k.unite === "nombre" ? `${d >= 0 ? "+" : ""}${formatNumber(d)}` : `${d >= 0 ? "+" : ""}${formatPercent(d)}`;
-        const target = v?.target ? ` · objectif ${formatMoney(Number(v.target), "fr", 0)}` : "";
+        const target = v?.target ? ` · ${t("kpi.objective", { amount: formatMoney(Number(v.target), "fr", 0) })}` : "";
         return (
           // La clé change à chaque flash : l'animation CSS est rejouée
-          <Link href={k.lien ?? "/dashboard"} title="Ouvrir dans le back-office" key={`${k.id}:${flash[k.id] ?? 0}`} className={`${panel} flex min-w-44 items-center gap-3 px-3.5 py-2.5 transition hover:-translate-y-0.5 ${flash[k.id] ? "animate-[kpiflash_1.6s_ease-out]" : ""}`}>
+          <Link href={k.lien ?? "/dashboard"} title={t("kpi.openInBackoffice")} key={`${k.id}:${flash[k.id] ?? 0}`} className={`${panel} flex min-w-44 items-center gap-3 px-3.5 py-2.5 transition hover:-translate-y-0.5 ${flash[k.id] ? "animate-[kpiflash_1.6s_ease-out]" : ""}`}>
             <span className="grid size-9 place-items-center rounded-xl bg-accent/10 text-accent">
               <Icon name={KPI_ICON[k.unite]} size={17} />
             </span>
@@ -77,58 +80,59 @@ export function Toasts() {
   );
 }
 
-const TABS = ["Préparation", "Équipe", "Commandes pro", "Stock"] as const;
+const TABS = ["prep", "team", "orders", "stock"] as const;
 
 export function LiveTable() {
   const snap = useMap((s) => s.snapshot);
   useMap((s) => s.engineReady); // re-rendu quand la scène (tables de pack) est prête
-  const [tab, setTab] = useState<(typeof TABS)[number]>("Préparation");
+  const t = useTranslations("map");
+  const [tab, setTab] = useState<(typeof TABS)[number]>("prep");
   if (!snap) return null;
   const go = (type: string, id: string) => {
     const pick = engineRef.current?.resolve(type, id);
     if (pick) engineRef.current?.selectPick(pick);
   };
   const tables = engineRef.current ? [...engineRef.current.world.objects.values()].filter((o) => o.def.kit === "pack_table") : [];
-  const counts: Record<string, number> = {
-    Préparation: tables.length,
-    Équipe: snap.employees.filter((e) => !["absent", "teletravail", "deplacement", "pas_badge", "parti"].includes(e.status)).length,
-    "Commandes pro": snap.workOrders.filter((w) => !["livree", "facturee"].includes(w.stage)).length,
-    Stock: snap.stock.filter((s) => s.quantity < s.minQuantity).length,
+  const counts: Record<(typeof TABS)[number], number> = {
+    prep: tables.length,
+    team: snap.employees.filter((e) => !["absent", "teletravail", "deplacement", "pas_badge", "parti"].includes(e.status)).length,
+    orders: snap.workOrders.filter((w) => !["livree", "facturee"].includes(w.stage)).length,
+    stock: snap.stock.filter((s) => s.quantity < s.minQuantity).length,
   };
   return (
     <div className={`${panel} pointer-events-auto flex h-full w-[420px] flex-col overflow-hidden`}>
       <div role="tablist" className="flex gap-1 border-b border-black/5 p-1.5">
-        {TABS.map((t) => (
-          <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={`flex-1 rounded-lg px-2 py-1.5 text-[12px] font-semibold ${tab === t ? "bg-white shadow-sm ring-1 ring-black/10" : "text-muted hover:text-ink"}`}>
-            {t} <span className="font-normal text-muted">{counts[t]}</span>
+        {TABS.map((id) => (
+          <button key={id} role="tab" aria-selected={tab === id} onClick={() => setTab(id)} className={`flex-1 rounded-lg px-2 py-1.5 text-[12px] font-semibold ${tab === id ? "bg-white shadow-sm ring-1 ring-black/10" : "text-muted hover:text-ink"}`}>
+            {t(`table.tabs.${id}`)} <span className="font-normal text-muted">{counts[id]}</span>
           </button>
         ))}
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto px-2 py-1 text-[12px]">
-        {tab === "Préparation" &&
+        {tab === "prep" &&
           tables.map((o) => {
             const slot = o.def.workspots?.[0]?.owner;
             const e = snap.employees.find((x) => x.slot === slot);
             const n = snap.shopToday.byStation[String(o.def.params?.index)] ?? 0;
             return (
-              <TableRow key={o.def.id} id={`T${o.def.params?.index}`} sub="Table" onClick={() => engineRef.current?.selectPick(`obj:${o.def.id}`)} title={e ? `${e.firstName} ${e.lastName}` : "Libre"} pill={<Pill tone={e?.status === "au_poste" ? "ok" : e ? e.status : "muted"}>{e?.status === "au_poste" ? "En préparation" : undefined}</Pill>} progress={Math.min(1, n / 12)} />
+              <TableRow key={o.def.id} id={`T${o.def.params?.index}`} sub={t("table.table")} onClick={() => engineRef.current?.selectPick(`obj:${o.def.id}`)} title={e ? `${e.firstName} ${e.lastName}` : t("table.free")} pill={<Pill tone={e?.status === "au_poste" ? "ok" : e ? e.status : "muted"}>{e?.status === "au_poste" ? t("table.preparing") : undefined}</Pill>} progress={Math.min(1, n / 12)} />
             );
           })}
-        {tab === "Équipe" &&
+        {tab === "team" &&
           snap.employees
             .slice()
             .sort((a, b) => statusOrder(a.status) - statusOrder(b.status))
             .map((e) => <TableRow key={e.id} id={`${e.firstName[0]}${e.lastName[0]}`} sub={e.firstIn ? formatTime(e.firstIn) : "—"} title={`${e.firstName} ${e.lastName} · ${e.jobTitle}`} pill={<Pill tone={e.status} />} onClick={() => go("employees", e.id)} />)}
-        {tab === "Commandes pro" &&
+        {tab === "orders" &&
           snap.workOrders
             .filter((w) => !["livree", "facturee"].includes(w.stage))
             .map((w) => (
-              <TableRow key={w.id} id={w.number.slice(-4)} sub={w.number.slice(0, 5)} title={`${w.clientName} · ${w.title}`} pill={<Pill tone={w.status === "attente" ? "warn" : "accent"}>{w.status === "attente" ? "Attente" : sectorConfig.objetMetierCentral.etapes.find((s) => s.id === w.stage)?.libelle}</Pill>} progress={w.progress} onClick={() => go("work_orders", w.id)} />
+              <TableRow key={w.id} id={w.number.slice(-4)} sub={w.number.slice(0, 5)} title={`${w.clientName} · ${w.title}`} pill={<Pill tone={w.status === "attente" ? "warn" : "accent"}>{w.status === "attente" ? t("table.waiting") : sectorConfig.objetMetierCentral.etapes.find((s) => s.id === w.stage)?.libelle}</Pill>} progress={w.progress} onClick={() => go("work_orders", w.id)} />
             ))}
-        {tab === "Stock" &&
+        {tab === "stock" &&
           snap.stock.map((s) => {
             const low = s.quantity < s.minQuantity;
-            return <TableRow key={s.id} id={s.location ?? ""} sub="Empl." title={s.name} pill={<Pill tone={s.onOrder ? "muted" : low ? "accent" : "ok"}>{s.onOrder ? "Commandé" : low ? "Stock bas" : "En stock"}</Pill>} progress={s.quantity / Math.max(1, s.minQuantity * 2)} tone={low ? "accent" : "ok"} onClick={() => go("stock_items", s.id)} />;
+            return <TableRow key={s.id} id={s.location ?? ""} sub={t("table.location")} title={s.name} pill={<Pill tone={s.onOrder ? "muted" : low ? "accent" : "ok"}>{s.onOrder ? t("common.ordered") : low ? t("common.lowStock") : t("common.inStock")}</Pill>} progress={s.quantity / Math.max(1, s.minQuantity * 2)} tone={low ? "accent" : "ok"} onClick={() => go("stock_items", s.id)} />;
           })}
       </div>
     </div>
@@ -159,6 +163,7 @@ export function WorkOrderDock() {
   const snap = useMap((s) => s.snapshot);
   const sel = useMap((s) => s.selection);
   const now = useNow(30000);
+  const t = useTranslations("map");
   if (!snap) return null;
   const wo = pickWorkOrder(snap, sel);
   if (!wo) return null;
@@ -169,7 +174,7 @@ export function WorkOrderDock() {
     <div className={`${panel} pointer-events-auto flex items-center gap-4 px-4 py-3`}>
       <div className="min-w-0">
         <p className="flex items-center gap-1.5 text-[13px] font-semibold">
-          <Icon name="truck" size={15} className="text-accent" /> Suivi {sectorConfig.objetMetierCentral.nom}
+          <Icon name="truck" size={15} className="text-accent" /> {t("dock.title", { object: sectorConfig.objetMetierCentral.nom })}
         </p>
         <ol className="mt-2 flex items-start">
           {stages.map((s, i) => {
@@ -184,7 +189,7 @@ export function WorkOrderDock() {
                     {done ? <Icon name="check" size={13} /> : current ? <span className="size-2 rounded-full bg-white" /> : null}
                   </span>
                   <span className={`mt-1 text-[11px] font-semibold ${i > idx ? "text-muted" : ""}`}>{s.libelle}</span>
-                  <span className="text-[10px] text-muted">{st ? `${formatDate(st.enteredAt).slice(0, 5)} · ${formatTime(st.enteredAt)}` : i === stages.length - 1 && wo.dueAt ? `ETA ${formatDate(wo.dueAt).slice(0, 5)}` : "—"}</span>
+                  <span className="text-[10px] text-muted">{st ? `${formatDate(st.enteredAt).slice(0, 5)} · ${formatTime(st.enteredAt)}` : i === stages.length - 1 && wo.dueAt ? t("dock.eta", { date: formatDate(wo.dueAt).slice(0, 5) }) : "—"}</span>
                 </div>
                 {i < stages.length - 1 && <span className={`mt-3 h-0.5 w-4 ${i < idx ? "bg-accent" : "bg-black/10"}`} />}
               </li>
@@ -197,7 +202,7 @@ export function WorkOrderDock() {
         <span className="leading-tight">
           <span className="block font-mono text-[12px] font-semibold">#{wo.number}</span>
           <span className="block max-w-36 truncate text-[12px]">{wo.clientName}</span>
-          <span className="block text-[10px] text-muted">{wo.dueAt ? `échéance ${formatTime(wo.dueAt)}${Date.parse(wo.dueAt) < now ? " · en retard" : ""}` : ""}</span>
+          <span className="block text-[10px] text-muted">{wo.dueAt ? t(Date.parse(wo.dueAt) < now ? "dock.dueLate" : "dock.due", { time: formatTime(wo.dueAt) }) : ""}</span>
         </span>
         <Icon name="chevron" size={14} className="text-muted" />
       </Link>
@@ -218,27 +223,28 @@ function pickWorkOrder(s: MapSnapshot, sel: ReturnType<typeof useMap.getState>["
 }
 
 export function CameraButtons() {
+  const t = useTranslations("map");
   const d = () => engineRef.current?.director;
   const btn = "grid size-9 place-items-center rounded-xl hover:bg-black/5";
   return (
     <div className={`${panel} pointer-events-auto flex flex-col p-1`}>
-      <button aria-label="Zoom avant" className={btn} onClick={() => d()?.zoom(0.7)}>
+      <button aria-label={t("camera.zoomIn")} className={btn} onClick={() => d()?.zoom(0.7)}>
         <Icon name="plus" />
       </button>
-      <button aria-label="Zoom arrière" className={btn} onClick={() => d()?.zoom(1.4)}>
+      <button aria-label={t("camera.zoomOut")} className={btn} onClick={() => d()?.zoom(1.4)}>
         <Icon name="minus" />
       </button>
       <span className="mx-2 my-1 h-px bg-black/10" />
-      <button aria-label="Pivoter à gauche" className={btn} onClick={() => d()?.rotate(Math.PI / 4)}>
+      <button aria-label={t("camera.rotateLeft")} className={btn} onClick={() => d()?.rotate(Math.PI / 4)}>
         <Icon name="rotl" />
       </button>
-      <button aria-label="Pivoter à droite" className={btn} onClick={() => d()?.rotate(-Math.PI / 4)}>
+      <button aria-label={t("camera.rotateRight")} className={btn} onClick={() => d()?.rotate(-Math.PI / 4)}>
         <Icon name="rotr" />
       </button>
-      <button aria-label="Vue d'ensemble (H)" className={btn} onClick={() => d()?.home()}>
+      <button aria-label={t("camera.overview")} className={btn} onClick={() => d()?.home()}>
         <Icon name="home" />
       </button>
-      <button aria-label="Visite guidée (T)" className="mt-1 grid size-9 place-items-center rounded-xl bg-accent text-white" onClick={() => startTour()}>
+      <button aria-label={t("camera.tour")} className="mt-1 grid size-9 place-items-center rounded-xl bg-accent text-white" onClick={() => startTour((key, values) => t(key, values))}>
         <Icon name="play" />
       </button>
     </div>
@@ -247,33 +253,34 @@ export function CameraButtons() {
 
 export function TourBar() {
   const tour = useMap((s) => s.tour);
+  const t = useTranslations("map");
   if (!tour.active) return null;
   return (
     <div className={`${panel} pointer-events-auto flex items-center gap-3 px-4 py-2 text-[13px]`}>
       <span className="size-2 animate-pulse rounded-full bg-accent" />
-      <span className="font-semibold">Visite guidée</span>
+      <span className="font-semibold">{t("tour.title")}</span>
       <span className="text-muted">— {tour.title} · {tour.index + 1}/{tour.total}</span>
       <Bar value={tour.progress} className="w-28" tone="accent" />
       <button onClick={() => useMap.getState().set({ tour: { ...tour, active: false } })} className="text-xs text-muted hover:text-ink">
-        Échap
+        {t("tour.escape")}
       </button>
     </div>
   );
 }
 
-/** Visite guidée : plans enchaînés automatiquement, lente orbite pendant chaque plan. */
-export async function startTour() {
+/** Visite guidée : plans enchaînés automatiquement, lente orbite pendant chaque plan. Traducteur « map » fourni par l'appelant. */
+export async function startTour(t: Translate) {
   const e = engineRef.current;
   const st = useMap.getState();
   if (!e) return;
   const zones = e.layout.zones;
   const zoneShot = (type: string) => zones.find((z) => z.type === type);
-  const shots: { title: string; pick?: string; home?: boolean }[] = [{ title: "Vue d'ensemble", home: true }];
-  for (const t of ["bar", "open_space", "studio", "reunion", "preparation", "stock", "quarantaine", "expedition", "detente"]) {
-    const z = zoneShot(t);
+  const shots: { title: string; pick?: string; home?: boolean }[] = [{ title: t("tour.overview"), home: true }];
+  for (const type of ["bar", "open_space", "studio", "reunion", "preparation", "stock", "quarantaine", "expedition", "detente"]) {
+    const z = zoneShot(type);
     if (z) shots.push({ title: z.name, pick: `zone:${z.key}` });
   }
-  shots.push({ title: "Retour à la vue d'ensemble", home: true });
+  shots.push({ title: t("tour.back"), home: true });
   st.select(null);
   st.set({ tour: { active: true, index: 0, total: shots.length, title: shots[0].title, progress: 0 } });
   const SHOT = 5500;
@@ -301,10 +308,11 @@ export async function startTour() {
 export function Rail({ onEdit }: { onEdit?: () => void }) {
   const snap = useMap((s) => s.snapshot);
   const editMode = useMap((s) => s.editMode);
+  const t = useTranslations("map");
   const icons: Record<string, string> = { bar: "cup", open_space: "users", studio: "target", reunion: "users", preparation: "box", stock: "layers", expedition: "truck", detente: "cup", reception: "truck" };
   const zones = (snap?.zones ?? []).filter((z) => icons[z.type]);
   return (
-    <nav aria-label="Raccourcis d'espaces" className="pointer-events-auto flex flex-col items-center gap-1 rounded-2xl bg-brand-deep p-1.5 text-ground/80 shadow-xl">
+    <nav aria-label={t("rail.label")} className="pointer-events-auto flex flex-col items-center gap-1 rounded-2xl bg-brand-deep p-1.5 text-ground/80 shadow-xl">
       {zones.map((z) => (
         <button key={z.key} title={z.name} aria-label={z.name} onClick={() => engineRef.current?.selectPick(`zone:${z.key}`)} className="grid size-9 place-items-center rounded-xl hover:bg-white/10 hover:text-white">
           <Icon name={icons[z.type]} size={17} />
@@ -312,11 +320,11 @@ export function Rail({ onEdit }: { onEdit?: () => void }) {
       ))}
       <span className="my-1 h-px w-6 bg-white/15" />
       {snap?.me.editsPlan && (
-        <button title="Modifier le plan" aria-label="Modifier le plan" aria-pressed={editMode} onClick={onEdit} className={`grid size-9 place-items-center rounded-xl ${editMode ? "bg-accent text-white" : "hover:bg-white/10 hover:text-white"}`}>
+        <button title={t("rail.editPlan")} aria-label={t("rail.editPlan")} aria-pressed={editMode} onClick={onEdit} className={`grid size-9 place-items-center rounded-xl ${editMode ? "bg-accent text-white" : "hover:bg-white/10 hover:text-white"}`}>
           <Icon name="edit" size={17} />
         </button>
       )}
-      <Link href="/tech" title="Back-office (page technique)" aria-label="Back-office" className="grid size-9 place-items-center rounded-xl hover:bg-white/10 hover:text-white">
+      <Link href="/tech" title={t("rail.backofficeTitle")} aria-label={t("rail.backoffice")} className="grid size-9 place-items-center rounded-xl hover:bg-white/10 hover:text-white">
         <Icon name="layers" size={17} />
       </Link>
     </nav>
@@ -325,11 +333,12 @@ export function Rail({ onEdit }: { onEdit?: () => void }) {
 
 export function Loading() {
   const loading = useMap((s) => s.loading);
+  const t = useTranslations("map");
   const [gone, setGone] = useState(false);
   useEffect(() => {
     if (loading.done) {
-      const t = setTimeout(() => setGone(true), 700);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => setGone(true), 700);
+      return () => clearTimeout(timer);
     }
   }, [loading.done]);
   if (gone) return null;
@@ -343,7 +352,7 @@ export function Loading() {
             <circle cx="31" cy="9.5" r="3" fill="var(--matcha)" />
           </svg>
         </div>
-        <p className="text-sm font-medium text-muted">Ouverture de la Maison {sectorConfig.entreprise.nomCourt}…</p>
+        <p className="text-sm font-medium text-muted">{t("loading.opening", { company: sectorConfig.entreprise.nomCourt })}</p>
         <Bar value={loading.progress} tone="accent" className="w-56" />
       </div>
     </div>

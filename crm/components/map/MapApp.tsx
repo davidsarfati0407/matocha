@@ -6,12 +6,13 @@
  */
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import * as THREE from "three";
 import { sectorConfig } from "@/config/sector.config";
 import { formatTime } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
 import { subscribeActivity, type ActivityEvent } from "@/lib/map/realtime";
-import { Scenario } from "@/lib/map/scenario";
+import { Scenario, type Translate } from "@/lib/map/scenario";
 import { loadSnapshot, type MapSnapshot } from "@/lib/map/snapshot";
 import { assignAsset } from "@/app/(map)/map/actions";
 import { ASSET_DRAG } from "./hud/DetailPanel";
@@ -39,6 +40,14 @@ export default function MapApp({ initial, focus }: { initial: MapSnapshot; focus
   const editMode = useMap((s) => s.editMode);
   const hovered = useMap((s) => s.hovered);
   const selection = useMap((s) => s.selection);
+  const t = useTranslations("map");
+  const tStatus = useTranslations("status");
+  // Traducteur lu par les rappels hors rendu (flux d'événements, scénario, raccourcis)
+  const tRef = useRef<Translate>((k) => k);
+
+  useEffect(() => {
+    tRef.current = (key, values) => t(key, values);
+  }, [t]);
 
   useEffect(() => {
     labels.current.hover = hoverRef.current;
@@ -79,15 +88,15 @@ export default function MapApp({ initial, focus }: { initial: MapSnapshot; focus
     let lastShopToast = 0;
     const onEvent = (e: ActivityEvent) => {
       const st = useMap.getState();
-      const t = toastFor(e, st.snapshot);
+      const toast = toastFor(e, st.snapshot, tRef.current);
       const muted = st.muted[e.type] ?? 0;
-      if (t && muted < Date.now()) {
+      if (toast && muted < Date.now()) {
         if (e.type.startsWith("shop_order.")) {
           if (Date.now() - lastShopToast > 8000) {
             lastShopToast = Date.now();
-            st.toast(t);
+            st.toast(toast);
           }
-        } else st.toast(t);
+        } else st.toast(toast);
       }
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => void refresh(), 200);
@@ -114,10 +123,10 @@ export default function MapApp({ initial, focus }: { initial: MapSnapshot; focus
         const [type, ...rest] = focus.split(":");
         const pick = engine.resolve(type, rest.join(":"));
         if (pick) engine.selectPick(pick);
-        else useMap.getState().toast({ title: "Élément introuvable sur la map", detail: "Il n'a pas de présence physique en ce moment.", tone: "warn" });
+        else useMap.getState().toast({ title: tRef.current("app.notFoundTitle"), detail: tRef.current("app.notFoundDetail"), tone: "warn" });
       }
       if (initial.org.demoMode && initial.org.settings.demo_autoplay !== false && !saved) {
-        scenario.current = new Scenario(engine, refresh);
+        scenario.current = new Scenario(engine, refresh, (key, values) => tRef.current(key, values));
         void scenario.current.start();
       }
     },
@@ -160,8 +169,8 @@ export default function MapApp({ initial, focus }: { initial: MapSnapshot; focus
       if (typing || ev.metaKey || ev.ctrlKey || ev.altKey) return;
       if (ev.key === "/") {
         ev.preventDefault();
-        (document.querySelector('[aria-label="Recherche globale"]') as HTMLInputElement | null)?.focus();
-      } else if (ev.key.toLowerCase() === "t") void startTour();
+        (document.getElementById("map-search") as HTMLInputElement | null)?.focus();
+      } else if (ev.key.toLowerCase() === "t") void startTour(tRef.current);
       else if (ev.key.toLowerCase() === "h") void engineRef.current?.director.home();
     };
     window.addEventListener("keydown", onKey);
@@ -209,12 +218,12 @@ export default function MapApp({ initial, focus }: { initial: MapSnapshot; focus
     ev.preventDefault();
     const p = pickUnder(ev);
     engineRef.current?.setHover(null);
-    if (p?.entityType !== "employees") return useMap.getState().toast({ title: "Déposez le véhicule sur une personne", tone: "warn" });
-    void assignAsset(assetId, p.entityId).then((r) => useMap.getState().toast(r.ok ? { title: r.message ?? "Affecté", detail: p.label, tone: "ok" } : { title: "Affectation refusée", detail: r.error, tone: "warn" }));
+    if (p?.entityType !== "employees") return useMap.getState().toast({ title: t("app.dropOnPerson"), tone: "warn" });
+    void assignAsset(assetId, p.entityId).then((r) => useMap.getState().toast(r.ok ? { title: r.message ?? t("app.assigned"), detail: p.label, tone: "ok" } : { title: t("app.assignRefused"), detail: r.error, tone: "warn" }));
   };
 
   const hoverLabel = hovered && hovered !== selection?.pickId ? engineRef.current?.world.pickables.get(hovered) : null;
-  const hoverStatus = hoverLabel?.kind === "person" ? statusLabel(useMap.getState().snapshot, hoverLabel.entityId) : "";
+  const hoverStatus = hoverLabel?.kind === "person" ? statusLabel(useMap.getState().snapshot, hoverLabel.entityId, tStatus) : "";
 
   return (
     <main className="relative h-dvh w-full overflow-hidden bg-ground" onDragOver={onAssetDragOver} onDrop={onAssetDrop}>
@@ -275,7 +284,7 @@ export default function MapApp({ initial, focus }: { initial: MapSnapshot; focus
       <FullSheet />
       <Loading />
       <p className="sr-only" aria-live="polite">
-        {selection ? `Sélection : ${selection.label}` : ""}
+        {selection ? t("app.selection", { label: selection.label }) : ""}
       </p>
       <span className="pointer-events-none absolute bottom-1 left-1/2 z-20 -translate-x-1/2 text-[10px] text-muted/70">{sectorConfig.entreprise.statutDemo}</span>
     </main>
@@ -285,9 +294,10 @@ export default function MapApp({ initial, focus }: { initial: MapSnapshot; focus
 function SelectionStatus() {
   const sel = useMap((s) => s.selection);
   const snap = useMap((s) => s.snapshot);
+  const tStatus = useTranslations("status");
   if (!sel || !snap) return null;
   let status = "";
-  if (sel.entityType === "employees") status = statusLabel(snap, sel.entityId);
+  if (sel.entityType === "employees") status = statusLabel(snap, sel.entityId, tStatus);
   if (sel.entityType === "work_orders") {
     const w = snap.workOrders.find((x) => x.id === sel.entityId);
     status = w ? sectorConfig.objetMetierCentral.etapes.find((s) => s.id === w.stage)?.libelle ?? "" : "";
@@ -297,60 +307,61 @@ function SelectionStatus() {
   return <span className="bg-black/15 px-2 py-1">{status}</span>;
 }
 
-const STATUS_FR: Record<string, string> = { au_poste: "Au poste", reunion: "En réunion", pause: "En pause", teletravail: "Télétravail", absent: "Absent", deplacement: "En déplacement", pas_badge: "Pas encore badgé", parti: "Parti" };
-function statusLabel(s: MapSnapshot | null, id: string) {
+/** Libellé de présence traduit (status.presence.*), ou la valeur brute si inconnue. */
+function statusLabel(s: MapSnapshot | null, id: string, tStatus: ReturnType<typeof useTranslations<"status">>) {
   const e = s?.employees.find((x) => x.id === id);
-  return e ? STATUS_FR[e.status] ?? e.status : "";
+  return e ? (tStatus.has(`presence.${e.status}`) ? tStatus(`presence.${e.status}`) : e.status) : "";
 }
 
-function toastFor(e: ActivityEvent, s: MapSnapshot | null): { title: string; detail?: string; pickId?: string; tone?: "info" | "ok" | "warn" | "accent" } | null {
+/** Notification d'un événement du flux ; le traducteur (espace « map ») est passé par l'appelant. */
+function toastFor(e: ActivityEvent, s: MapSnapshot | null, t: Translate): { title: string; detail?: string; pickId?: string; tone?: "info" | "ok" | "warn" | "accent" } | null {
   const emp = s?.employees.find((x) => x.id === e.entity_id);
-  const name = emp ? `${emp.firstName} ${emp.lastName}` : "Un collaborateur";
+  const name = emp ? `${emp.firstName} ${emp.lastName}` : t("toast.someone");
   const p = e.payload as Record<string, string | number>;
   const time = formatTime(e.at);
   switch (e.type) {
     case "badge.in":
-      return { title: `${name} est arrivé·e`, detail: `Badge à ${time}`, pickId: `person:${e.entity_id}`, tone: "ok" };
+      return { title: t("toast.badgeIn", { name }), detail: t("toast.badgeAt", { time }), pickId: `person:${e.entity_id}`, tone: "ok" };
     case "badge.out":
-      return { title: `${name} est parti·e`, detail: `Badge de sortie à ${time}`, tone: "info" };
+      return { title: t("toast.badgeOut", { name }), detail: t("toast.badgeOutAt", { time }), tone: "info" };
     case "badge.pause_start":
-      return { title: `${name} part en pause`, detail: `Badge à ${time}`, pickId: `person:${e.entity_id}`, tone: "warn" };
+      return { title: t("toast.pauseStart", { name }), detail: t("toast.badgeAt", { time }), pickId: `person:${e.entity_id}`, tone: "warn" };
     case "work_order.stage": {
       const label = sectorConfig.objetMetierCentral.etapes.find((x) => x.id === p.to)?.libelle ?? p.to;
       return { title: `${p.number} → ${label}`, pickId: `wo:${e.entity_id}`, tone: "accent" };
     }
     case "work_order.created":
-      return { title: `Nouvelle ${sectorConfig.objetMetierCentral.nom} ${p.number}`, tone: "accent" };
+      return { title: t("toast.workOrderCreated", { object: sectorConfig.objetMetierCentral.nom, number: String(p.number) }), tone: "accent" };
     case "quote.accepted":
-      return { title: "Devis accepté", tone: "ok" };
+      return { title: t("toast.quoteAccepted"), tone: "ok" };
     case "lot.quarantaine":
-      return { title: "Lot reçu — en quarantaine", pickId: `lot:${e.entity_id}`, tone: "warn" };
+      return { title: t("toast.lotQuarantine"), pickId: `lot:${e.entity_id}`, tone: "warn" };
     case "lot.libere":
-      return { title: "Lot libéré par la qualité", tone: "ok" };
+      return { title: t("toast.lotReleased"), tone: "ok" };
     case "expedition.pickup":
-      return { title: "Enlèvement transporteur", detail: `${p.orders} colis en ligne · ${p.work_orders} commande(s) pro`, tone: "ok" };
+      return { title: t("toast.pickup"), detail: t("toast.pickupDetail", { orders: Number(p.orders), workOrders: Number(p.work_orders) }), tone: "ok" };
     case "notification.ambient":
       return { title: String(p.title), tone: "info" };
     case "shop_order.payee":
-      return { title: "Nouvelle commande en ligne", detail: "La boutique enregistre de nouvelles commandes.", tone: "info" };
+      return { title: t("toast.shopOrder"), detail: t("toast.shopOrderDetail"), tone: "info" };
     case "leave.approved":
-      return { title: "Congé validé", tone: "ok" };
+      return { title: t("toast.leaveApproved"), tone: "ok" };
     case "invoice.paid":
-      return { title: "Paiement reçu", tone: "ok" };
+      return { title: t("toast.invoicePaid"), tone: "ok" };
     case "room.insert": {
       const a = s?.assets.find((x) => x.id === e.entity_id);
-      return { title: `${a?.name ?? "Salle"} réservée`, detail: `${p.title} · ${formatTime(String(p.starts_at))}–${formatTime(String(p.ends_at))}`, tone: "info" };
+      return { title: t("toast.roomBooked", { room: a?.name ?? t("toast.room") }), detail: `${p.title} · ${formatTime(String(p.starts_at))}–${formatTime(String(p.ends_at))}`, tone: "info" };
     }
     case "room.delete": {
       const a = s?.assets.find((x) => x.id === e.entity_id);
-      return { title: `${a?.name ?? "Salle"} libérée`, tone: "info" };
+      return { title: t("toast.roomReleased", { room: a?.name ?? t("toast.room") }), tone: "info" };
     }
     case "asset.assigned": {
       const who = s?.employees.find((x) => x.id === p.employee_id);
-      return { title: `${p.name} affecté`, detail: who ? `à ${who.firstName} ${who.lastName}` : "affectation retirée", tone: "accent" };
+      return { title: t("toast.assetAssigned", { name: String(p.name) }), detail: who ? t("toast.assetAssignedTo", { name: `${who.firstName} ${who.lastName}` }) : t("toast.assignmentRemoved"), tone: "accent" };
     }
     case "stock.entree":
-      return { title: "Entrée en stock", detail: String(p.reason ?? ""), tone: "ok" };
+      return { title: t("toast.stockIn"), detail: String(p.reason ?? ""), tone: "ok" };
     default:
       return null;
   }

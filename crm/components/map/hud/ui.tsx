@@ -1,6 +1,7 @@
 "use client";
 /** Primitives d'interface de la map : icônes, pastilles de statut, jauges. */
 import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 
 const ICONS: Record<string, string> = {
   search: "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm10 2-4.3-4.3",
@@ -70,27 +71,34 @@ export function Icon({ name, size = 16, className = "" }: { name: keyof typeof I
   );
 }
 
-export const STATUS: Record<string, { label: string; cls: string; dot: string }> = {
-  au_poste: { label: "Au poste", cls: "bg-[#2f8f5b]/12 text-[#2f8f5b]", dot: "bg-[#2f8f5b]" },
-  reunion: { label: "En réunion", cls: "bg-[#3D5A80]/12 text-[#3D5A80]", dot: "bg-[#3D5A80]" },
-  pause: { label: "En pause", cls: "bg-[#c98a12]/15 text-[#a36f0c]", dot: "bg-[#c98a12]" },
-  teletravail: { label: "Télétravail", cls: "bg-[#79A84B]/20 text-[#173D2B]", dot: "bg-[#79A84B]" },
-  deplacement: { label: "En déplacement", cls: "bg-black/5 text-[#64707a]", dot: "bg-[#64707a]" },
-  absent: { label: "Absent", cls: "bg-black/5 text-[#64707a]", dot: "bg-[#64707a]" },
-  pas_badge: { label: "Pas encore badgé", cls: "bg-[#E07A5F]/12 text-[#c2573c]", dot: "bg-[#E07A5F]" },
-  parti: { label: "Parti", cls: "bg-black/5 text-[#64707a]", dot: "bg-[#64707a]" },
-  ok: { label: "OK", cls: "bg-[#2f8f5b]/12 text-[#2f8f5b]", dot: "bg-[#2f8f5b]" },
-  warn: { label: "Alerte", cls: "bg-[#c98a12]/15 text-[#a36f0c]", dot: "bg-[#c98a12]" },
-  accent: { label: "", cls: "bg-[#E07A5F]/12 text-[#c2573c]", dot: "bg-[#E07A5F]" },
-  muted: { label: "", cls: "bg-black/5 text-[#64707a]", dot: "bg-[#64707a]" },
+/** Couleurs des pastilles ; libellés traduits au rendu (status.presence.* ou map.pill.*). */
+export const STATUS: Record<string, { cls: string; dot: string }> = {
+  au_poste: { cls: "bg-[#2f8f5b]/12 text-[#2f8f5b]", dot: "bg-[#2f8f5b]" },
+  reunion: { cls: "bg-[#3D5A80]/12 text-[#3D5A80]", dot: "bg-[#3D5A80]" },
+  pause: { cls: "bg-[#c98a12]/15 text-[#a36f0c]", dot: "bg-[#c98a12]" },
+  teletravail: { cls: "bg-[#79A84B]/20 text-[#173D2B]", dot: "bg-[#79A84B]" },
+  deplacement: { cls: "bg-black/5 text-[#64707a]", dot: "bg-[#64707a]" },
+  absent: { cls: "bg-black/5 text-[#64707a]", dot: "bg-[#64707a]" },
+  pas_badge: { cls: "bg-[#E07A5F]/12 text-[#c2573c]", dot: "bg-[#E07A5F]" },
+  parti: { cls: "bg-black/5 text-[#64707a]", dot: "bg-[#64707a]" },
+  ok: { cls: "bg-[#2f8f5b]/12 text-[#2f8f5b]", dot: "bg-[#2f8f5b]" },
+  warn: { cls: "bg-[#c98a12]/15 text-[#a36f0c]", dot: "bg-[#c98a12]" },
+  accent: { cls: "bg-[#E07A5F]/12 text-[#c2573c]", dot: "bg-[#E07A5F]" },
+  muted: { cls: "bg-black/5 text-[#64707a]", dot: "bg-[#64707a]" },
 };
 
+/** Clé de libellé (traducteur racine) d'une pastille ; vide pour les tons purement décoratifs. */
+const PRESENCE = new Set(["au_poste", "reunion", "pause", "teletravail", "deplacement", "absent", "pas_badge", "parti"]);
+export const statusKey = (tone: string) => (PRESENCE.has(tone) ? `status.presence.${tone}` : tone === "ok" || tone === "warn" ? `map.pill.${tone}` : null);
+
 export function Pill({ tone, children }: { tone: keyof typeof STATUS | string; children?: ReactNode }) {
+  const t = useTranslations();
   const s = STATUS[tone] ?? STATUS.muted;
+  const key = children == null ? statusKey(tone) : null;
   return (
     <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${s.cls}`}>
       <span className={`size-1.5 rounded-full ${s.dot}`} />
-      {children ?? s.label}
+      {children ?? (key ? t(key) : "")}
     </span>
   );
 }

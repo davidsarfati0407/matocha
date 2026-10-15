@@ -15,6 +15,8 @@ import type { Vec2 } from "./layout";
 import { useMap } from "./store";
 
 type Ev = (typeof sectorConfig.evenementsLiveDeDemo)[number];
+/** Traducteur de l'espace « map » fourni par le composant (pas de hook hors React). */
+export type Translate = (key: string, values?: Record<string, string | number>) => string;
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export class Scenario {
@@ -25,6 +27,7 @@ export class Scenario {
   constructor(
     private engine: MapEngine,
     private refresh: () => Promise<void>,
+    private t: Translate,
   ) {}
 
   /** Paramètres de remise à zéro déduits des événements de la fiche. */
@@ -90,7 +93,7 @@ export class Scenario {
         this.mute("badge.in");
         await demoStep("badge", { employee_id: e.id, kind: "in" });
         this.flashBadge();
-        this.toast(ev, `${e.firstName} ${e.lastName} a badgé à ${formatTime(new Date())}.`, `person:${e.id}`);
+        this.toast(ev, this.t("scenario.badged", { name: `${e.firstName} ${e.lastName}`, time: formatTime(new Date()) }), `person:${e.id}`);
         await this.refresh();
         sim.release(e.id);
         break;
@@ -98,7 +101,7 @@ export class Scenario {
       case "lot.recu": {
         const carrier = this.emp(ev.params.porteur);
         const truckId = `truck:${ev.params.vehicule}`;
-        const truck = sim.truckToDock(truckId, ev.params.vehicule, "Porteur — arrivage Japon", "CHAEN MIDORI");
+        const truck = sim.truckToDock(truckId, ev.params.vehicule, this.t("scenario.truckArrival"), "CHAEN MIDORI");
         await truck;
         const dock = this.anchor("dock_reception");
         const drop = this.anchor("quarantine_drop");
@@ -109,7 +112,7 @@ export class Scenario {
         }
         this.mute("lot.quarantaine");
         await demoStep("lot_received", { lot: ev.params.lot });
-        this.toast(ev, `Lot ${ev.params.lot} reçu — placé en quarantaine jusqu'au contrôle.`);
+        this.toast(ev, this.t("scenario.lotReceived", { lot: ev.params.lot }));
         await this.refresh();
         if (carrier) sim.release(carrier.id);
         await wait(2500);
@@ -151,7 +154,7 @@ export class Scenario {
         const agent = sim.agentByEmployee(e.id);
         this.mute("badge.pause_start");
         await demoStep("badge", { employee_id: e.id, kind: "pause_start", reader: "detente" });
-        this.toast(ev, `${e.firstName} ${e.lastName} part en pause.`, `person:${e.id}`);
+        this.toast(ev, this.t("scenario.pause", { name: `${e.firstName} ${e.lastName}` }), `person:${e.id}`);
         if (agent && queue) {
           await sim.walkTo(e.id, queue, { finalPose: "coffee", finalRotation: Math.PI });
           await wait(4000);
@@ -164,18 +167,18 @@ export class Scenario {
         this.mute("quote.accepted", "work_order.created");
         const r = await demoStep("quote_accepted", { number: ev.params.devis });
         const number = (r as { data?: { number?: string } }).data?.number;
-        this.toast(ev, number ? `${ev.detail.split(":")[0]} — commande ${number} créée.` : ev.detail);
+        this.toast(ev, number ? this.t("scenario.quoteSigned", { prefix: ev.detail.split(":")[0], number }) : ev.detail);
         await this.refresh();
         break;
       }
       case "expedition.enlevement": {
         const truckId = `truck:${ev.params.vehicule}`;
-        await sim.truckToDock(truckId, ev.params.vehicule, "Transporteur — enlèvement 15 h", "TRANSVAL");
+        await sim.truckToDock(truckId, ev.params.vehicule, this.t("scenario.truckPickup"), "TRANSVAL");
         await wait(3500);
         this.mute("expedition.pickup");
         const r = await demoStep("pickup", {});
         const n = (r as { data?: { orders?: number; work_orders?: number } }).data;
-        this.toast(ev, `${n?.orders ?? 0} colis en ligne et ${n?.work_orders ?? 0} commande(s) pro chargés.`);
+        this.toast(ev, this.t("scenario.pickupLoaded", { orders: n?.orders ?? 0, workOrders: n?.work_orders ?? 0 }));
         await this.refresh();
         await wait(1500);
         void sim.truckLeave(truckId, ev.params.vehicule);
