@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "regions": ["fra1"],
+  "regions": ["dub1"],
   "buildCommand": "node scripts/deploy/migrate.mjs && next build",
   "crons": [{ "path": "/api/integrations/worker", "schedule": "0 5 * * *" }]
 }

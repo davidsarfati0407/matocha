@@ -336,7 +336,7 @@ Realtime (`NEXT_PUBLIC_REALTIME` vide).
 1. Projet Supabase en région **Zurich (eu-central-2)** ou **Francfort (eu-central-1)**.
 2. Migrations : automatiques au build (ci-dessus) ou `npx supabase link` puis `npx supabase db push`.
    **Ne mettez jamais `SEED_DEMO=1` en production.**
-3. Sur Vercel (région `fra1`, déjà fixée dans `vercel.json`), renseignez les variables de
+3. Sur Vercel (région `dub1` dans `vercel.json`, à aligner sur la région du projet Supabase), renseignez les variables de
    `.env.example`, racine du projet sur `crm/`.
 4. **Variables à ne jamais exposer au navigateur** : `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`,
    `INTEGRATIONS_ENCRYPTION_KEY`, `CRON_SECRET`, `ANTHROPIC_API_KEY` et les secrets OAuth.
